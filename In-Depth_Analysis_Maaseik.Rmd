@@ -1,0 +1,2185 @@
+---
+title: "In-depth Analysis for Maaseik"
+subtitle: Leveraging Data Analytics for Efficient OR Planning at ZOL
+date: "October 2025"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: false
+    keep_tex: true
+  html_document:
+    toc: false
+    df_print: paged
+geometry: margin=1in
+header-includes:
+  - |
+    \usepackage{graphicx}
+    \usepackage{booktabs}
+    \usepackage{float}
+    \usepackage{titling}
+
+    % Logo's bovenaan
+    \pretitle{%
+      \begin{center}
+      \includegraphics[width=4cm]{figures/BINF.png}\hfill
+      \includegraphics[width=6cm]{figures/PAIH.png}\\[2cm]
+      \huge
+    }
+    \posttitle{\end{center}}
+---
+
+\begin{center}
+\vspace{2cm}
+
+Niels MARTIN\\
+niels.martin@uhasselt.be\\[0.5em]
+Maxim RIEBUS\\
+maxim.riebus@uhasselt.be\\[0.5em]
+Haroon THARWAT\\
+haroon.tharwat@uhasselt.be\\
+
+\vspace{6cm}
+
+\textbf{Hasselt University} \\
+Faculty of Business Economics \\
+Research Group Business Informatics \\
+Process Analytics in Healthcare
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+knitr::opts_chunk$set(out.width = "70%")
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.asp = 0.618)
+
+kable <- function(x, ...) {
+  knitr::kable(x, booktabs = T, format = "latex",  position = "H", ...)
+}
+
+knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+source("packages.R")
+
+```
+
+```{r data import, include=FALSE}
+# run data cleaning script
+source("data_cleaning.R")
+
+# load cleaned data from the 'modified data' folder
+data    <- read_excel("modified data/data_cleaned.xlsx")
+genk    <- read_excel("modified data/maaseik_cleaned.xlsx")
+```
+
+```{r functions, echo = F}
+# Define function for categorical summaries
+categoricals <- function(df, var, label) {
+  df %>%
+    count({{ var }}, name = "Count") %>%
+    mutate(
+      Variable = label,
+      Level = as.character({{ var }}),
+      Percentage = round(100 * Count / sum(Count), 1)
+    ) %>%
+    select(Variable, Level, Count, Percentage) %>%
+    knitr::kable(booktabs = TRUE, caption = paste("Frequency table for", label))
+}
+```
+
+# Introduction
+Efficient management of operating rooms (ORs) requires an understanding of how planned surgical activity aligns with real-world execution.   This document provides an in-depth, site-specific analysis for **Campus Maaseik**, serving as an analytical extension of the previous exploratory study.   The goal is to systematically address the key research questions formulated in the project description:
+
+**Research questions**
+
+- **Planned versus observed timing**
+    - How well do the planned operating durations correspond to the actual durations?  
+    - What is the typical deviation between the planned start time and the actual entry into the operating room?  
+    - Which specialisms or procedure types show the largest differences?  
+    - How do these deviations scale relative to the planned duration (proportional or percentage-wise)?  
+
+- **Adherence to working hours**
+    - How often do procedures run beyond regular working hours (08:00 to 16:30)?  
+    - What proportion of OR activity occurs in the evening or at night?  
+    - How do these patterns differ between campuses?  
+
+- **Room allocation**
+    - How often are procedures performed in a different room than originally planned?  
+    - Are these reallocations concentrated in specific rooms or specialisms?  
+
+- **Urgency and scheduling**
+    - How are urgent and non-elective cases distributed across campuses and time periods?  
+    - To what extent do urgent surgeries overlap with elective activity and cause scheduling disruptions?
+
+Each of the following sections addresses one of these themes in depth, focusing on the local characteristics of the Maaseik campus.
+
+## Unique values and data richness  
+
+The dataset captures a high degree of heterogeneity in surgical practice. A total of 33231 unique patient IDs are recorded, spread across 1016 distinct procedure codes and 1002 procedure names. Surgeon and anesthesiologist coverage is broad, with 133 and 38 unique identifiers respectively. These numbers reflect the diversity of clinical practice at ZOL and underscore the importance of developing grouping strategies to obtain actionable insights. Table \ref{tab:uniquevalues} provides an overview of the number of unique values per variable.
+
+```{r unique values, echo=F, table.pos='H'}
+unique_counts <- genk %>%
+  select(
+    AnesthesiologistID, ProcedureCode, ProcedureName, PlannedOR,
+    LengthOfStay, HeadSurgeonID, PatientID, Year,
+    Weekday, AdmissionType, ActualOR
+  ) %>%
+  summarise(across(everything(), ~ n_distinct(.))) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Variable",
+    values_to = "UniqueValues"
+  ) %>%
+  arrange(desc(UniqueValues))
+
+kable(
+  unique_counts,
+  caption = "Number of unique values per variable. \\label{tab:uniquevalues}"
+)
+```
+
+
+## Surgical procedure durations  
+
+Operating time is one of the most critical variables for planning. Procedure durations display wide variation, both within and across procedure types. Percentile analysis shows that 95% of all procedures finish within 115 minutes, 98% within 148 minutes, 99% within 178 minutes, and 99.9% within 294 minutes. While the majority of procedures are considerably shorter, the long right hand tail in the distribution indicates the presence of outliers and highly complex cases that drive variability in scheduling. Figure \ref{fig:duration} illustrates the distribution of procedure durations, and Table \ref{tab:durationpercentiles} summarizes the percentile values.
+
+```{r procedure_durations, echo=F, fig.cap="Histogram of Surgery Duration \\label{fig:duration}", fig.pos='H'}
+# Histogram of surgery duration (in minutes)
+ggplot(genk, aes(x = DurationMinutes)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "black") +
+  scale_x_continuous(limits = c(0, quantile(genk$DurationMinutes, 0.99, na.rm = TRUE))) +  # limit to 99th percentile
+  labs(title = "Histogram of Surgery Duration", x = "Duration (minutes)", y = "Number of Procedures")
+
+```
+
+\newpage
+
+```{r duration_percentiles, echo=F, table.pos='H'}
+durationPercentiles <- quantile(genk$DurationMinutes, probs = c(0.95, 0.98, 0.99, 0.999), na.rm = TRUE)
+
+durationPercentiles_df <- as.data.frame(durationPercentiles) %>%
+  tibble::rownames_to_column("Percentile") %>%
+  rename(`Duration (minutes)` = durationPercentiles)
+
+knitr::kable(
+  durationPercentiles_df,
+  caption = "Percentiles of surgical procedure duration (in minutes). \\label{tab:durationpercentiles}"
+)
+```
+
+
+Looking at the most frequent procedures illustrates the large variation in operating times. OZ Colonoscopie/Anesthesie – MK has an average duration of 16.7 minutes and a median of 16 minutes, while LENSIMPLANT UNIFOCAAL – MK averages 25 minutes with a median of 23 minutes. Transforaminale epidurale infiltratie: lumbaal – MK typically lasts 11.5 minutes on average with a median of 10 minutes. In contrast, major orthopedic procedures require far more time. Totale heupprothese DAA – MK has an average duration of 79.6 minutes and a median of 77 minutes, and Totale knie prothese robot assisted ROSA – MK lasts even longer, with an average of 126.9 minutes and a median of 124 minutes. These differences highlight the substantial gap in resource requirements between routine short procedures and complex surgical interventions. This mix of short standardized cases and long high-complexity operations underscores the operational challenge of planning an efficient operating room schedule that accommodates both ends of the spectrum. Table \ref{tab:top10dur} summarises the ten most frequent procedure types.
+```{r, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(DurationMinutes)) %>%
+  group_by(ProcedureName) %>%
+  summarize(
+    Count  = n(),
+    Mean   = round(mean(DurationMinutes), 1),
+    Median = round(median(DurationMinutes), 1)
+  ) %>%
+  arrange(desc(Count)) %>%
+  slice_head(n = 10) %>%
+  knitr::kable(
+    booktabs = TRUE,
+    caption = "Top 10 most frequent procedure types with mean and median duration \\label{tab:top10dur}"
+  )
+```
+
+## Admission type and urgency  
+
+The majority of procedures in the dataset are performed in a planned setting. Ambulatory surgery accounts for 83.9%, and inpatient hospitalization for 16.1%, while emergency admissions represent only three recorded cases. The urgency classification shows a similar pattern: 94.3% of procedures are elective, and 5.7% are non elective. Although relatively small in number, the latter category remains important from a planning perspective, as urgent procedures may disrupt elective schedules and lead to cancellations or overtime. Table \ref{tab:admissiontype} and Table \ref{tab:urgencytype} summarize both distributions.
+
+```{r type and urgency, echo=F}
+genk %>%
+  filter(!is.na(AdmissionType)) %>%
+  count(AdmissionType, name = "Count") %>%
+  mutate(
+    Percentage = round(100 * Count / sum(Count), 1)
+  ) %>%
+  arrange(desc(Count)) %>%
+  knitr::kable(
+    booktabs = TRUE,
+    caption = "Frequency table for Admission Type \\label{tab:admissiontype}"
+  )
+
+genk %>%
+  filter(!is.na(UrgencyType)) %>%
+  count(UrgencyType, name = "Count") %>%
+  mutate(
+    Percentage = round(100 * Count / sum(Count), 1)
+  ) %>%
+  arrange(desc(Count)) %>%
+  knitr::kable(
+    booktabs = TRUE,
+    caption = "Frequency table for Urgency Classification \\label{tab:urgencytype}"
+  )
+```
+
+
+## Temporal distribution of activity  
+
+Surgical activity is spread consistently across weekdays. Fridays account for 19.5 percent of weekly activity, Tuesdays for 22.8 percent, Thursdays for 20.9 percent, Wednesdays each for 17.2 percent, and Mondays each for 18.4 percent. Weekend days show limited but non negligible activity, with 0.6 percent of procedures performed on Saturdays and Sundays. Annual trends reveal steady growth, with the number of procedures increasing from 14059 in 2022 to 16869 in 2024. At the time of data extraction, 7258 procedures in 2025 represented 13.5 percent of the total. Together, Table \ref{tab:weekday} and Table \ref{tab:year} summarize the distribution of surgical activity across weekdays and years.
+
+```{r day and year, echo=F}
+genk %>%
+  filter(!is.na(Weekday)) %>%
+  count(Weekday, name = "Count") %>%
+  mutate(Percentage = round(Count / sum(Count) * 100, 1)) %>%
+  arrange(desc(Count)) %>%
+  pander(
+    split.table = 120,
+    caption = "Frequency table for Day of the Week (sorted by descending count) \\label{tab:weekday}"
+  )
+
+genk %>%
+  filter(!is.na(Year)) %>%
+  count(Year, name = "Count") %>%
+  mutate(Percentage = round(Count / sum(Count) * 100, 1)) %>%
+  arrange(Year) %>%
+  pander(
+    split.table = 120,
+    caption = "Frequency table for Year \\label{tab:year}"
+  )
+```
+
+In summary, procedure durations show strong variability with a long tailed distribution driven by complex surgeries. The majority of procedures are elective, while non elective cases still have an important impact on schedule stability. Activity is distributed somewhat evenly across weekdays and has grown consistently in recent years. These findings form the baseline against which more advanced performance metrics such as start and end deviations, utilization rates, and predictive models can be developed in subsequent sections of this report.
+
+\newpage
+
+# How accurately does planning reflect reality in the OR?
+## Are planned and observed durations aligned?
+
+The comparison between planned and observed surgery durations shows a broad spread around the one to one line. Many procedures lie close to the diagonal, indicating that their observed durations correspond reasonably well to the planned values. At the same time, a substantial number of points fall above or below this line, showing that both underestimation and overestimation occur frequently. Most deviations appear as longer than planned surgeries, visible in the dense area below the red dashed line. The dispersion increases for longer procedures, reflecting greater uncertainty for complex cases. Figure \ref{fig:planned_vs_observed} displays this relationship.
+
+```{r planned vs observed, echo=F, fig.cap="Planned vs. Observed Surgery Duration (Maaseik) \\label{fig:planned_vs_observed}"}
+ggplot(genk, aes(x = DurationMinutes, y = PlannedDurationMinutes)) +
+  geom_point(alpha = 0.3, color = "steelblue") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Planned vs. Observed Surgery Duration (Masseik)",
+    x = "Observed duration (minutes)",
+    y = "Planned duration (minutes)"
+  ) +
+  theme_minimal()
+```
+
+On average, surgeries at Maaseik show meaningful variation between planned and actual durations. Among procedures that last longer than planned, the mean deviation is 13.9 minutes with a median of 8 minutes, while shorter cases deviate on average by 9.1 minutes with a median of 6 minutes. The standard deviations of 19.5 minutes and 20.7 minutes highlight the presence of both moderate deviations and substantial outliers. While most differences remain within reasonable limits, a small number of extreme values extend the overall range.
+
+Less than half of all surgeries (39.7%) take longer than planned, with an interquartile range of 14 minutes, while 60.3% finish earlier, with an interquartile range of 8 minutes. This distribution shows that deviations occur in both directions, but the spread is larger for cases that finish earlier. The considerable variability within each category indicates that although overall planning accuracy is reasonable at the aggregate level, individual durations remain difficult to predict. Improving the consistency of duration estimates, particularly for procedures that frequently deviate, could help reduce daily schedule variability and limit delays across the operating list. Table \ref{tab:dur_diff_direction} provides a detailed overview of these differences.
+
+```{r duration_diff_direction, echo=F}
+genk %>%
+  filter(!is.na(duration_diff)) %>%
+  mutate(
+    direction = ifelse(duration_diff > 0, "Longer than planned", "Shorter than planned"),
+    abs_diff = abs(duration_diff)
+  ) %>%
+  group_by(direction) %>%
+  summarise(
+    Mean = round(mean(abs_diff, na.rm = TRUE), 1),
+    Median = round(median(abs_diff, na.rm = TRUE), 1),
+    SD = round(sd(abs_diff, na.rm = TRUE), 1),
+    IQR = round(IQR(abs_diff, na.rm = TRUE), 1),
+    Min = round(min(abs_diff, na.rm = TRUE), 1),
+    Max = round(max(abs_diff, na.rm = TRUE), 1),
+    P95 = round(quantile(abs_diff, 0.95, na.rm = TRUE), 1),
+    P99 = round(quantile(abs_diff, 0.99, na.rm = TRUE), 1),
+    P99_9 = round(quantile(abs_diff, 0.999, na.rm = TRUE), 1),
+    Percent = scales::percent(n() / nrow(genk %>% filter(!is.na(duration_diff))), 0.1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Difference between actual and planned duration (minutes), separated by direction \\label{tab:dur_diff_direction}"
+  )
+
+```
+
+Expressing deviations as a percentage of the planned duration provides a standardized view across short and long procedures. Most cases fall within about ±40 percent of the planned time, indicating a generally acceptable level of scheduling accuracy in routine practice. The histogram peaks slightly below zero, showing that surgeries are on average completed a bit earlier than planned. The shape is roughly symmetrical, although the right tail extends further, indicating that large overruns occur less frequently but can be substantial when they appear. This pattern suggests that while most procedures are reasonably well estimated, a smaller group of cases contributes disproportionately to the overall variability in duration accuracy. Figure \ref{fig:relative_dev} shows the full distribution.
+
+```{r relative_deviation_hist, echo=F, fig.cap="Distribution of relative deviation between planned and observed duration \\label{fig:relative_dev}"}
+genk %>%
+  filter(!is.na(percentage_deviation), abs(percentage_deviation) <= 200) %>%
+  ggplot(aes(x = percentage_deviation)) +
+  geom_histogram(binwidth = 10, fill = "#2C77B2", color = "white") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Distribution of relative deviation between planned and observed duration",
+    x = "Relative deviation (% of planned duration; + = longer)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal()
+```
+
+Duration deviations differ markedly between admission types. Inpatient, HOS, cases show the highest variability, with an average deviation of 15.8 percent and a median of 4.1 percent, indicating that these procedures run longer than planned. With the coefficient of variation of 10.2 signals that deviations vary widely from case to case. This is typical for the heterogeneous and clinically complex nature of inpatient surgeries.
+
+Emergency, SPOED, surgeries have an average deviation of 13.1 percent and a median of minus 63.2 percent. This implies that while a small number of very long emergency procedures pull the mean upward, the typical emergency case actually finishes much earlier than planned. The coefficient of variation of 8 indicates high variability between cases, implying that some procedures last much longer or shorter than expected. This reflects the intrinsic clinical uncertainty of acute interventions.
+
+Ambulatory, DAG, surgeries have an average deviation is minus 1.8 percent, the median is minus 8.8 percent, suggesting that most day-case surgeries run slightly shorter than their planned duration. The coefficient of variation of minus 26.4 mainly reflects the fact that even moderate absolute differences translate into larger percentages for short procedures. These results show that standardized short-stay procedures are generally estimated accurately in the planning process. Table \ref{tab:rel_dev_admission} summarizes these patterns.
+
+```{r rel_dev_admission, echo=F}
+genk %>%
+  filter(!is.na(percentage_deviation), !is.na(AdmissionType)) %>%
+  group_by(AdmissionType) %>%
+  summarise(
+    n = n(),
+    `Mean relative deviation (%)`   = round(mean(percentage_deviation, na.rm = TRUE), 1),
+    `Median relative deviation (%)` = round(median(percentage_deviation, na.rm = TRUE), 1),
+    `SD (%)`                        = round(sd(percentage_deviation, na.rm = TRUE), 1),
+    `CV (%)`                        = round(
+      (sd(percentage_deviation, na.rm = TRUE) /
+         mean(percentage_deviation, na.rm = TRUE)), 1
+    )
+  ) %>%
+  arrange(desc(`Mean relative deviation (%)`)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Relative duration deviation and coefficient of variation by admission type (Maaseik) \\label{tab:rel_dev_admission}"
+  )
+
+
+```
+
+A similar pattern appears when comparing elective and non elective surgeries. Non elective procedures have an average relative deviation of 24.8 percent and a median of 2.3 percent, with a coefficient of variation of 10.7, highlighting their unpredictable character. Elective operations show smaller deviations, with an average of minus 0.4 percent and a median of minus 6.7 percent. Their coefficient of variation of minus 123 results from the influence of a small number of extreme outliers rather than consistent misestimation. Overall, these findings confirm that while elective cases generally follow expected durations well, non elective surgeries remain the main source of variability in the operating schedule. Table \ref{tab:rel_dev_urgency} summarizes these results.
+
+```{r rel_dev_urgency, echo=F}
+genk %>%
+  filter(!is.na(percentage_deviation), !is.na(UrgencyType)) %>%
+  group_by(UrgencyType) %>%
+  summarise(
+    n = n(),
+    `Mean relative deviation (%)`   = round(mean(percentage_deviation, na.rm = TRUE), 1),
+    `Median relative deviation (%)` = round(median(percentage_deviation, na.rm = TRUE), 1),
+    `SD (%)`                        = round(sd(percentage_deviation, na.rm = TRUE), 1),
+    `CV (%)`                        = round(
+      (sd(percentage_deviation, na.rm = TRUE) /
+         mean(percentage_deviation, na.rm = TRUE)), 1
+    )
+  ) %>%
+  arrange(desc(`Mean relative deviation (%)`)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Relative duration deviation and coefficient of variation by urgency type (Maaseik) \\label{tab:rel_dev_urgency}"
+  )
+
+```
+
+The mean relative deviation between planned and observed durations remains broadly stable over the observed years. In 2022 the average deviation is 2.6 percent, decreasing slightly to 2.3 percent in 2023. A clearer decline appears in 2024, reaching minus 0.3 percent, while the partial data for 2025 show a decrease to minus 1.5 percent.
+
+This pattern indicates that planning accuracy at Maaseik has remained relatively consistent over time, with moderate year to year decline. The differences are small and likely reflect normal operational variation rather than systematic changes in planning quality. Overall, the stability of the yearly averages suggests surguries are finishing slightly shorter than planned, but the effect size is small and should not be overstated. Figure \ref{fig:reldev_year} illustrates these trends.
+
+```{r rel_duration_dev_year, echo=F, fig.cap="Relative duration deviation by year \\label{fig:reldev_year}", fig.pos='H'}
+genk %>%
+  filter(!is.na(percentage_deviation), !is.na(Year)) %>%
+  group_by(Year) %>%
+  summarise(
+    `Mean relative deviation (%)` = mean(percentage_deviation, na.rm = TRUE)
+  ) %>%
+  ggplot(aes(x = as.factor(Year), y = `Mean relative deviation (%)`, group = 1)) +
+  geom_line(color = "#2C77B2") +
+  geom_point(size = 2, color = "#2C77B2") +
+  geom_text(
+    aes(label = round(`Mean relative deviation (%)`, 1)),
+    vjust = -0.6, size = 3
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Relative duration deviation by year",
+    x = "Year",
+    y = "Mean relative deviation (% of plan)"
+  ) +
+  theme_minimal()
+
+```
+
+The relative deviation between planned and observed durations remains stable throughout the regular workweek, with mean deviations ranging from minus 2.4 percent to 2.8 percent. This consistency indicates limited variation in planning accuracy across Monday to Friday. Small fluctuations, such as the slightly higher averages on Tuesday and Friday or the lower values on Wednesday and Thhursday, likely reflect differences in case mix rather than structural scheduling issues.
+
+A clear contrast appears during the weekend. On Saturdays and Sundays the mean deviations rise sharply to 17.7 percent and 18.7 percent, far above weekday levels. These higher discrepancies reflect the different operating context of weekend surgery, where volumnes are low and cases are more often acute and unplanned. Weekend surgeries are typically non elective, often requiring flexible resource allocation and showing less predictable durations. The weekday weekend contrast therefore highlights the stability of elective scheduling during standard operating days and the inherent variability associated with emergency work at the end of the week. Figure \ref{fig:reldev_weekday} summarizes these differences.
+
+
+```{r rel_dev_weekday, echo=F, fig.cap="Relative deviation by weekday \\label{fig:reldev_weekday}", fig.pos='H'}
+genk %>%
+  filter(!is.na(percentage_deviation), !is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, levels = c("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"))) %>%
+  group_by(Weekday) %>%
+  summarise(
+    `Mean relative deviation (%)` = mean(percentage_deviation, na.rm = TRUE)
+  ) %>%
+  ggplot(aes(x = Weekday, y = `Mean relative deviation (%)`)) +
+  geom_col(fill = "#2C77B2") +
+  geom_text(aes(label = round(`Mean relative deviation (%)`, 1)),
+            vjust = -0.3, size = 3) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Relative deviation by weekday",
+    x = "Weekday",
+    y = "Mean relative deviation (% of planned duration)"
+  ) +
+  theme_minimal()
+
+```
+
+Variation in deviation differs considerably across operating rooms. The largest average deviations are concentrated in the complex surgery rooms of the MO block, most notably MO03, where the mean absolute deviation is 22.5 minutes and 56.6 percent of cases run longer than planned. Other high variability rooms such as MO05, MO04, and MO01 also show average deviations between 15.5 and 18.1 minutes, reflecting the higher uncertainty typical of lengthy or technically demanding procedures.
+
+By contrast, rooms such as MKI1 and MKI3, mainly associated with short and standardized interventions, display mean deviations around 6 minutes and a higher share of shorter than longer cases. These differences illustrate how the degree of procedural complexity and specialization strongly influences planning precision. Table \ref{tab:ordeviation_or} provides the detailed overview.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(
+    !is.na(duration_diff),
+    !is.na(PlannedDurationMinutes),
+    PlannedDurationMinutes > 0
+  ) %>%
+  group_by(ActualOR) %>%
+  summarise(
+    n = n(),
+    `Mean abs dev` = round(mean(abs(duration_diff), na.rm = TRUE), 1),
+    `Longer (%)` = round(100 * mean(duration_diff > 0, na.rm = TRUE), 1),
+    `Mean relative dev (longer)` = round(mean(100 * duration_diff[duration_diff > 0] / PlannedDurationMinutes[duration_diff > 0], na.rm = TRUE), 1),
+    `Shorter (%)` = round(100 * mean(duration_diff < 0, na.rm = TRUE), 1),
+    `Mean relative dev (shorter)` = round(mean(100 * duration_diff[duration_diff < 0] / PlannedDurationMinutes[duration_diff < 0], na.rm = TRUE), 1)
+  ) %>%
+  arrange(desc(`Mean abs dev`)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Duration deviations per operating room, ordered by mean absolute deviation \\label{tab:ordeviation_or}"
+  )
+```
+
+Among the most extreme deviations in surgery duration, overruns remain the predominant direction. Around 81.7 percent of the top one percent of deviations correspond to procedures that last longer than planned, while 18.3 percent finish earlier than expected. This indicates that large underestimations still occur
+
+Although both directions are represented among the extreme cases, their operational impact remains different. Early finishes generally create limited idle time, whereas overruns can delay subsequent cases and increase the likelihood of overtime. The presence of both substantial overruns and substantial early completions in the extreme group suggests that large deviations, regardless of direction, contribute meaningfully to schedule variability. This reinforces the importance of monitoring procedure types that exhibit high relative uncertainty, as both underestimation and overestimation can materially affect workflow stability. Table \ref{tab:extreme_dir} summarizes these results.
+
+```{r extreme_dir, echo=F, table.pos='H'}
+# Bereken drempelwaarde (99e percentiel)
+threshold_dur <- quantile(abs(genk$duration_diff), 0.99, na.rm = TRUE)
+
+# Filter enkel de top 1% meest extreme afwijkingen
+genk %>%
+  filter(!is.na(duration_diff), abs(duration_diff) >= threshold_dur) %>%
+  mutate(Direction = ifelse(duration_diff > 0, "Longer than planned", "Shorter than planned")) %>%
+  count(Direction) %>%
+  mutate(Percentage = scales::percent(n / sum(n), 0.1)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Direction of deviation among the 1% most extreme cases (Masseik) \\label{tab:extreme_dir}"
+  )
+
+```
+
+## A closer look on the coefficient of variation
+
+```{r, echo=FALSE}
+# ---- Data preparation ----
+genk <- genk %>%
+  mutate(
+    YearMonth = floor_date(as.Date(PlannedStartDT), "month"),
+    PlannedGroup = cut(
+      PlannedDurationMinutes,
+      breaks = c(0, 30, 60, 90, 180, Inf),
+      labels = c("<30", "31–60", "61–90", "91–180", "> 180"),
+      include.lowest = TRUE
+    )
+  )
+```
+
+The monthly coefficient of variation for planning deviation shows clear fluctuations over time without evidence a consistent long term upward or downward trend. As shown in Figure \ref{fig:cv_planning}, early 2022 begins at relatively low variability levels near 1.2 to 1.5. Through the remainder of 2022 the values move mostly between 1.3 and 1.9, indicating modest dispersion in planning deviations.
+
+During 2023 the pattern becomes more irregular, with several months reaching values between about 2.5 and 3.5, although lower values around 1.3 also occur. This results in a more irregular pattern rather than a continuous increase. In early 2024 the coefficient peaks briefly above 3.25, marking the largest monthly value in the series. After this spike the metric decreases again and fluctuates between roughly 1.3 and 2.5 during the remainder of 2024.
+
+In 2025 the values settles into a narrower band around 1.5 to 2.75, showing moderate variability. Taken together, these fluctuations indicate that the coefficient of variation is driven more by short term shifts in procedure mix and occasional months with small mean deviations than by systematic changes in planning accuracy.
+Most months fall within a moderate range, while the isolated spikes signal periods of heightened dispersion rather than long term trends.
+
+```{r cv_monthly, echo=F, fig.cap="Monthly evolution of coefficient of variation (Planning deviation) \\label{fig:cv_planning}", fig.pos='H'}
+
+# ---- Monthly coefficient of variation (overall) ----
+cv_overall <- genk %>%
+  filter(!is.na(DurationMinutes), !is.na(PlannedDurationMinutes)) %>%
+  group_by(YearMonth = floor_date(as.Date(PlannedStartDT), "month")) %>%
+  summarise(
+    `CV of observed duration` = sd(DurationMinutes, na.rm = TRUE) / mean(DurationMinutes, na.rm = TRUE),
+    `CV of planning deviation` = sd(abs(duration_diff), na.rm = TRUE) / mean(abs(duration_diff), na.rm = TRUE)
+  )
+
+# ---- Plot 2: Coefficient of variation (Planning deviation) ----
+ggplot(cv_overall, aes(x = YearMonth, y = `CV of planning deviation`)) +
+  geom_line(linewidth = 1, color = "darkorange") +
+  geom_point(size = 1.8, color = "darkorange") +
+  labs(
+    title = "Monthly evolution of coefficient of variation (Planning deviation)",
+    x = "Month",
+    y = "Coefficient of variation (SD / Mean)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title  = element_text(hjust = 0.5)
+  )
+```
+
+### Variability by planned duration group
+
+Variation in surgical timing can be examined from two complementary perspectives that describe different aspects of performance. The first is the coefficient of variation of observed duration, calculated as the standard deviation divided by the mean of the observed surgical times. This indicator expresses how dispersed the recorded durations are relative to their average. In a dataset such as this one, which contains a mix of both short and long operations, the magnitude of this coefficient is driven primarily by the structural heterogeneity of the case mix rather than by instability within individual cases.
+
+The second perspective is the coefficient of variation of the planning deviation, which measures the consistency of planning accuracy. It is computed as the standard deviation of the absolute deviation between planned and observed time, divided by the mean of that deviation. Unlike the first measure, this coefficient isolates how variable planning errors are, independent of the underlying diversity in surgical duration.
+
+Together, these indicators separate two sources of variability: the inherent spread in surgical case lengths and the irregularity of scheduling precision. Understanding how these two behave provides insight into whether deviations arise mainly from the diversity of surgical activity or from planning inconsistency. Table \ref{tab:cv_group} summarises these metrics across five duration categories and forms the basis for the category specific analyses that follow.
+
+The summary statistics confirm a clear scaling effect in relative variability. The coefficient of variation of observed durations decreases as planned duration increases: procedures planned for less than 30 minutes have a CV of 0.6036042, procedures in the 31–60 minute group show 0.4727512, the 61–90 minute group 0.3614345, the 91–180 minute group 0.3480405, and the longest category over 180 minutes shows 0.3700689. This pattern is consistent with the fact that shorter cases amplify small absolute fluctuations when expressed relative to their mean, while longer cases distribute absolute variation over a broader time base.
+
+For the planning deviation, coefficients of variation are considerably higher across all groups, reflecting the larger proportional spread in the differences between planned and actual duration. These values range from 1.2314398 in the shortest category to 1.0728840 in the 31–60 minute group, 1.0520157 in the 61–90 minute group, 0.9782855 in the 91–180 minute group, and 1.9709173 in procedures lasting more than 180 minutes. This pattern suggests that longer and more complex procedures, while not necessarily less stable in execution, exhibit greater variation in planning accuracy.
+
+Together, these figures show that relative variability in observed duration is largely structural and reflects case mix composition, whereas variability in planning deviation captures the irregularity in scheduling precision. The distinction between the two metrics provides the foundation for the next analyses, which explore how these patterns manifest within each duration category and across operating rooms.
+
+```{r cv group, echo=F, table.pos='H'}
+cv_by_group <- genk %>%
+  filter(
+    !is.na(DurationMinutes),
+    !is.na(PlannedDurationMinutes),
+    !is.na(PlannedGroup)
+  ) %>%
+  group_by(`Group` = PlannedGroup) %>%
+  summarise(
+    n = n(),
+    `Mean duration` = mean(DurationMinutes, na.rm = TRUE),
+    `SD duration` = sd(DurationMinutes, na.rm = TRUE),
+    `CV duration` = `SD duration` / `Mean duration`,
+    `Mean planning` = mean(abs(duration_diff), na.rm = TRUE),
+    `SD planning` = sd(abs(duration_diff), na.rm = TRUE),
+    `CV planning` = `SD planning` / `Mean planning`
+  )
+
+knitr::kable(
+  cv_by_group,
+  booktabs = TRUE,
+  format = "latex",
+  longtable = FALSE,
+  caption = "Summary of mean duration, SD, and CV by planned duration group (Observed vs. Planning deviation) \\label{tab:cv_group}"
+)
+```
+
+The monthly evolution of the coefficient of variation for observed durations shows stable and clearly separated patterns between the planned duration groups. Short procedures in the <30 minute category consistently display the highest relative variability, with values generally between 0.55 and 75 and an isolated spike close to 0.9. Procedures in the 31–60, typically around 0.45 to 0.55. The 61–90 and 91–180 minute groups cluster at lower levels, mostly between 0.30 and 0.40. Procedures longer than 180 minutes display much stronger month to month swings, with coefficients ranging roughly from 0.05 to 0.60; this group alternates between being the least and one of the more variable categories. Overall, the relative ordering of variability by planned duration is stable over time, with short procedures showing the highest proportional dispersion and mid range durations the lowest. Figure \ref{fig:cv_obs_group} illustrates these monthly patterns across duration groups.
+
+```{r cv obs group, echo=F, fig.cap="Monthly evolution of coefficient of variation (Observed durations) \\label{fig:cv_obs_group}", fig.pos='H'}
+
+# ---- Monthly evolution by duration group ----
+cv_by_group_month <- genk %>%
+  filter(!is.na(DurationMinutes), !is.na(PlannedDurationMinutes), !is.na(PlannedGroup)) %>%
+  group_by(Month = floor_date(as.Date(PlannedStartDT), "month"), PlannedGroup) %>%
+  summarise(
+    CV_obs  = sd(DurationMinutes) / mean(DurationMinutes),
+    CV_diff = sd(abs(duration_diff)) / mean(abs(duration_diff))
+  )
+
+ggplot(cv_by_group_month, aes(x = Month, y = CV_obs, color = PlannedGroup)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5) +
+  labs(
+    title = "Monthly evolution of coefficient of variation (Observed durations)",
+    x = "Month", y = "Coefficient of variation (SD / Mean)", color = "Planned duration group"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7), plot.title = element_text(hjust = 0.5))
+```
+
+The coefficient of variation of planning deviation exhibits noticeably stronger fluctuations over time than the coefficient of variation of observed durations. While most duration groups remain centred around values close to 1.0, the amplitude of month-to-month variation differs substantially across categories. The longest procedures (>180 minutes) show the most pronounced volatility, with coefficients ranging from below 0.5 to peaks above 2.3. This pattern likely reflects both the small number of long cases in many months—making the measure sensitive to denominator effects—and the inherent unpredictability of complex procedures. Shorter procedures (<30 minutes) also display visible fluctuation, with values typically around 1.0–1.4 and occasional peaks approaching 2.1. These variations suggest that even small absolute planning errors can produce relatively large proportional deviations for very short surgeries. By contrast, the mid-range groups (31–60, 61–90, and 91–180 minutes) form a more stable band, with coefficients generally between 0.6 and 1.3 and far fewer extreme spikes. This indicates that planning accuracy for medium-duration procedures is relatively consistent across months. Figure \ref{fig:cv_planning_group} shows how these patterns evolve monthly across the duration groups.
+
+
+```{r cv planning group, echo=F, fig.cap="Monthly evolution of coefficient of variation (Planning deviation) \\label{fig:cv_planning_group}", fig.pos='H'}
+
+ggplot(cv_by_group_month, aes(x = Month, y = CV_diff, color = PlannedGroup)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5) +
+  labs(
+    title = "Monthly evolution of coefficient of variation (Planning deviation)",
+    x = "Month", y = "Coefficient of variation (SD / Mean of |difference|)", color = "Planned duration group"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7), plot.title = element_text(hjust = 0.5))
+```
+
+Viewed together, the two figures show a clear contrast between the stability of observed surgical durations and the variability of planning accuracy. The coefficient of variation for observed durations remains structurally stable across months and duration categories, with each group maintaining a consistent relative position over time. In contrast, the coefficient of variation for planning deviation fluctuates more markedly, particularly for the shortest and longest procedure groups, where month-to-month swings are more pronounced. These contrasting patterns suggest that the execution of surgical procedures is relatively consistent, while planning accuracy is more sensitive to shifts in case mix, sample size effects, or variations in procedural complexity. The following sections explore these dynamics in greater depth by analyzing each duration group individually and comparing the distribution of coefficients of variation across operating rooms.
+
+\vspace{1em}
+\noindent\textbf{Surgeries planned under 30 minutes}
+\vspace{0.5em}
+
+Short procedures, typically representing high volume and standardized interventions, show moderate relative variability across operating rooms. For this category, coefficients of variation of observed durations range roughly between 0.39 and 0.61, which reflects the proportional impact of small absolute timing fluctuations on short cases. These values are expected for brief procedures, where even limited variation translates into relatively large coefficients once expressed relative to their mean duration. Table \ref{tab:cv_room_lt30} summarises these indicators for all rooms with at least eleven surgeries in this duration group.
+
+Across operating rooms, the pattern is broadly homogeneous. Rooms such as MKI3, MO04, and MO05 display higher CV values in the range of 0.57–0.61, while others, including MO02 and MO06, lie toward the lower end between 0.39 and 0.52. These differences are modest and primarily reflect variation in the specific mix of short procedures allocated to each room rather than substantive disparities in execution consistency.
+
+For the coefficient of variation of planning deviation, values are systematically higher and exhibit a wider spread, with most rooms falling between roughly 0.93 and 1.37. This indicates that proportional variability in planning accuracy exceeds that of the observed durations themselves. Lower planning deviation CVs appear in rooms such as MKI3 and MO01, whereas higher values are found in rooms including MO02 and MO05.These differences likely stem from variation in case composition and the sensitivity of the CV metric when mean deviations are small.
+
+Taken together, short procedures show consistent execution profiles and broadly similar planning accuracy across rooms. The relatively high coefficients primarily reflect proportional scaling effects inherent to short interventions rather than meaningful operational instability. The next sections examine whether these patterns persist for procedures of longer planned duration, where absolute variability becomes more influential and planning precision may pose greater challenges.
+
+
+```{r, echo=FALSE, table.pos='H'}
+# ---- Room-level summary for a specific duration group ----
+group_selected <- "<30"
+
+cv_room_group <- genk %>%
+  filter(PlannedGroup == group_selected) %>%
+  group_by(`OR` = ActualOR) %>%
+  summarise(
+    `n`           = n(),
+    `Mean duration`   = mean(DurationMinutes, na.rm = TRUE),
+    `SD duration`     = sd(DurationMinutes, na.rm = TRUE),
+    `CV duration`     = `SD duration` / `Mean duration`,
+    `Mean dev`  = mean(abs(duration_diff), na.rm = TRUE),
+    `SD dev`    = sd(abs(duration_diff), na.rm = TRUE),
+    `CV dev`    = `SD dev` / `Mean dev`
+  ) %>%
+  # enkel rijen behouden zonder NA's en met meer dan 10 observaties
+  filter(if_all(everything(), ~ !is.na(.)) & `n` > 10) %>%
+  arrange(desc(`n`))
+
+pander::pander(
+  cv_room_group,
+  caption = paste("Coefficient of variation per operating room for surgeries planned", group_selected, "minutes (only rooms with >10 surgeries shown) \\label{tab:cv_room_lt30}")
+)
+```
+
+\vspace{1em}
+\noindent\textbf{Surgeries planned 31–60 minutes}
+\vspace{0.5em}
+
+Procedures with a planned duration of 31–60 minutes show moderate and relatively uniform variability across operating rooms.
+For this category, the coefficients of variation of observed durations cluster between approximately 0.41 and 0.51, as reported in Table \ref{tab:cv_room_31_60}. The highest values appear in MO04 (0.5149), MO05 (0.4832), and MO01 (0.4562), while several rooms, including MO02 (0.4144), MO06 (0.4264), and MO03 (0.4365), show lower variability. Higher values appear in rooms such as MO04 (0.5149), MO05 (0.4832), and MO01 (0.4562), while rooms including MO02 (0.4144), MO06 (0.4264), and MO03 (0.4365) show slightly lower dispersion. These differences are modest and likely reflect variation in the composition of procedures performed in each room rather than systematic differences in execution stability.
+
+The coefficients of variation for planning deviation are consistently higher, ranging from roughly 0.87 to 1.12 across rooms.
+As shown in Table \ref{tab:cv_room_31_60}, the lowest CV values appear in rooms such as MO02 (0.8763) and MKI3 (0.9102), while larger or multipurpose rooms including MO03 (1.122) and MO06 (1.077) show higher values.
+This indicates that proportional variability in planning accuracy exceeds that of the observed durations, although the degree of dispersion remains moderate and relatively uniform across the operating suite.
+
+Taken together, these results show that procedures planned for 31–60 minutes display consistent execution times and moderate variation in planning accuracy across operating rooms. The observed coefficients largely follow proportional scaling effects typical of medium-length procedures rather than substantial operational differences.
+
+```{r, echo=FALSE, table.pos='H'}
+# ---- Room-level summary for a specific duration group ----
+group_selected <- "31–60"
+
+cv_room_group <- genk %>%
+  filter(PlannedGroup == group_selected) %>%
+  group_by(`OR` = ActualOR) %>%
+  summarise(
+    `n`           = n(),
+    `Mean duration`   = mean(DurationMinutes, na.rm = TRUE),
+    `SD duration`     = sd(DurationMinutes, na.rm = TRUE),
+    `CV duration`     = `SD duration` / `Mean duration`,
+    `Mean dev`  = mean(abs(duration_diff), na.rm = TRUE),
+    `SD dev`    = sd(abs(duration_diff), na.rm = TRUE),
+    `CV dev`    = `SD dev` / `Mean dev`
+  ) %>%
+  # enkel rijen behouden zonder NA's en met meer dan 10 observaties
+  filter(if_all(everything(), ~ !is.na(.)) & `n` > 10) %>%
+  arrange(desc(`n`))
+
+pander::pander(
+  cv_room_group,
+  caption = paste(
+    "Coefficient of variation per operating room for surgeries planned",
+    group_selected,
+    "minutes (only rooms with >10 surgeries shown) \\label{tab:cv_room_31_60}"
+  )
+)
+
+```
+
+\vspace{1em}
+\noindent\textbf{Surgeries planned 61–90 minutes}
+\vspace{0.5em}
+
+Procedures planned between 61 and 90 minutes represent a balanced segment of the surgical workload, combining moderately complex inpatient cases with standardized elective interventions. Within this group, the coefficient of variation of observed durations is relatively low and stable across operating rooms. As shown in Table \ref{tab:cv_room_61_90}, most rooms display CV values between 0.27 and 0.57, indicating proportionally consistent execution times once procedures of this length begin. The limited dispersion suggests that mid-length operations, often supported by standardized preparation and anaesthesia routines, show predictable timing.
+
+Differences between rooms are modest. Lower CVs appear in MO04 (0.2558), MO01 (0.3457), and MO05 (0.3562), while higher values emerge in MO02 (0.4981) and MO03 (0.4344). The highest variability is observed in MKI3 (0.5668), a room that accommodates a broader mix of procedures. These differences likely reflect variations in case composition rather than underlying differences in workflow reliability.
+
+The coefficient of variation of planning deviation follows a similar but slightly broader distribution. Most rooms show CV_deviation levels between 0.27 and 1.3, indicating moderate variation in planning accuracy. As shown in Table \ref{tab:cv_room_61_90}, rooms such as MKI1 (0.2718) and MKI3 (0.4576) show lower CV values, while others, including MO04 (0.9475) and MO03 (1.294), display higher dispersion in planning deviation. These patterns suggest that although mean estimates are generally accurate, deviations vary more widely for some case mixes.
+
+Overall, procedures in the 61–90 minute category show stable and proportional execution times with only limited variation across operating rooms. Planning accuracy exhibits moderate dispersion but remains broadly consistent across the complex. Compared with shorter procedures, these mid-length cases are less affected by proportional scaling effects and offer a relatively steady anchor point within the daily schedule.
+
+
+```{r, echo=FALSE, table.pos='H'}
+# ---- Room-level summary for a specific duration group ----
+group_selected <- "61–90"
+
+cv_room_group <- genk %>%
+  filter(PlannedGroup == group_selected) %>%
+  group_by(`OR` = ActualOR) %>%
+  summarise(
+    `n`           = n(),
+    `Mean duration`   = mean(DurationMinutes, na.rm = TRUE),
+    `SD duration`     = sd(DurationMinutes, na.rm = TRUE),
+    `CV duration`     = `SD duration` / `Mean duration`,
+    `Mean dev`  = mean(abs(duration_diff), na.rm = TRUE),
+    `SD dev`    = sd(abs(duration_diff), na.rm = TRUE),
+    `CV dev`    = `SD dev` / `Mean dev`
+  ) %>%
+  # enkel rijen behouden zonder NA's en met meer dan 10 observaties
+  filter(if_all(everything(), ~ !is.na(.)) & `n` > 10) %>%
+  arrange(desc(`n`))
+
+pander::pander(
+  cv_room_group,
+  caption = paste(
+    "Coefficient of variation per operating room for surgeries planned",
+    group_selected,
+    "minutes (only rooms with >10 surgeries shown) \\label{tab:cv_room_61_90}"
+  )
+)
+```
+
+\vspace{1em}
+\noindent\textbf{Surgeries planned 91–180 minutes}
+\vspace{0.5em}
+
+Surgeries with a planned duration between 91 and 180 minutes encompass complex elective procedures as well as major inpatient operations.
+Within this category, the coefficient of variation of observed durations is moderate and shows limited variation across operating rooms.
+As reported in Table \ref{tab:cv_room_91_180}, most rooms exhibit CV values between 0.30 and 0.37, indicating proportionally stable execution times despite the broader absolute duration range typical of these cases. The lowest coefficients appear in MO05 (0.3036) and MO04 (0.3295), while MO03 (0.4321) displays the highest value in this group, likely reflecting a more heterogeneous case mix. Overall, these differences remain modest and suggest consistent timing performance across rooms.
+
+The coefficient of variation of planning deviation shows a similarly compact distribution. Most rooms fall between 0.63 and 0.94, with the lowest value observed in MO02 (0.63) and higher values in MO03 (1.204) and MO05 (0.9404). Although planning deviation CVs are uniformly higher than the CVs of observed duration, the spread across rooms remains limited, as expected in this category. This pattern indicates that planning accuracy for mid- to long-duration surgeries is reasonably stable, even when procedure complexity varies.
+
+Taken together, both indicators show restrained variability, suggesting that once procedures reach the 91–180 minute range, timing performance becomes comparatively predictable. Relative variation in both observed duration and planning deviation diminishes as the absolute operation time increases, making this segment one of the more consistent components of the surgical program from a timing perspective.
+
+```{r, echo=FALSE, table.pos='H'}
+# ---- Room-level summary for a specific duration group ----
+group_selected <- "91–180"
+
+cv_room_group <- genk %>%
+  filter(PlannedGroup == group_selected) %>%
+  group_by(`OR` = ActualOR) %>%
+  summarise(
+    `n`           = n(),
+    `Mean duration`   = mean(DurationMinutes, na.rm = TRUE),
+    `SD duration`     = sd(DurationMinutes, na.rm = TRUE),
+    `CV duration`     = `SD duration` / `Mean duration`,
+    `Mean dev`  = mean(abs(duration_diff), na.rm = TRUE),
+    `SD dev`    = sd(abs(duration_diff), na.rm = TRUE),
+    `CV dev`    = `SD dev` / `Mean dev`
+  ) %>%
+  # enkel rijen behouden zonder NA's en met meer dan 10 observaties
+  filter(if_all(everything(), ~ !is.na(.)) & `n` > 10) %>%
+  arrange(desc(`n`))
+
+pander::pander(
+  cv_room_group,
+  caption = paste(
+    "Coefficient of variation per operating room for surgeries planned",
+    group_selected,
+    "minutes (only rooms with >10 surgeries shown) \\label{tab:cv_room_91_180}"
+  )
+)
+```
+
+\vspace{1em}
+\noindent\textbf{Surgeries planned over 180 minutes}
+\vspace{0.5em}
+
+Procedures with a planned duration exceeding three hours represent the most complex and resource-intensive segment of the surgical program. Within this group, the coefficient of variation of observed durations remains moderate across operating rooms. As shown in Table \ref{tab:cv_room_over180}, CV values range from 0.321 in MO03 to 0.473 in MO06, with MO04 lying in between at 0.405. These values indicate that, despite the inherent heterogeneity and longer absolute times of these procedures, their proportional variability remains stable across rooms.
+
+The coefficient of variation of planning deviation shows a wider spread, reflecting the greater difficulty of estimating the duration of lengthy and complex operations. CV_dev ranges from 1.62 in MO04 to 2.087 in MO03, with MO06 also exhibiting a high value of 1.742. These elevated coefficients primarily reflect the large absolute differences between planned and actual durations that tend to arise in very long procedures, rather than systematic inconsistencies in scheduling accuracy.
+
+Taken together, the results suggest that surgeries lasting more than three hours display relatively uniform proportional duration patterns across operating rooms. Observed durations show limited relative variability, while planning deviations exhibit broader dispersion consistent with the uncertainty inherent to long and complex surgical interventions. The higher coefficients in some rooms likely reflect small sample sizes or concentration of rare, high-complexity cases rather than persistent operational issues.
+
+```{r, echo=FALSE, table.pos='H'}
+# ---- Room-level summary for a specific duration group ----
+group_selected <- "> 180"
+
+cv_room_group <- genk %>%
+  filter(PlannedGroup == group_selected) %>%
+  group_by(`OR` = ActualOR) %>%
+  summarise(
+    `n`           = n(),
+    `Mean duration`   = mean(DurationMinutes, na.rm = TRUE),
+    `SD duration`     = sd(DurationMinutes, na.rm = TRUE),
+    `CV duration`     = `SD duration` / `Mean duration`,
+    `Mean dev`  = mean(abs(duration_diff), na.rm = TRUE),
+    `SD dev`    = sd(abs(duration_diff), na.rm = TRUE),
+    `CV dev`    = `SD dev` / `Mean dev`
+  ) %>%
+  # enkel rijen behouden zonder NA's en met meer dan 10 observaties
+  filter(if_all(everything(), ~ !is.na(.)) & `n` > 10) %>%
+  arrange(desc(`n`))
+
+pander::pander(
+  cv_room_group,
+  caption = paste(
+    "Coefficient of variation per operating room for surgeries planned",
+    group_selected,
+    "minutes (only rooms with >10 surgeries shown) \\label{tab:cv_room_over180}"
+  )
+)
+
+```
+
+### Relationship between variability and mean operative duration
+
+Examining how variability scales with operative duration provides insight into whether dispersion in surgical times increases proportionally with the length of a procedure. By analysing this relationship at the level of procedure types, it becomes possible to distinguish structural scaling effects from differences in planning performance. The following figures present three complementary perspectives: the standard deviation of operative duration, the coefficient of variation of observed duration, and the coefficient of variation of planning deviation. Together, they describe how both absolute and relative variability evolve as surgeries become longer or more complex.
+
+```{r, echo=FALSE, table.pos='H'}
+# ---- Prepare data for relationship analysis ----
+cv_relation <- genk %>%
+  filter(!is.na(DurationMinutes),
+         !is.na(PlannedDurationMinutes),
+         DurationMinutes > 0,
+         PlannedDurationMinutes > 0) %>%
+  group_by(ProcedureName) %>%  
+  summarise(
+    n_cases = n(),
+    mean_dur = mean(DurationMinutes, na.rm = TRUE),
+    sd_dur   = sd(DurationMinutes, na.rm = TRUE),
+    CV_duration = sd_dur / mean_dur,  # klassieke CV zoals in Davis et al.
+
+    mean_absdiff = mean(abs(DurationMinutes - PlannedDurationMinutes), na.rm = TRUE),
+    sd_absdiff   = sd(abs(DurationMinutes - PlannedDurationMinutes), na.rm = TRUE),
+    CV_planning  = sd_absdiff / mean_absdiff  # CV van planning accuracy
+  ) %>%
+  filter(n_cases >= 10)
+
+```
+
+Figure \ref{fig:sd_mean_relation} shows a clear positive relationship between mean operative time and its standard deviation across procedure types. As average duration increases, the absolute spread of observed times also increases, and the fitted regression line indicates that this expansion occurs in a roughly proportional manner. This pattern reflects a natural scaling effect: longer procedures inherently allow for larger absolute deviations while still maintaining a similar proportional variability. In the scatterplot, procedures clustered around 50–100 minutes typically exhibit standard deviations of 20–40 minutes, whereas operations with mean durations above 150 minutes often show standard deviations of 50 minutes or more. A very long procedure exceeding 250 minutes displays even greater dispersion, consistent with the larger range of potential intraoperative complexity.
+
+Importantly, this linear trend does not imply that longer procedures are relatively more unpredictable. Instead, it shows that absolute variability increases with case duration, while relative variability may remain stable or even decrease, as demonstrated earlier in the coefficient-of-variation analyses. The figure therefore highlights that differences in standard deviation alone cannot be used to infer poorer timing control for longer surgeries; the observed increase simply mirrors the scaling of operative time itself.
+
+```{r sd mean relation, echo=F, fig.cap="Standard deviation in operative time relative to mean duration \\label{fig:sd_mean_relation}", fig.pos='H'}
+ggplot(cv_relation, aes(x = mean_dur, y = sd_dur)) +
+  geom_point(color = "steelblue", alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.8) +
+  labs(
+    title = "Standard deviation in operative time relative to mean duration",
+    subtitle = "Each point represents a procedure type",
+    x = "Mean operative time (minutes)",
+    y = "Standard deviation (minutes)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+When variability is expressed relative to mean duration, a clear inverse relationship appears, as shown in Figure \ref{fig:cv_mean_relation}. The coefficient of variation decreases progressively as procedures become longer, indicating that proportional dispersion narrows with increasing case length. Shorter procedures frequently exhibit CV values above 0.6, and several exceed 0.8 or 1.0, whereas most long procedures fall well below 0.4, with many clustering near 0.25. This pattern reflects a fundamental scaling property of surgical duration data. Although longer procedures show larger absolute variability as demonstrated in the previous figure their variability grows more slowly than their mean duration. As a result, longer cases appear proportionally more stable relative to their expected duration, while short procedures amplify even modest absolute deviations into larger relative differences. Overall, the figure confirms that relative unpredictability decreases with increasing procedure length, complementing the earlier observation that absolute variability rises as surgeries become longer.
+
+```{r cv mean relation, echo=F, fig.cap="Coefficient of variation (operative duration) relative to mean duration \\label{fig:cv_mean_relation}", fig.pos='H'}
+ggplot(cv_relation, aes(x = mean_dur, y = CV_duration)) +
+  geom_point(color = "steelblue", alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.8) +
+  labs(
+    title = "Coefficient of variation (operative duration) relative to mean duration",
+    subtitle = "Each point represents a procedure type",
+    x = "Mean operative time (minutes)",
+    y = "CV of operative duration (SD / Mean)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+A similar inverse pattern appears when plotting the coefficient of variation of planning deviation against mean operative duration, as shown in Figure \ref{fig:cv_planning_relation}. For short procedures, the relative spread in planning deviations is large, with some CV values rising above 3.0 and, in a few cases, approaching 5.0. These extreme coefficients arise because even small absolute deviations in planning translate into large proportional differences when the planned duration is short.
+
+As procedure length increases, this proportional amplification weakens. Procedures with mean durations above roughly 100 minutes tend to cluster around CV values close to or below 1.0, reflecting a more stable relationship between planned and observed duration in relative terms. Although the scatter remains wide, the downward slope in the fitted line shows that the proportional variability in planning deviation decreases gradually as surgeries become longer. This trend reflects the same underlying scaling principle observed for operative duration: absolute deviations grow with procedure length, but not quickly enough to increase proportional variability. Consequently, the negative slope therefore reflects the same scaling principle observed for operative duration, rather than a systematic improvement in planning accuracy.
+```{r cv planning relation, echo=F, fig.cap="Coefficient of variation (planning deviation) relative to mean duration \\label{fig:cv_planning_relation}", fig.pos='H'}
+cv_relation <- cv_relation %>%
+  mutate(mean_planned = mean_dur - mean_absdiff)  # optioneel, of vervang door geplande duur indien beschikbaar
+
+ggplot(cv_relation, aes(x = mean_dur, y = CV_planning)) +
+  geom_point(color = "darkorange", alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.8) +
+  labs(
+    title = "Coefficient of variation (planning deviation) relative to mean duration",
+    subtitle = "Each point represents a procedure type",
+    x = "Mean operative time (minutes)",
+    y = "CV of planning deviation (SD / Mean of |difference|)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+Taken together, the three figures demonstrate a consistent pattern: absolute variability in operative time increases as procedures become longer, while relative variability decreases. As case length grows, standard deviations expand in absolute terms, but this growth is slower than the increase in mean duration. The result is that proportional uncertainty is highest for short procedures where even minor timing differences constitute a large share of total duration and lowest for long surgeries, where absolute deviations are spread over a much larger time base. This structural scaling effect explains why longer operations appear more stable in relative terms, despite exhibiting wider absolute ranges.
+
+## How large are start-time delays, and when do they happen?
+
+Start-time deviations exhibit substantial variability, with late starts occurring more frequently and with slightly greater magnitude than early ones. As shown in Table \ref{tab:start_diff}, 65.3 percent of surgeries begin later than scheduled, with a mean delay of 39.1 minutes and a median of 25 minutes. Early starts account for the remaining 34.7 percent, averaging 27.5 minutes ahead of plan and a median of 16 minutes.
+
+The dispersion in both directions is considerable. Standard deviations reach 53.3 minutes for late starts and 47.7 minutes for early starts, indicating broad day-to-day fluctuations in punctuality. A small number of extreme outliers extend far beyond the typical range, with the largest delays exceeding 1,700 minutes and the earliest starts surpassing 1,200 minutes, underscoring the presence of rare but very large scheduling deviations. Overall, these results confirm that punctuality at the beginning of the surgical day remains a significant operational challenge. Late starts are more common and can propagate delays across subsequent cases, reducing room efficiency and compressing already constrained schedules.
+
+```{r start diff, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(start_diff)) %>%
+  mutate(
+    direction = ifelse(start_diff > 0, "Late start", "Early start"),
+    abs_diff = abs(start_diff)
+  ) %>%
+  group_by(direction) %>%
+  summarise(
+    Mean   = round(mean(abs_diff), 1),
+    Median = round(median(abs_diff), 1),
+    SD     = round(sd(abs_diff), 1),
+    IQR    = round(IQR(abs_diff), 1),
+    Min    = round(min(abs_diff), 1),
+    Max    = round(max(abs_diff), 1),
+    P95    = round(quantile(abs_diff, 0.95), 1),
+    P99    = round(quantile(abs_diff, 0.99), 1),
+    P99.9  = round(quantile(abs_diff, 0.999), 1),
+    Percent = scales::percent(n() / nrow(genk %>% filter(!is.na(start_diff))), 0.1),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(direction)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Difference between actual and planned start time (absolute minutes), separated by direction \\label{tab:start_diff}"
+  )
+
+```
+
+The distribution of start-time deviations is centered close to zero, as shown in Figure \ref{fig:start_diff_hist}, with a prominent peak around small differences. This indicates that many surgeries begin near their scheduled time. However, the histogram displays a clear right skew: late starts occur more frequently and with a wider spread than early starts. Most cases begin within roughly 30 minutes of plan, but the density gradually tapers toward larger positive deviations, signalling that a subset of surgeries experiences substantial delays. The long right-hand tail highlights the presence of occasional extreme delays, which, although rare, can disrupt downstream scheduling and reduce overall operating room efficiency. On the left side, early starts also occur but are less frequent and exhibit a shorter tail. 
+
+```{r start diff hist, echo=F, fig.cap="Start time deviations (grouped per 10 minutes) \\label{fig:start_diff_hist}", fig.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), start_diff <= 200, start_diff >= -200) %>%
+  mutate(start_diff_bin = round(start_diff / 10) * 10) %>%     # groepeer per 10 min
+  count(start_diff_bin) %>%
+  ggplot(aes(x = start_diff_bin, y = n)) +
+  geom_col(fill = "steelblue") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  scale_x_continuous(
+    breaks = seq(-180, 180, by = 30),
+    labels = function(x) ifelse(x > 0, paste0("+", x), x)
+  ) +
+  labs(
+    title = "Start time deviations (grouped per 10 minutes)",
+    x = "Start difference (minutes; + = later, - = earlier)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+```
+
+Average start-time delays vary moderately across the week, as shown in Figure \ref{fig:start_delay_weekday}. During regular working days, mean delays range from 11.1 minutes on Wednesday to 19.7 minutes on Friday. Monday (19.2 minutes) and Tuesday (16.6 minutes) also show delays toward the higher end of this range, while Thursday (13.4 minutes) remains closer to the middle. These differences are modest, suggesting that start-time punctuality is broadly consistent across weekdays, with no evidence of systematic structural variation.
+
+Weekend behavior differs slightly. Saturday shows a mean delay of 13.7 minutes, comparable to midweek levels, while Sunday displays the lowest average delay of the entire week at 5.8 minutes. Lower weekend delays likely reflect smaller surgical volumes and reduced scheduling pressure rather than improved punctuality. Overall, the pattern indicates that first-case delays are generally stable throughout the week, with only mild fluctuations and no pronounced weekday–weekend divide.
+
+```{r start delay weekday, echo=F, fig.cap="Mean start delay by weekday \\label{fig:start_delay_weekday}", fig.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), !is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, levels = c("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"))) %>%
+  group_by(Weekday) %>%
+  summarise(
+    `Mean start delay (min)` = round(mean(start_diff, na.rm = TRUE), 1)
+  ) %>%
+  ggplot(aes(x = Weekday, y = `Mean start delay (min)`)) +
+  geom_col(fill = "#2C77B2") +
+  geom_text(aes(label = `Mean start delay (min)`), vjust = -0.3, size = 3) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Mean start delay by weekday",
+    x = "Weekday",
+    y = "Mean start delay (minutes)"
+  ) +
+  theme_minimal()
+```
+
+Late starts occur more frequently than early starts on every day of the week, as shown in Table \ref{tab:start_diff_weekday}.
+Across regular weekdays, approximately 64 to 67 percent of surgeries begin later than scheduled. Mean delays range from 32.2 minutes on Wednesday to 43.7 minutes on Monday, while median delays fall between 20 and 29.5 minutes. Early starts account for roughly 31 to 34 percent of cases, with mean leads between –27 and –31 minutes and median leads around –17 to –19 minutes. These small differences across weekdays indicate broadly stable punctuality, with no particular day exhibiting markedly better or worse performance.
+
+Weekend patterns show similar proportions but lower absolute timing variation due to smaller case volumes. On Saturday and Sunday, late starts comprise 61 to 63 percent of cases and are slightly below weekday levels. The median delays drop to 7 minutes on Saturday and 3 minutes on Sunday. Early starts remain around 30 to 31 percent, but mean leads become somewhat larger in magnitude, reaching –37.3 minutes on Saturday and –45.6 minutes on Sunday. These values reflect the different operational context of weekend activity, where fewer scheduled cases and a higher share of urgent procedures influence timing behavior. Overall, weekday start-time performance is relatively consistent, while weekend deviations reflect lower volumes and more irregular scheduling conditions rather than systematic delay accumulation.
+
+```{r start diff weekday, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), !is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, levels = c("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"))) %>%
+  group_by(Weekday) %>%
+  summarise(
+    n = n(),
+    `Late starts (%)`          = round(100 * mean(start_diff > 0, na.rm = TRUE), 1),
+    `Mean delay`   = round(mean(start_diff[start_diff > 0], na.rm = TRUE), 1),
+    `Median delay` = round(median(start_diff[start_diff > 0], na.rm = TRUE), 1),
+    `Early starts (%)`         = round(100 * mean(start_diff < 0, na.rm = TRUE), 1),
+    `Mean lead`   = round(mean(start_diff[start_diff < 0], na.rm = TRUE), 1),
+    `Median lead` = round(median(start_diff[start_diff < 0], na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Start-time deviation patterns per weekday (minutes). \\label{tab:start_diff_weekday}"
+  )
+```
+
+
+Start-time reliability varies notably across operating rooms, as shown in Table \ref{tab:start_diff_or}. The proportion of late starts ranges from 46 percent in MKI3 to nearly 80 percent in MKI1 and MO02, indicating that punctuality differs substantially between rooms. The rooms with the highest rates of late starts are MKI1 (79.8 percent), MO02 (79.6 percent), and MO03 (73 percent). These rooms also show relatively large mean delays of 57.5 minutes, 34.7 minutes, and 55.3 minutes, respectively. This suggests more persistent difficulties in beginning cases on time. Median delays in these rooms range from 23 to 51 minutes, which displays the pattern of recurrent lateness rather than isolated extreme events.
+
+Rooms such as MO04 (64.7 percent late starts), MO05 (63.3 percent), and MO01 (62.3 percent) exhibit moderately high rates of late starts but with more moderate mean delays around 35–37 minutes. These values indicate consistent but less severe timing deviations. At the opposite end of the spectrum, MKI3 stands out with only 46 percent late starts and over half of its cases (52.3 percent) beginning early.
+Its mean delay is 20.1 minutes, with a median delay of 15 minutes, making it the most punctual room in the dataset.
+
+The variation between rooms suggests that start-time deviations are not uniformly distributed across the OR complex. Some operating rooms show recurrent delays, while others demonstrate far more stable and predictable timing performance. These differences may reflect room-specific workflows, case compositions, staffing patterns, or logistical constraints.
+
+```{r start diff or, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), !is.na(ActualOR)) %>%
+  group_by(ActualOR) %>%
+  summarise(
+    n = n(),
+    `Late starts (%)`          = round(100 * mean(start_diff > 0, na.rm = TRUE), 1),
+    `Mean delay`   = round(mean(start_diff[start_diff > 0], na.rm = TRUE), 1),
+    `Median delay` = round(median(start_diff[start_diff > 0], na.rm = TRUE), 1),
+    `Early starts (%)`         = round(100 * mean(start_diff < 0, na.rm = TRUE), 1),
+    `Mean lead`   = round(mean(start_diff[start_diff < 0], na.rm = TRUE), 1),
+    `Median lead` = round(median(start_diff[start_diff < 0], na.rm = TRUE), 1)
+  ) %>%
+  arrange(desc(`Late starts (%)`)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Start-time deviation patterns per operating room (minutes). \\label{tab:start_diff_or}"
+  )
+```
+
+## Which procedures deviate most from plan?
+
+Procedures vary substantially in how accurately their durations are predicted, as shown in Table \ref{tab:duration_dev_proc}. The table lists the twenty procedure types with the highest mean absolute deviation between planned and observed operative time. Across these procedures, average deviations range from approximately 28 to 65 minutes, indicating that for certain interventions, planning estimates diverge considerably from realised durations.
+
+The largest deviations occur in procedures such as DVC – MK (mean absolute deviation 64.8 minutes), TARUP (58.3 minutes), and EVENTRATIE – MK (55.4 minutes). These procedures tend to include complex surgical steps or substantial intraoperative variability, which makes precise planning more difficult. Several high-volume procedures, for example, LAPAROTOMIE EXPLORATIE CHIR – MK, LAPAROSCOPIE HEMICOLON RECHTS – MK, and TOTALE HEUPPROTHESE also show deviations above 40 minutes, demonstrating that unpredictability persists even for interventions performed frequently.
+
+Across most of the listed procedures, longer-than-planned cases are slightly more common than shorter ones. For instance, procedures such as LAPAROSCOPIE HEMICOLON RECHTS – MK show 82.6 percent of cases finishing later than planned, while others such as PERCUTANE NEFROLITHOTRAPAXIE – MK show the opposite pattern, with 71.9 percent finishing earlier. These contrasts underline that deviation patterns depend not only on the procedure type but also on inherent clinical uncertainty and variation in patient presentation.
+
+Overall, the results confirm that planning accuracy is strongly procedure-dependent. Routine operations with standardized workflows tend to show smaller deviations, while complex, technically demanding, or less frequently performed procedures exhibit substantially greater uncertainty in their operative times.
+
+```{r duration dev proc, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(duration_diff), !is.na(ProcedureName)) %>%
+  group_by(ProcedureName) %>%
+  summarise(
+    n = n(),
+    `Mean abs dev (min)` = round(mean(abs(duration_diff), na.rm = TRUE), 1),
+    `Longer (%)` = round(100 * mean(duration_diff > 0, na.rm = TRUE), 1),
+    `Mean + dev (min)` = round(mean(duration_diff[duration_diff > 0], na.rm = TRUE), 1),
+    `Shorter (%)` = round(100 * mean(duration_diff < 0, na.rm = TRUE), 1),
+    `Mean - dev (min)` = round(mean(duration_diff[duration_diff < 0], na.rm = TRUE), 1)
+  ) %>%
+  filter(n >= 30) %>%
+  arrange(desc(`Mean abs dev (min)`)) %>%
+  slice_head(n = 20) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Top 20 procedures by average absolute duration deviation (Maaseik). \\label{tab:duration_dev_proc}"
+  )
+```
+
+
+The scatter plot in Figure \ref{fig:volume_deviation} shows an inverse relationship between procedure volume and average deviation. Procedures that occur more frequently tend to have lower mean absolute deviations, while rare procedures show much greater variability in duration. This pattern is visible in the downward trend of the points as procedure volume increases.
+
+High-volume procedures, which appear toward the right of the chart, cluster at lower deviation values, indicating more stable and predictable planning performance. In contrast, low-volume procedures on the left display a much wider range of deviations that can exceed 60 minutes. The relationship suggests that familiarity and repetition contribute to more accurate duration estimates, whereas infrequent procedures are harder to predict due to limited historical data. Overall, the figure highlights that case volume is an important factor in explaining the variability of planning accuracy across procedure types.
+
+```{r volume_deviation, echo=F, fig.cap="Relationship between procedure volume and mean deviation \\label{fig:volume_deviation}", fig.pos='H'}
+genk %>%
+  filter(!is.na(duration_diff), !is.na(ProcedureName)) %>%
+  group_by(ProcedureName) %>%
+  summarise(
+    n = n(),
+    `Mean abs dev (min)` = mean(abs(duration_diff), na.rm = TRUE)
+  ) %>%
+  filter(n >= 30) %>%
+  ggplot(aes(x = n, y = `Mean abs dev (min)`)) +
+  geom_point(alpha = 0.6, color = "#2C77B2") +
+  scale_x_log10() +
+  labs(
+    title = "Relationship between procedure volume and mean deviation",
+    x = "Number of surgeries (log scale)",
+    y = "Mean absolute deviation (minutes)"
+  ) +
+  theme_minimal()
+```
+
+
+The distribution of duration deviations across surgeons reveals notable variation in planning accuracy, as shown in Table \ref{tab:surgeon_deviation}. Among those with at least fifty recorded procedures, the average absolute deviation ranges from 30.4 to 68.1 minutes, while the average relative deviation spans 17.2% to 52.6%. A few surgeons show comparatively high mean deviations above 55 minutes, whereas most fall between 30 and 40 minutes, indicating that planning performance differs across individuals but remains within a moderate range for the majority.
+
+No clear relationship appears between the number of recorded cases and the size of the deviation, suggesting that factors beyond case volume influence the observed variation. Overall, the results show that duration deviations are not uniformly distributed across surgeons, emphasizing that planning accuracy can vary meaningfully even within a shared operational environment.
+
+```{r surgeon deviation, echo=F, table.pos='H'}
+genk %>%
+  filter(
+    !is.na(duration_diff),
+    !is.na(PlannedDurationMinutes),
+    PlannedDurationMinutes > 0,
+    !is.na(HeadSurgeonID)
+  ) %>%
+  group_by(HeadSurgeonID) %>%
+  summarise(
+    n = n(),
+    `Mean absolute dev (min)` = round(mean(abs(duration_diff), na.rm = TRUE), 1),
+    `Mean relative dev (%)` = round(mean(abs(100 * duration_diff / PlannedDurationMinutes), na.rm = TRUE), 1)
+  ) %>%
+  filter(n >= 50) %>%
+  arrange(desc(`Mean absolute dev (min)`)) %>%
+  mutate(Surgeon = paste0("Surgeon ", row_number())) %>%
+  select(Surgeon, everything(), -HeadSurgeonID) %>%
+  slice_head(n = 15) %>%
+  knitr::kable(
+    caption = "Top 15 surgeons by average absolute and relative duration deviation (pseudonymized). \\label{tab:surgeon_deviation}",
+    align = "lccc",
+    booktabs = TRUE
+  )
+```
+
+\newpage
+
+# Do surgeries stay within regular working hours?
+## How often do cases extend beyond their assigned time window?
+
+Around 2.8 percent of all surgeries at Maaseik continue beyond the scheduled shift end of the operating team, as shown in Table \ref{tab:overtime_summary}. On average, these extended cases run about 42 minutes beyond the planned shift, with a median of 29 minutes. Most overruns are therefore relatively short, though a smaller subset lasts considerably longer, as reflected in the 95th percentile of 129 minutes. These outliers typically involve complex or unpredictable procedures that cannot be concluded within the planned block.
+
+The results indicate that overtime is a recurring feature across the full 24-hour cycle. Although the large majority of surgeries conclude within their scheduled working periods, the 2.8 percent share of extended cases points to regular spillover between adjacent shifts. The substantial spread in overtime duration also shows that while most overruns are moderate, a small number of prolonged sessions contribute disproportionately to the evening and night workload.
+
+```{r overtime summary, echo=F, table.pos='H'}
+genk %>%
+  summarise(
+    Total = n(),
+    `Surgeries with overtime` = sum(afterhours_flag == 1, na.rm = TRUE),
+    Percentage = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+    `Mean Overtime` = round(mean(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1),
+    `Median Overtime` = round(median(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1),
+    `P95 Overtime` = round(quantile(overtime_minutes[overtime_minutes > 0], 0.95, na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Overall share and duration of after-hours surgeries (Maaseik). \\label{tab:overtime_summary}"
+  )
+```
+
+he distribution of overtime duration, shown in Figure \ref{fig:overtime_dist}, is strongly right-skewed. Most extended cases finish within the first 60 minutes beyond the scheduled shift, with the highest concentration in the 10–20-minute range. Beyond this point, frequencies decline steadily, and only a small fraction of cases exceed 200 minutes. A few rare outliers extend beyond 300 minutes, but these represent exceptional circumstances rather than routine deviations.
+
+This pattern confirms that while overtime is a recurring operational feature, it is typically limited in duration. The long right tail illustrates that a small number of prolonged procedures account for a disproportionate share of total overtime minutes. Although these outliers can significantly affect staff workload and room turnover late in the day, they do not represent the typical case. Overall, overtime at Maaseik mainly consists of brief extensions of planned activity rather than frequent or sustained night-time operating.
+
+```{r overtime_dist, echo=F, fig.cap="Distribution of overtime duration for after-hours surgeries \\label{fig:overtime_dist}", fig.pos='H'}
+genk %>%
+  filter(!is.na(overtime_minutes), overtime_minutes > 0, overtime_minutes < 600) %>%
+  ggplot(aes(x = overtime_minutes)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "white") +
+  labs(
+    title = "Distribution of overtime duration for after-hours surgeries",
+    x = "Overtime (minutes)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal()
+```
+
+The share of surgeries extending beyond scheduled shift hours remains low and relatively stable throughout the regular workweek, as shown in Figure \ref{fig:afterhours_weekday}. From Monday to Thursday, after-hours cases account for only 2.2 to 2.7 percent of all surgeries, increasing slightly to 3.5 percent on Friday. These small and steady values indicate that weekday operations at Maaseik are generally well contained within their planned timeframes, with only a limited fraction of cases requiring additional time beyond the scheduled shift.
+
+A clearer rise occurs during the weekend. On Saturday, 4.5 percent of surgeries extend beyond shift boundaries, and on Sunday this share increases sharply to 8.7 percent, the highest of the week. Although weekend case volumes are lower, these proportions show that a substantially larger share of procedures performed on weekends exceed the available shift window. This likely reflects the higher prevalence of urgent or semi-urgent interventions during weekends, which are less predictable in both timing and duration.
+
+Overall, the weekday–weekend contrast highlights how overtime at Maaseik is structurally embedded in the hospital’s continuous surgical service. While overtime during weekdays is relatively infrequent and well controlled, weekend operations more often extend into subsequent shifts due to the emergency-driven case mix.
+```{r afterhours_weekday, echo=F, fig.cap="Share of after-hours surgeries by weekday \\label{fig:afterhours_weekday}", fig.pos='H'}
+genk %>%
+  filter(!is.na(afterhours_flag), !is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, levels = c("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"))) %>%
+  group_by(Weekday) %>%
+  summarise(
+    n = n(),
+    `After-hours (%)` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+    `Mean overtime (min)` = round(mean(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1)
+  ) %>%
+  ggplot(aes(x = Weekday, y = `After-hours (%)`)) +
+  geom_col(fill = "#2C77B2") +
+  geom_text(aes(label = `After-hours (%)`), vjust = -0.3, size = 3) +
+  labs(
+    title = "Share of after-hours surgeries by weekday",
+    x = "Weekday",
+    y = "After-hours surgeries (%)"
+  ) +
+  theme_minimal()
+```
+
+The proportion of surgeries extending beyond scheduled shift hours has remained low and broadly stable over time, as illustrated in Figure \ref{fig:afterhours_trend}. In 2022, about 2.7 percent of all surgeries at Maaseik exceeded their scheduled shift, increasing slightly to 2.8 percent in both 2023 and 2024, before declining to 2.6 percent in the partial dataset for 2025.
+
+These values represent the percentage of procedures in each year that continued past the official end of their assigned shift. The small year-to-year movements suggest that the frequency of after-hours cases has remained steady, with a mild reduction visible in the most recent year.
+
+Although the changes are modest, the pattern indicates stable adherence to scheduled shift boundaries and suggests that daytime throughput and list planning processes are functioning consistently across years. Overall, overtime remains a relatively small but persistent component of operating room activity at Maaseik, with little indication of structural increase or deterioration over time.
+
+```{r afterhours_trend, echo=F, fig.cap="Evolution of after-hours activity over time \\label{fig:afterhours_trend}", fig.pos='H'}
+genk %>%
+  filter(!is.na(afterhours_flag), !is.na(Year)) %>%
+  group_by(Year) %>%
+  summarise(
+    `After-hours (%)` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+    `Mean overtime (min)` = round(mean(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1)
+  ) %>%
+  ggplot(aes(x = as.factor(Year), y = `After-hours (%)`, group = 1)) +
+  geom_line(color = "#2C77B2") +
+  geom_point(size = 2, color = "#2C77B2") +
+  geom_text(aes(label = `After-hours (%)`), vjust = -0.6, size = 3) +
+  labs(
+    title = "Evolution of after-hours activity over time",
+    x = "Year",
+    y = "Share of after-hours surgeries (%)"
+  ) +
+  theme_minimal()
+```
+
+The proportion of surgeries extending beyond scheduled shift hours differs markedly across operating rooms, as summarized in Table \ref{tab:overtime_or}. Most rooms show overtime rates between 4 and 9 percent, while a few stand out with substantially lower shares. MO03 records the highest proportion of overtime cases at 8.9 percent, with a mean duration of 62.2 minutes and a 95th percentile of 180.8 minutes, indicating frequent and occasionally prolonged extensions. Such figures likely reflect the type of procedures performed in this room, which may be more complex or less predictable in length.
+
+Several other rooms, including MO05, MO04, and MO06, show overtime in roughly 5 to 6 percent of cases, with mean durations between 36.2 and 42 minutes. These values suggest that while most surgeries in these rooms finish within their allocated shift, a notable share still extends into the next operational block.
+
+In contrast, rooms such as MO01 and MO02 show more moderate overtime frequencies below 5 percent, with average extensions typically between 14.5 and 34.4 minutes. The lowest rates occur in the MKI1 and MKI3 rooms, where overtime is rare and mean durations remain short.
+
+Overall, the data indicate that overtime at Maaseik is concentrated in a limited number of operating rooms with heavier or more variable case mixes. While many rooms complete their scheduled activity within the planned shift most of the time, a subset still experiences overtime in 5 to 9 percent of surgeries, showing that after-shift extensions remain a recurring part of daily operations rather than isolated exceptions.
+
+```{r overtime or, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(ActualOR)) %>%
+  group_by(ActualOR) %>%
+  summarise(
+    Cases = n(),
+    `Percentage of overtime surgeries` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+    `Mean Overtime` = round(mean(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1),
+    `Median Overtime` = round(median(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1),
+    P95 = round(quantile(overtime_minutes[overtime_minutes > 0], 0.95, na.rm = TRUE), 1)
+  ) %>%
+  arrange(desc(`Percentage of overtime surgeries`)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Operating rooms by after-hours activity (Maaseik). \\label{tab:overtime_or}"
+  )
+```
+
+
+## When does overtime occur, and how heavy is it?
+
+The distribution of overtime surgeries, shown in Figure \ref{fig:overtime_timing}, displays a clear concentration of cases ending in the first one to two hours after the regular shift boundary at 16:30. The largest peak occurs around 17:00, followed by substantial numbers of cases finishing near 17:30 and 18:00. These observations primarily reflect procedures that began during the daytime schedule but required additional time to complete.
+
+As the evening progresses, the number of overtime surgeries declines sharply. Only a small number of cases finish after 20:00, and a distinct but limited secondary cluster appears around 23:00. Operations ending during the late evening or night are therefore relatively infrequent. Very few procedures extend past midnight, and only isolated cases finish between 03:00 and 07:00.
+
+Overall, the pattern demonstrates that overtime activity is dominated by surgeries that conclude soon after the end of the regular working day, while operations finishing late at night contribute only a small share of total overtime. Most after-hours activity represents brief extensions of daytime work rather than sustained night-time operating.
+
+```{r overtime_timing, echo=F, fig.cap="Timing of overtime surgeries \\label{fig:overtime_timing}", fig.pos='H'}
+ref <- as.POSIXct("2000-01-01 16:30:00", tz = "UTC")
+
+genk %>%
+  filter(afterhours_flag == 1, !is.na(OROut)) %>%
+  mutate(
+    tod = hms::as_hms(OROut),
+    secs = as.integer(tod) - as.integer(hms::as_hms("16:30:00")),
+    secs = ifelse(secs < 0, secs + 24 * 3600, secs),
+    EndRef = ref + secs
+  ) %>%
+  ggplot(aes(x = EndRef)) +
+  geom_histogram(
+    binwidth = 30 * 60,
+    fill = "#2C77B2", color = "white",
+    boundary = ref
+  ) +
+  scale_x_datetime(
+    limits = c(ref, ref + dseconds(16.5 * 3600)),
+    breaks = seq(ref, ref + dseconds(16.5 * 3600), by = "1 hour"),
+    labels = function(x) format(x, "%H:%M")
+  ) +
+  labs(
+    title = "Timing of overtime surgeries",
+    x = "End time of surgery",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Average overtime durations show moderate variation across weekdays, as illustrated in Figure \ref{fig:overtime_weekday}. Mean values range from 31.7 minutes on Thursday to 48.1 minutes on Tuesday, while Monday, Wednesday, and Friday all fall between 39.9 and 44.6 minutes. Median durations are consistently lower than the means, varying from 23 to 33.5 minutes, indicating a right-skewed distribution in which a small number of long overruns raise the average beyond the typical case.
+
+A similar pattern appears on the weekend. Saturday shows the highest mean overtime duration at 52.9 minutes, alongside a median of 45.5 minutes, while Sunday records a mean of 44.8 minutes and a median of 40 minutes. These values should not be interpreted as shorter or longer relative to daytime hours; rather, they reflect the overtime profile of cases that extend beyond their scheduled shift, independent of weekday or weekend scheduling structures.
+
+Overall, once surgeries run past the shift boundary, the typical overrun ranges from about 25 to 45 minutes, as reflected in the median values, while the means cluster closer to 40 to 50 minutes because of a limited number of prolonged extensions. This pattern highlights that most overtime cases represent modest delays, with only a small subset contributing disproportionately to average overtime duration.
+
+```{r overtime_weekday, echo=F, fig.cap="Average and median overtime duration by weekday \\label{fig:overtime_weekday}", fig.pos='H'}
+genk %>%
+  filter(afterhours_flag == 1, !is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, 
+                          levels = c("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"))) %>%
+  group_by(Weekday) %>%
+  summarise(
+    Cases = n(),
+    AvgOvertime = round(mean(overtime_minutes, na.rm = TRUE), 1),
+    MedOvertime = round(median(overtime_minutes, na.rm = TRUE), 1)
+  ) %>%
+  pivot_longer(
+    cols = c("AvgOvertime", "MedOvertime"),
+    names_to = "Statistic",
+    values_to = "Minutes"
+  ) %>%
+  ggplot(aes(x = Weekday, y = Minutes, fill = Statistic)) +
+  geom_col(position = "stack") +
+  geom_text(aes(label = Minutes),
+            position = position_stack(vjust = 0.5), size = 3, color = "white") +
+  scale_fill_manual(values = c("steelblue", "darkblue"),
+                    labels = c("Mean", "Median"),
+                    name = "") +
+  labs(
+    title = "Average and median overtime duration by weekday",
+    x = "Weekday",
+    y = "Overtime (minutes)"
+  ) +
+  theme_minimal()
+```
+
+Average and median overtime durations per surgery show a stable pattern over the observed years, as illustrated in Figure \ref{fig:overtime_year}. The mean varies only slightly, from 43 minutes in 2022 to 42.6 minutes in 2023, 43.2 minutes in 2024, and a slightly lower 35.9 minutes in 2025. The median consistently remains below the mean, ranging from 25 to 31 minutes across the same period.
+
+This persistent gap between the mean and median indicates that overtime durations are right-skewed, with a minority of lengthy overruns pulling the mean upward. In most years, the typical overtime duration (median) is therefore around 25 to 31 minutes, while the average sits closer to 40 minutes, reflecting the influence of occasional long cases.
+
+The small year-to-year changes suggest that the overall duration of overtime has remained stable. At the same time, the difference between mean and median values shows that the underlying distribution is not uniform: years with similar averages can still exhibit very different spreads. This pattern highlights that a limited number of extended overruns continues to account for a disproportionate share of total overtime minutes.
+
+```{r overtime_year, echo=F, fig.cap="Average and median overtime per surgery by year \\label{fig:overtime_year}", fig.pos='H'}
+genk %>%
+  filter(afterhours_flag == 1, !is.na(Year)) %>%
+  group_by(Year) %>%
+  summarise(
+    AvgOvertime = round(mean(overtime_minutes, na.rm = TRUE), 1),
+    MedOvertime = round(median(overtime_minutes, na.rm = TRUE), 1)
+  ) %>%
+  ggplot(aes(x = as.factor(Year), group = 1)) +
+  geom_line(aes(y = AvgOvertime), color = "#2C77B2", linewidth = 1) +
+  geom_point(aes(y = AvgOvertime), size = 2, color = "#2C77B2") +
+  geom_line(aes(y = MedOvertime), color = "darkblue", linewidth = 1, linetype = "dashed") +
+  geom_point(aes(y = MedOvertime), size = 2, color = "darkblue") +
+  geom_text(aes(y = AvgOvertime, label = AvgOvertime), vjust = -0.6, size = 3, color = "#2C77B2") +
+  geom_text(aes(y = MedOvertime, label = MedOvertime), vjust = 1.6, size = 3, color = "darkblue") +
+  labs(
+    title = "Average and median overtime per surgery by year",
+    x = "Year",
+    y = "Overtime (minutes)",
+    caption = "Solid line = mean, dashed line = median"
+  ) +
+  theme_minimal() +
+  expand_limits(y = 0)
+```
+
+The distribution of overtime differs noticeably between shift types, as shown in Figure \ref{fig:overtime_shift}. The day shift (08:00–16:30) displays the widest spread, with most cases extending only slightly beyond the scheduled end but a small number continuing for several hours. This broad distribution reflects the higher case volume and greater procedural variability during daytime hours, which explains why the day shift accounts for the majority of total overtime minutes.
+
+In the evening shift (16:30–22:00), the spread is narrower and most cases cluster close to zero, indicating that only a limited share of procedures extends far beyond the planned shift end. Although a few longer overruns appear, they are markedly less frequent than during the day.
+
+The night shift (22:00–08:00) shows a similar pattern, with most observations concentrated around short extensions and only a few long outliers. The much lower density of points reflects the small number of surgeries performed during this period, making extended overtime events relatively rare.
+
+Overall, the distributions illustrate that overtime is most variable during the day, when activity levels and case complexity are highest, and becomes progressively more contained during the later shifts. The pronounced right tails in each group confirm that a limited number of long-running procedures account for a substantial share of total overtime minutes.
+
+```{r overtime_shift, echo=F, fig.cap="Relative overtime per shift type \\label{fig:overtime_shift}", fig.pos='H'}
+genk %>%
+  filter(!is.na(relative_overtime_minutes),
+         !is.na(shift_label)) %>%
+  ggplot(aes(x = shift_label, y = overtime_minutes, fill = shift_label)) +
+  geom_violin(trim = TRUE, alpha = 0.8, show.legend = FALSE) +
+  labs(
+    title = "Relative overtime per shift type",
+    x = "Shift type",
+    y = "Overtime minutes"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+## How does Maaseik compare with Cathlab, Lanaken, and Genk?
+
+The comparison between campuses highlights clear differences in after-hours activity, with Maaseik occupying an intermediate position within this pattern. At Maaseik, 2.8 percent of all surgeries extend beyond the scheduled shift boundary, substantially lower than Genk (8.4 percent) and Cathlab (5.8 percent) but higher than at Lanaken (0.5 percent). This reflects Maaseik’s focused surgical profile: the campus handles a substantial volume of planned interventions but performs fewer highly complex procedures that typically run long.
+
+Overtime durations at Maaseik fall between those of the other sites. The average overrun is 42 minutes, with a median of 29 minutes and a 95th percentile of 129 minutes. These values show that extended cases occur regularly but remain contained, unlike Genk, where mean overtime reaches 59 minutes and the upper tail extends beyond 193 minutes. Compared with Lanaken, Maaseik experiences both longer and more frequent overruns, since Lanaken’s limited after-hours activity produces much shorter median and tail durations.
+
+Taken together, the results show that Maaseik experiences a moderate level of after-hours surgical work, more than the smaller Lanaken campus but considerably less than Genk. The Cathlab also exhibits a controlled but non-negligible share of overtime. Overall, this places Maaseik in a balanced position within the ZOL network, where occasional overruns occur but extended evening work is not a dominant feature of daily operations.
+
+```{r afterhours campus, echo=F, table.pos='H'}
+
+# load cleaned data from the 'modified data' folder
+data    <- read_excel("modified data/data_cleaned.xlsx")
+genk_    <- read_excel("modified data/genk_cleaned.xlsx")
+
+bind_rows(
+  genk_ %>% mutate(Campus = "Genk"),
+  lanaken %>% mutate(Campus = "Lanaken"),
+  cathlab %>% mutate(Campus = "Cathlab"),
+  maaseik %>% mutate(Campus = "Maaseik")
+) %>%
+  group_by(Campus) %>%
+  summarise(
+    Total = n(),
+    `AfterHour surgeries` = sum(afterhours_flag == 1, na.rm = TRUE),
+    `Share of overtime surgeries` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+    `Average Overtime` = round(mean(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1),
+    `Median Overtime` = round(median(overtime_minutes[overtime_minutes > 0], na.rm = TRUE), 1),
+    `P95 Overtime` = round(quantile(overtime_minutes[overtime_minutes > 0], 0.95, na.rm = TRUE), 1)
+  ) %>%
+  arrange(desc(`Share of overtime surgeries`)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Comparison of after-hours activity between campuses. \\label{tab:afterhours_campus}"
+  )
+```
+
+\newpage
+
+# Are surgeries performed in their assigned operating rooms?
+## How frequently are surgeries relocated to a different room?
+
+Room reallocations at Maaseik are rare, as shown in Table \ref{tab:room_swap}. Out of 53902 recorded surgeries, only 413 cases were performed in a different operating room than originally planned, corresponding to 0.8 percent of all procedures. This proportion is slightly lower than the rate observed at Genk and higher than the near zero values at Lanaken, indicating that room assignments at Maaseik are generally stable and require only limited reactive adjustments during daily operations.
+
+Although infrequent, these relocations matter operationally because they typically arise from last minute scheduling constraints, such as unexpected overruns, equipment availability, or staff distribution across rooms. Even small shifts of this kind can influence preparation workflows, turnover sequencing, and coordination between surgical teams. Monitoring their frequency therefore provides insight into how resilient the planning process is and whether disruptions tend to be isolated events or concentrated in specific rooms or time periods.
+
+```{r room swap, echo=F, table.pos='H'}
+genk %>%
+  summarise(
+    Total = n(),
+    `Swapped (absolute)` = sum(room_swap == 1, na.rm = TRUE),
+    `Swapped (%)` = round(100 * mean(room_swap == 1, na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Overall frequency of surgeries relocated to a different room (Maaseik). \\label{tab:room_swap}"
+  )
+```
+
+The share of relocated surgeries remains very low across all weekdays, as shown in Figure \ref{fig:room_swap_weekday}, fluctuating between 0.5 and 1.3 percent. This narrow range indicates that room assignments are highly stable during regular working days, with only limited need for reactive changes. Monday shows the lowest proportion of relocations, while Wednesday and Friday exhibit slightly higher values, though still close to one percent.
+
+A noticeable increase occurs during the weekend, where the share rises to 4.8 percent on Saturday and 3.5 percent on Sunday. These elevated rates likely reflect the reduced number of available rooms and the more variable case mix characteristic of weekend operations, which can make adherence to planned room allocations more difficult.
+
+```{r room_swap_weekday, echo=F, fig.cap="Share of relocated surgeries by weekday \\label{fig:room_swap_weekday}", fig.pos='H'}
+genk %>%
+  filter(!is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, levels = c("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"))) %>%
+  group_by(Weekday) %>%
+  summarise(
+    Total = n(),
+    SharePct = round(100 * mean(room_swap == 1, na.rm = TRUE), 1)
+  ) %>%
+  ggplot(aes(x = Weekday, y = SharePct)) +
+  geom_col(fill = "#2C77B2") +
+  geom_text(aes(label = SharePct), vjust = -0.3, size = 3) +
+  labs(
+    title = "Share of relocated surgeries by weekday",
+    x = "Weekday",
+    y = "Relocated surgeries (%)"
+  ) +
+  theme_minimal()
+```
+
+The monthly percentage of surgeries that are relocated to a different operating room fluctuates between 0.5 and 2 percent, as shown in Figure \ref{fig:room_swap_month}. Despite noticeable month-to-month variation, there is no clear upward or downward trend across the observed period. Occasional peaks above 1.5 percent indicate that some months experience more frequent reallocations, yet these occur as isolated spikes rather than forming any sustained pattern.
+
+The consistently low baseline shows that room swaps remain rare and are typically driven by temporary scheduling pressures or logistical constraints. The absence of a systematic trend over time suggests that the stability of room assignments at Maaseik has remained largely unchanged throughout the study period.
+
+```{r room_swap_month, echo=F, fig.cap="Monthly percentage of surgeries with room swap \\label{fig:room_swap_month}", fig.pos='H'}
+genk %>%
+  filter(!is.na(room_swap)) %>%
+  mutate(Month = lubridate::floor_date(SurgeryDateTime, "month")) %>%
+  group_by(Month) %>%
+  summarise(PercentSwapped = mean(room_swap == 1, na.rm = TRUE) * 100) %>%
+  ggplot(aes(x = Month, y = PercentSwapped)) +
+  geom_line(linewidth = 1, color = "steelblue") +
+  geom_point(color = "steelblue") +
+  labs(
+    title = "Monthly percentage of surgeries with room swap",
+    x = "Month",
+    y = "% of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+
+## Are specific rooms affected more than others?
+
+The analysis shows that only a limited number of operating rooms are regularly involved in relocations, as summarized in Table \ref{tab:room_swap_or}. A small subset of rooms acts as central nodes that receive or exchange cases more frequently, while most other rooms are affected only occasionally. In the main operating block, MO04 and MO05 form the most prominent pair: they exchange cases frequently and appear to function as mutual overflow buffers when one room runs short on capacity. Similar patterns appear between MO03 and MO06, which also show repeated bidirectional swaps.
+
+These consistent interactions indicate that room reallocations follow operational logic rather than occurring at random. Rooms with comparable setups, adjacent locations, or overlapping specialty coverage tend to exchange cases when small scheduling conflicts arise. Rather than signaling instability, these movements reflect the adaptive use of available capacity to maintain continuity in the surgical program when plans need minor adjustments.
+
+```{r room swap or, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(PlannedOR), !is.na(ActualOR), PlannedOR != ActualOR) %>%
+  count(PlannedOR, ActualOR, name = "Count") %>%
+  group_by(PlannedOR) %>%
+  mutate(
+    TotalMoved = sum(Count),
+    Percent = round(100 * Count / TotalMoved, 1)
+  ) %>%
+  arrange(desc(TotalMoved)) %>%
+  slice_head(n = 50) %>%
+  group_by(PlannedOR) %>%
+  arrange(desc(Count), .by_group = TRUE) %>%
+  mutate(Rank = row_number()) %>%
+  filter(Rank <= 5) %>%
+  ungroup() %>%
+  mutate(Label = paste0(ActualOR, " (", Count, ", ", Percent, "%)")) %>%
+  select(PlannedOR, TotalMoved, Rank, Label) %>%
+  tidyr::pivot_wider(
+    names_from = Rank,
+    values_from = Label,
+    names_prefix = "Top"
+  ) %>%
+  distinct(PlannedOR, .keep_all = TRUE) %>%
+  slice_head(n = 10) %>%
+  arrange(desc(TotalMoved)) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Top 10 planned ORs with the highest number of room swaps, showing the five most frequent new OR destinations (Maaseik). \\label{tab:room_swap_or}"
+  )
+```
+
+A small number of operating rooms receive the majority of relocated surgeries, as shown in Table \ref{tab:room_swap_dest}. The clearest destination is MO05, which alone receives 136 transferred cases, representing one quarter of all relocations. Other rooms with similarly prominent roles include MO06, MO03, and MO04, each absorbing between 68 and 76 relocated procedures. These rooms function as the principal buffers in the system, taking on cases when adjustments to the planned schedule become necessary.
+
+The distribution is highly concentrated: only a handful of rooms receive the overwhelming majority of relocations, while the remaining ORs are involved only sporadically. For example, rooms such as MO01 and MO02 receive far fewer transferred cases, and several rooms register only a small number of relocations. This concentration suggests that certain operating rooms are more adaptable, either because they have broader procedural compatibility, more flexible staffing, or more consistent availability to absorb unplanned activity.
+
+Overall, although relocations remain rare in absolute terms, the pattern shows that when adjustments occur, they are directed primarily toward a small set of rooms that serve as the operational safety net for managing day-to-day variability.
+
+```{r room swap dest, echo=F, table.pos='H'}
+genk %>%
+  filter(room_swap == 1, !is.na(ActualOR)) %>%
+  group_by(ActualOR) %>%
+  summarise(
+    ReceivedCases = n(),
+    SharePct = round(100 * ReceivedCases / nrow(genk), 2)
+  ) %>%
+  arrange(desc(ReceivedCases)) %>%
+  slice_head(n = 15) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Top 15 actual operating rooms most frequently used as destinations after relocation (Maaseik). \\label{tab:room_swap_dest}"
+  )
+```
+
+Procedures with the highest likelihood of being relocated mainly consist of short, standardized interventions, as shown in Table \ref{tab:room_swap_procedure}. At the top of the list are procedures such as DVC – MK, cardioversion, abscess drainage, and several minor orthopedic or trauma-related interventions, all of which show relocation rates far above the campus baseline of 0.8 percent. The highest values exceed 20 percent, indicating that these procedures are particularly flexible in terms of room assignment.
+
+The pattern suggests that relocations most often involve short, low-complexity procedures that can be performed in multiple suitable rooms without requiring specialized infrastructure. This flexibility makes them easier to reassign when schedule adjustments are needed. In contrast, longer inpatient procedures or interventions requiring specialized equipment appear far less frequently among the relocated cases.
+
+Overall, the table shows that room swaps at Maaseik are concentrated in a narrow group of routine, easily transferable procedures, reflecting an operational strategy in which schedulers preferentially reassign cases that create minimal disruption to the broader OR program.
+
+```{r room swap procedure, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(ProcedureName)) %>%
+  group_by(ProcedureName) %>%
+  summarise(
+    n = n(),
+    SwapPct = round(100 * mean(room_swap == 1, na.rm = TRUE), 2)
+  ) %>%
+  filter(n >= 30) %>%
+  arrange(desc(SwapPct)) %>%
+  slice_head(n = 15) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Top 15 procedure types with the highest share of relocated surgeries (Maaseik). \\label{tab:room_swap_procedure}"
+  )
+```
+
+
+## What is the operational impact of these reallocations?
+
+Relocated surgeries differ from non-relocated ones in several aspects of timing and scheduling performance, as summarized in Table \ref{tab:room_swap_impact}. For start times, relocated cases show markedly larger deviations in both directions. Among late starts, the average delay is 73.9 minutes for relocated cases compared with 38.8 minutes for non-relocated ones. Early starts show a similar pattern: relocated surgeries begin on average 81 minutes before schedule, versus 29.2 minutes for non-relocated surgeries. These differences indicate that relocated cases are more likely to be scheduled under time pressure or atypical circumstances that push them further from their planned start times. Median values are somewhat closer together (49 vs 25 minutes for late starts, 56 vs 18 minutes for early starts), but still reflect greater variability around the intended schedule.
+
+For procedure duration, both groups diverge from their planned times, but relocated surgeries show systematically larger deviations. Longer-than-planned cases average 25.4 minutes of overrun for relocated surgeries compared with 13.8 minutes for non-relocated ones. Shorter-than-planned cases show a similar gap: 16.8 minutes for relocated surgeries versus 9.7 minutes for non-relocated ones. This suggests that, while relocation does not necessarily change the intrinsic length of procedures, it is associated with conditions that amplify timing uncertainty.
+
+Despite these differences, overtime remains limited in both groups. Median overtime is zero for relocated and non-relocated cases, and the mean is only slightly higher for relocated surgeries (4.7 vs 1.1 minutes). This indicates that relocations rarely push procedures far enough into the next shift to create sustained after-hours activity.
+
+Overall, the results show that relocations are primarily linked to greater variability in start times and duration deviations, rather than systematically longer surgeries or extended overtime. Their operational impact therefore appears to stem from scheduling constraints and coordination challenges rather than from the procedures themselves.
+
+```{r room swap impact, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(room_swap)) %>%
+  mutate(Type = ifelse(room_swap == 1, "Relocated", "Not relocated")) %>%
+  group_by(Type) %>%
+  summarise(
+    `Late start (mean)`  = round(mean(start_diff[start_diff > 0], na.rm = TRUE), 1),
+    `Late start (median)`   = round(median(start_diff[start_diff > 0], na.rm = TRUE), 1),
+    `Early start (mean)` = round(mean(abs(start_diff[start_diff < 0]), na.rm = TRUE), 1),
+    `Early start (median)`  = round(median(abs(start_diff[start_diff < 0]), na.rm = TRUE), 1),
+    `Longer duration (mean)`  = round(mean(duration_diff[duration_diff > 0], na.rm = TRUE), 1),
+    `Longer duration (median)`   = round(median(duration_diff[duration_diff > 0], na.rm = TRUE), 1),
+    `Shorter duration (mean)` = round(mean(abs(duration_diff[duration_diff < 0]), na.rm = TRUE), 1),
+    `Shorter duration (median)`  = round(median(abs(duration_diff[duration_diff < 0]), na.rm = TRUE), 1),
+    `Overtime (mean)`    = round(mean(overtime_minutes, na.rm = TRUE), 1),
+    `Overtime (median)`     = round(median(overtime_minutes, na.rm = TRUE), 1)
+  ) %>%
+  tidyr::pivot_longer(
+    cols = -Type,
+    names_to = c("Metric", ".value"),
+    names_pattern = "(.*) \\((.*)\\)"
+  ) %>%
+  rename(Mean = mean, Median = median) %>%
+  mutate(Metric = factor(
+    Metric,
+    levels = c("Late start", "Early start", "Longer duration", "Shorter duration", "Overtime")
+  )) %>%
+  arrange(Metric, desc(Type)) %>%
+  group_split(Metric) %>%
+  lapply(function(df) {
+    rbind(df, data.frame(Type = "", Metric = "----", Mean = "", Median = ""))
+  }) %>%
+  bind_rows() %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Comparison of start and duration deviations (early/late, shorter/longer) and overtime between relocated and non-relocated surgeries (Maaseik). \\label{tab:room_swap_impact}"
+  )
+```
+
+Overtime is more common among relocated surgeries than among those performed in their originally assigned room, as shown in Table \ref{tab:overtime_relocation}. About 2.7 percent of non-relocated surgeries extend beyond 16:30, compared with 10.7 percent of relocated surgeries. This difference suggests that relocated cases are more likely to occur under time-pressured or unscheduled circumstances, such as late-day adjustments or capacity constraints, which can increase the likelihood of after-hours completion.
+
+Even so, the overall numbers remain small, and the vast majority of surgeries—relocated or not—finish within their planned operating window. The results indicate that room reassignments, while operationally meaningful, are not a major driver of evening work at the campus level. Relocations require coordination but do not substantially increase the after-hours workload.
+```{r overtime relocation, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(room_swap), !is.na(afterhours_flag)) %>%
+  mutate(SwapGroup = ifelse(room_swap == 1, "Relocated", "Not relocated")) %>%
+  group_by(SwapGroup) %>%
+  summarise(
+    AfterHours = sum(afterhours_flag == 1, na.rm = TRUE),
+    `Percentage of surgeries with afterhours` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Share of after-hours surgeries by relocation status (Maaseik). \\label{tab:overtime_relocation}"
+  )
+```
+
+The distribution of overtime duration for relocated surgeries, shown in Figure \ref{fig:overtime_relocated}, is heavily concentrated near zero, indicating that most relocated cases finish within regular working hours or only slightly beyond them. The histogram shows a steep decline after the first 20–30 minutes of overtime, and only a small number of relocated surgeries extend past one hour. A few isolated cases reach 100 minutes or more, but these remain rare and form a long, sparse right tail.
+
+This pattern reinforces the earlier finding that relocations typically involve short or moderately timed procedures that can be completed quickly once moved to another room. The limited overtime associated with these cases suggests that room reassignments are handled efficiently and generally do not lead to extended evening activity. Operationally, relocated surgeries function as flexible adjustments to manage workload or scheduling conflicts rather than as sources of prolonged delays.
+
+```{r overtime_relocated, echo=F, fig.cap="Distribution of overtime duration for relocated surgeries \\label{fig:overtime_relocated}", fig.pos='H'}
+genk %>%
+  filter(room_swap == 1, overtime_minutes > 0, overtime_minutes < 600) %>%
+  ggplot(aes(x = overtime_minutes)) +
+  geom_histogram(binwidth = 10, fill = "#2C77B2", color = "white") +
+  labs(
+    title = "Distribution of overtime duration for relocated surgeries",
+    x = "Overtime (minutes)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal()
+```
+
+\newpage
+
+# How do urgent cases disrupt elective planning?
+
+## When and where do urgent surgeries occur?
+
+The majority of surgeries at Maaseik are elective, representing 94.3 percent of all recorded cases, as shown in Table \ref{tab:urgency_dist}. Non elective or urgent surgeries account for the remaining 5.7 percent. Although this is a relatively small share, it still reflects a steady stream of unscheduled or time sensitive cases that enter the daily workflow.
+
+The presence of this non elective segment is operationally important. Even a small proportion of urgent cases can influence the stability of daily planning because their timing is unpredictable and they must be accommodated immediately or within a narrow clinical window. Understanding when and where these unplanned procedures occur provides essential context for evaluating their interaction with elective activity and assessing whether they contribute to schedule deviations, room pressure, or after hours work.
+
+```{r urgency dist, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(UrgencyType)) %>%
+  group_by(UrgencyType) %>%
+  summarise(
+    Total = n(),
+    SharePct = round(100 * n() / nrow(genk), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Distribution of surgeries by urgency classification (Maaseik). \\label{tab:urgency_dist}"
+  )
+```
+
+The start times of non elective surgeries, shown in Figure \ref{fig:urgency_timing}, display a clear concentration during daytime hours, with a pronounced peak between 13:00 and 15:00. This pattern indicates that most urgent procedures occur within or close to regular operating hours, where they overlap with ongoing elective activity and place additional pressure on room availability. A smaller but persistent level of activity extends into the evening, reflecting cases that emerge later in the day and require timely intervention.
+
+Night time activity is limited, with very few non elective surgeries beginning between midnight and early morning. Overall, the distribution shows that non elective cases are not evenly spread across the 24 hour period. Instead, they cluster strongly in the afternoon and early evening, precisely when operating room capacity is already heavily used—highlighting their potential to disrupt scheduling and increase operational strain.
+
+```{r urgency_timing, echo=F, fig.cap="Daily distribution of non-elective surgery start times \\label{fig:urgency_timing}", fig.pos='H'}
+genk %>%
+  filter(!is.na(UrgencyType), UrgencyType != "electief", !is.na(StartHour)) %>%
+  ggplot(aes(x = StartHour)) +
+  geom_density(fill = "#2C77B2", alpha = 0.7, adjust = 1.2) +
+  scale_x_continuous(breaks = seq(0, 23, by = 2)) +
+  labs(
+    title = "Daily distribution of non-elective surgery start times",
+    x = "Hour of day",
+    y = "Density"
+  ) +
+  theme_minimal()
+```
+
+Across all weekdays, non elective surgeries follow a consistent hourly pattern, as illustrated in Figure \ref{fig:urgency_weekday}. Most activity occurs between late morning and early evening, with pronounced peaks around 13:00 to 15:00 on nearly every weekday. This confirms that urgent procedures are frequently performed during regular daytime hours. Because these peaks coincide with the busiest elective periods, urgent cases often need to be absorbed into an already active operating schedule rather than handled in separate capacity.
+
+During weekends, the temporal pattern flattens slightly, yet the afternoon concentration remains visible. Both Saturday and Sunday show sustained urgent activity across the day and into the early evening, reflecting the continuous need for surgical care even when elective operations are minimal.
+
+Overall, the figure shows that urgent cases, despite being fewer in number, are strongly clustered within the same hours as routine operating room use. This temporal overlap can create additional scheduling pressure during peak times, especially when sudden non elective cases must be integrated into a full elective program.
+
+```{r urgency_weekday, echo=F, fig.cap="Hourly distribution of non-elective surgery start times by weekday \\label{fig:urgency_weekday}", fig.pos='H'}
+genk %>%
+  filter(!is.na(UrgencyType), UrgencyType != "electief", !is.na(StartHour), !is.na(Weekday)) %>%
+  mutate(Weekday = factor(Weekday, levels = rev(c("Ma","Di","Wo","Do","Vr","Za","Zo")))) %>%
+  ggplot(aes(x = StartHour, y = Weekday, fill = Weekday)) +
+  ggridges::geom_density_ridges(alpha = 0.7, show.legend = FALSE, scale = 1.2) +
+  scale_x_continuous(breaks = seq(0, 23, by = 3)) +
+  labs(
+    title = "Hourly distribution of non-elective surgery start times by weekday",
+    x = "Start hour of surgery",
+    y = "Weekday"
+  ) +
+  theme_minimal()
+```
+
+Elective surgeries dominate weekday activity at Maaseik, as shown in Table \ref{tab:urgency_wd}, consistently making up 94 to 95 percent of all procedures from Monday to Friday. The share of non elective surgeries remains steady across the workweek, between 4.6 and 6.3 percent, indicating a predictable and manageable level of urgent demand. This stability suggests that urgent cases are routinely absorbed into the daily schedule without major fluctuations, allowing elective activity to proceed with limited disruption.
+
+The weekend shows a markedly different pattern. On Saturday, only 41.8 percent of surgeries are elective, and on Sunday this drops to 43.9 percent, meaning that more than half of weekend procedures are non elective. This sharp shift reflects the reduced elective program on weekends and the dominant role of urgent or unplanned cases in driving surgical activity.
+
+Together, these patterns underline a clear operational distinction: weekdays are primarily shaped by scheduled elective work, whereas weekends rely heavily on urgent care. Maintaining sufficient flexibility in staffing, room allocation, and on-call capacity is therefore essential to handle weekend demand without compromising the stability of weekday elective operations.
+
+```{r urgency wd, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(Weekday), !is.na(UrgencyType)) %>%
+  mutate(
+    Weekday = factor(Weekday, levels = c("Ma","Di","Wo","Do","Vr","Za","Zo")),
+    Urg = ifelse(grepl("(niet|non)", tolower(UrgencyType)), "NonElective", "Elective")
+  ) %>%
+  group_by(Weekday, Urg) %>%
+  summarise(Cases = n(), .groups = "drop_last") %>%
+  mutate(SharePct = round(100 * Cases / sum(Cases), 1)) %>%
+  tidyr::pivot_wider(
+    names_from = Urg,
+    values_from = c(Cases, SharePct)
+  ) %>%
+  arrange(factor(Weekday, levels = c("Ma","Di","Wo","Do","Vr","Za","Zo"))) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Weekday distribution of elective vs. non-elective surgeries (Maaseik). \\label{tab:urgency_wd}",
+    col.names = c("Weekday","Elective (n)","Non-elective (n)","Elective (%)","Non-elective (%)")
+  )
+```
+
+## Do urgent cases drive overtime?
+
+Urgent cases contribute to overtime work, but they are not its primary driver, as shown in Table \ref{tab:afterhours_urgency}. Only 2.1 percent of elective surgeries extend beyond the scheduled shift, compared with 13.1 percent of non elective ones. Although this difference is substantial in relative terms, the absolute number of after-hours elective cases remains far higher because elective activity dominates the overall surgical volume. This indicates that while urgent cases are more likely to run into the evening, most after-hours work still originates from elective procedures.
+
+Average overtime per case is also higher for non elective surgeries. Urgent cases show a mean extension of 6 minutes, compared with 0.9 minutes for elective ones. The 95th percentile reinforces this pattern, reaching 44 minutes for non elective surgeries while remaining at 0 minutes for elective ones. These values suggest that when urgent procedures do extend beyond the shift, they are more likely to require longer overruns.
+
+Overall, the results imply that unplanned demand does contribute meaningfully to extended operating hours, but it does not overshadow the impact of elective cases. Most evening work arises from elective procedures that exceed their planned durations, while urgent cases account for a smaller but more intense share of after-hours extensions.
+
+```{r afterhours urgency, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(afterhours_flag), !is.na(overtime_minutes), !is.na(UrgencyType)) %>%
+  mutate(Urg = ifelse(grepl("(niet|non)", tolower(UrgencyType)), "NonElective", "Elective")) %>%
+  group_by(Urg) %>%
+  summarise(
+    Total = n(),
+    AfterHours = sum(afterhours_flag == 1, na.rm = TRUE),
+    ShareAfterHours = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+    MeanOvertime = round(mean(overtime_minutes, na.rm = TRUE), 1),
+    P95Overtime = round(quantile(overtime_minutes, 0.95, na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "After-hours frequency and overtime duration by urgency type (Maaseik). \\label{tab:afterhours_urgency}",
+    col.names = c(
+      "Urgency type",
+      "Total (n)",
+      "After-hours (n)",
+      "After-hours (%)",
+      "Mean overtime (min)",
+      "95th percentile (min)"
+    )
+  )
+```
+
+
+## Do urgent cases interrupt elective planning?
+
+```{r}
+is_overlap <- function(start1, end1, start2, end2) {
+(start1 < end2) & (end1 > start2)
+}
+
+ne_cases <- genk %>%
+filter(grepl("(niet|non)", tolower(UrgencyType)), !is.na(ActualOR), !is.na(ORIn), !is.na(OROut)) %>%
+select(NE_ID = PatientID, NE_OR = ActualOR, NE_start = ORIn, NE_end = OROut)
+
+e_cases <- genk %>%
+filter(!grepl("(niet|non)", tolower(UrgencyType)), !is.na(PlannedOR), !is.na(PlannedStartDT), !is.na(PlannedEndDT)) %>%
+select(E_ID = PatientID, E_OR = PlannedOR, E_start = PlannedStartDT, E_end = PlannedEndDT)
+
+overlaps <- ne_cases %>%
+inner_join(e_cases, by = c("NE_OR" = "E_OR")) %>%
+filter(is_overlap(NE_start, NE_end, E_start, E_end))
+```
+
+The results in Table \ref{tab:overlap_swap} show that room swaps among elective surgeries remain rare, but they occur slightly more often when an overlap with a non elective case takes place. Among elective surgeries with no overlap, 0.5 percent involved a room swap, compared with 1.6 percent among those that coincided with an urgent procedure. Although the relative difference is noticeable, the absolute frequencies remain low.
+
+This pattern indicates that while urgent cases occasionally increase local scheduling pressure, they do not systematically trigger widespread room reallocations. Instead, overlaps between elective and non elective activity appear to be handled mainly through short timing adjustments, coordination between teams, or temporary sequencing changes rather than by physically moving elective cases to other rooms. Overall, urgent interventions introduce some operational complexity but do not substantially disrupt the broader room allocation structure within the elective program.
+
+```{r overlap swap, echo=F, table.pos='H'}
+affected_electives <- overlaps %>% distinct(E_ID)
+
+genk %>%
+  filter(!grepl("(niet|non)", tolower(UrgencyType)), !is.na(room_swap)) %>%
+  mutate(Overlapped = ifelse(PatientID %in% affected_electives$E_ID, "Yes", "No")) %>%
+  group_by(Overlapped) %>%
+  summarise(
+    N = n(),
+    RoomSwaps = sum(room_swap == 1, na.rm = TRUE),
+    ShareSwapped = round(100 * mean(room_swap == 1, na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    caption = "Room swap frequency among elective cases: overlapped vs. not overlapped. \\label{tab:overlap_swap}"
+  )
+```
+
+As shown in Table \ref{tab:overlap_days}, overlaps between urgent and elective surgeries occurred on 456 out of 1174 observed days, corresponding to 38.8 percent of all days. This sizeable share indicates that schedule interference is not unusual but a recurring feature of day to day operations. Although the magnitude and operational impact of each overlap may differ, their regular occurrence underscores the ongoing need for flexibility in resource allocation and real time coordination between planned elective activity and urgent surgical demand.
+
+```{r overlap days, echo=F, table.pos='H'}
+overlap_days <- overlaps %>%
+  mutate(Date = as.Date(NE_start)) %>%
+  distinct(Date)
+
+total_days <- genk %>%
+  mutate(Date = as.Date(SurgeryDateTime)) %>%
+  summarise(TotalDays = n_distinct(Date)) %>%
+  pull(TotalDays)
+
+pander::pander(
+  tibble(
+    OverlapDays = nrow(overlap_days),
+    TotalDays = total_days,
+    SharePct = round(100 * nrow(overlap_days) / total_days, 1)
+  ),
+  caption = "Days with at least one urgent–elective overlap in the same OR. \\label{tab:overlap_days}"
+)
+```
+
+The proportion of elective surgeries affected by urgent overlaps fluctuates modestly over time, as shown in Figure \ref{fig:overlap_trend}. Monthly values typically range between 2 and 4 percent, with occasional peaks slightly above this level. A gradual upward tendency is visible across much of 2023 and into early 2024, followed by a temporary decline during the second half of 2024. Despite these month to month variations, the overall level remains relatively stable. This consistency indicates that interference from urgent cases is a persistent operational feature rather than a short lived anomaly, reflecting the regular need to accommodate unplanned demand alongside scheduled elective activity.
+
+```{r overlap_trend, echo=F, fig.cap="Monthly share of elective surgeries affected by urgent overlaps \\label{fig:overlap_trend}", fig.pos='H'}
+# Eerst: electieve cases met maand
+e_month <- genk %>%
+  filter(!grepl("(niet|non)", tolower(UrgencyType)), !is.na(PlannedStartDT)) %>%
+  mutate(Month = as.Date(lubridate::floor_date(PlannedStartDT, "month"))) %>%
+  select(PatientID, Month)
+
+# Overlappende electieve cases met maand (gebaseerd op overlaps)
+affected_electives <- overlaps %>%
+  mutate(Month = as.Date(lubridate::floor_date(NE_start, "month"))) %>%
+  distinct(E_ID, Month)
+
+# Bereken percentage
+share_monthly <- e_month %>%
+  group_by(Month) %>%
+  summarise(
+    TotalElective = n(),
+    AffectedElective = sum(PatientID %in% affected_electives$E_ID),
+    SharePct = round(100 * AffectedElective / TotalElective, 2)
+  )
+
+ggplot(share_monthly, aes(x = Month, y = SharePct)) +
+  geom_line(linewidth = 1.2, color = "#2C77B2") +
+  geom_point(color = "#2C77B2") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y") +
+  labs(
+    title = "Monthly share of elective surgeries affected by urgent overlaps",
+    x = "Month",
+    y = "Elective cases with overlap (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+As shown in Figure \ref{fig:overlap_hourly}, overlaps between urgent and elective surgeries occur predominantly during daytime hours. The frequency rises sharply after 08:00, reaches its highest levels between 13:00 and 15:00, and then declines steadily into the evening. Only a small number of overlaps occur during the night or early morning. This temporal pattern mirrors the broader distribution of non elective surgery starts and confirms that most schedule conflicts arise when operating room utilization is already at its peak. The concentration of overlaps in the middle of the day indicates that urgent admissions frequently coincide with the busiest elective periods, intensifying competition for operating room capacity during standard working hours.
+
+```{r overlap_hourly, echo=F, fig.cap="Hourly frequency of urgent–elective overlaps \\label{fig:overlap_hourly}", fig.pos='H'}
+overlaps %>%
+  mutate(Hour = lubridate::hour(NE_start)) %>%
+  count(Hour) %>%
+  ggplot(aes(x = Hour, y = n)) +
+  geom_col(fill = "#2C77B2") +
+  scale_x_continuous(breaks = seq(0, 23, by = 2)) +
+  labs(
+    title = "Hourly frequency of urgent–elective overlaps",
+    x = "Hour of day",
+    y = "Number of overlaps"
+  ) +
+  theme_minimal()
+```
+
+Figure \ref{fig:overlap_delay} shows that elective surgeries affected by an urgent overlap consistently start later than those without overlap. The gap is especially pronounced in early 2022, when mean start delays for overlapped cases often exceeded 60 minutes, compared with roughly 20 to 30 minutes for non overlapped cases. Although the difference narrows somewhat over time, overlapped surgeries remain visibly more delayed throughout the entire period.
+
+The recurring peaks in the overlapped series suggest that these delays arise from periodic scheduling pressures rather than isolated incidents. When urgent demand increases or competing cases accumulate, elective surgeries that experience an overlap appear particularly vulnerable to cascading delays. Overall, the figure demonstrates that urgent overlaps exert a measurable and persistent impact on elective punctuality, especially during months with high operating room utilization.
+
+```{r overlap_delay, echo=F, fig.cap="Average start delay of elective surgeries by overlap status \\label{fig:overlap_delay}", fig.pos='H'}
+affected_electives <- overlaps %>% distinct(E_ID)
+
+genk %>%
+  filter(!grepl("(niet|non)", tolower(UrgencyType)),
+         !is.na(start_diff),
+         !is.na(PlannedStartDT)) %>%
+  mutate(
+    Month = as.Date(lubridate::floor_date(PlannedStartDT, "month")),
+    Overlapped = ifelse(PatientID %in% affected_electives$E_ID, "Overlapped", "Not overlapped")
+  ) %>%
+  group_by(Month, Overlapped) %>%
+  summarise(MeanStartDelay = mean(start_diff, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(aes(x = Month, y = MeanStartDelay, color = Overlapped)) +
+  geom_line(linewidth = 1.1) +
+  geom_point() +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y") +
+  labs(
+    title = "Average start delay of elective surgeries by overlap status",
+    x = "Month",
+    y = "Mean start delay (minutes)",
+    color = "Overlap status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+As shown in Table \ref{tab:or_overlap}, the frequency and impact of overlaps vary substantially across operating rooms. The largest number of elective cases affected by urgent overlaps occurs in MO06 (323 cases) and MO03 (272 cases), where 8.6 percent and 7.8 percent of elective activity, respectively, experience an overlap. These rooms appear to function as high-volume environments where scheduled and urgent activity frequently intersect.
+
+Several other ORs, including MKI3, MO04, and MO05, also register meaningful numbers of overlap events, though at lower relative shares ranging from 1.8 to 4.7 percent. The smallest proportions are observed in MKI1, MO01, and MO02, where overlaps affect less than 2 percent of elective surgeries.
+
+Median start delays show a heterogeneous pattern across rooms. In most ORs, elective cases with overlaps begin later than comparable cases without overlap—for instance, median delays increase from 12 to 23 minutes in MO06 and from 15 to 32 minutes in MO03—indicating that urgent activity frequently disrupts planned schedules. In contrast, a few rooms such as MKI3 and MO05 display negative or near-zero differences, suggesting that local rescheduling or capacity adjustments may allow some elective cases to start earlier than originally anticipated.
+
+Overall, the results highlight that the operational impact of urgent cases is concentrated in a small group of high-volume rooms, where elective and non-elective activity most often coincide. These rooms experience the strongest scheduling pressures, while lower-volume ORs encounter urgent–elective overlaps only occasionally.
+
+```{r or overlap, echo=F, table.pos='H'}
+# Elective cases die in een overlap voorkwamen
+affected_electives <- overlaps %>%
+  distinct(NE_OR, E_ID)
+
+# Tabel per OR
+or_overlap_summary <- genk %>%
+  filter(!grepl("(niet|non)", tolower(UrgencyType)), 
+         !is.na(PlannedOR), 
+         !is.na(start_diff)) %>%
+  mutate(
+    OverlapFlag = ifelse(PatientID %in% affected_electives$E_ID, 1, 0)
+  ) %>%
+  group_by(PlannedOR) %>%
+  summarise(
+    Count = sum(OverlapFlag, na.rm = TRUE),
+    n_elective = n(),
+    Percentage = round(100 * mean(OverlapFlag, na.rm = TRUE), 1),
+    `Med StartDelay (No Overlap)` = round(median(start_diff[OverlapFlag == 0], na.rm = TRUE), 1),
+    `Med StartDelay (Overlap)` = round(median(start_diff[OverlapFlag == 1], na.rm = TRUE), 1)
+  ) %>%
+  filter(Count > 1) %>%          
+  arrange(desc(Count))           
+
+pander::pander(
+  or_overlap_summary,
+  split.table = 120,
+  caption = "Operating rooms with urgent–elective overlap. \\label{tab:or_overlap}"
+)
+```
+
+\newpage
+
+# How stable is the surgical schedule in execution?
+
+Beyond accurate planning, the stability of the realised schedule is a key indicator of operational performance in the operating theatre. Even when planned start times, durations, and room assignments are correct, day-to-day execution may deviate because of unforeseen delays, emergency insertions, or coordination issues.
+
+This section evaluates how consistently the planned schedule is maintained throughout the day by focusing on two complementary aspects:
+
+- *Shift changes*, where surgeries are executed in a different shift than originally planned, indicating how often the daily programme must be adjusted in real time.
+- *Idle or gap times*, representing the pauses between consecutive surgeries within the same room, which reflect how efficiently the available capacity is utilised.
+
+Together, these indicators capture the operational resilience of the OR complex and the ability to absorb disruptions and maintain smooth throughput despite variable circumstances. High rates of shift changes or long idle periods point to latent inefficiencies in daily planning and coordination, whereas stability across these metrics signals a well-synchronised workflow.
+
+## How often are surgeries moved to another shift?
+
+Changes between planned and actual shifts occur when surgeries begin later than scheduled or are rescheduled into a later block of the day. The actual shift is determined based on the observed start time relative to the operating department’s official shift boundaries (day: 08:00–16:30, evening: 16:30–22:00, night: 22:00–08:00).
+
+At Campus Maaseik, 758 surgeries, or 1.4 percent of all recorded cases, were performed in a different shift than initially planned, as shown in Table \ref{tab:shift_mismatch}. For these cases, the average start delay was 13.3 minutes, indicating that most shift changes arise not from extreme postponements but from moderate delays that push a case across a shift boundary. The average procedure duration deviation was -9.2 minutes, meaning that once these surgeries begin, they tend to run slightly shorter than expected.
+
+The mean overtime for shift-mismatched surgeries was 6.4 minutes, suggesting that these cases typically do not lead to substantial extensions into the next shift. Instead, most mismatches appear to result from cases scheduled near shift transitions or from minor timing deviations rather than major schedule overruns. Although these cases constitute a small share of total surgical activity, their occurrence can still complicate staffing, turnover, and the coordination of subsequent sessions.
+
+```{r shift mismatch, echo=F, table.pos='H'}
+genk %>%
+  summarise(
+    n = n(),
+    MismatchCount = sum(moved_to_other_shift == 1, na.rm = TRUE),
+    `Share moved (%)` = round(100 * mean(moved_to_other_shift == 1, na.rm = TRUE), 1),
+    `Mean Start Delay (min)` = round(mean(start_diff[moved_to_other_shift == 1], na.rm = TRUE), 1),
+    `Mean Duration Diff (min)` = round(mean(duration_diff[moved_to_other_shift == 1], na.rm = TRUE), 1),
+    `Mean Overtime (min)` = round(mean(overtime_minutes[moved_to_other_shift == 1], na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Cases performed in a different shift than planned (Maaseik). \\label{tab:shift_mismatch}"
+  )
+```
+
+As shown in Figure \ref{fig:shift_moved_monthly}, the monthly trend displays noticeable fluctuations but no structural deterioration over time. In early 2022, the share of surgeries performed in a different shift initially reached just above 2 percent before stabilizing between 1.2 and 1.8 percent during the rest of the year. Throughout 2023, the proportion continued to vary within a similar range, with several short-lived peaks around 2 percent and occasional dips close to 1 percent. A comparable pattern persisted into 2024 and the early months of 2025, with values generally oscillating between 0.7 and 1.6 percent. Although month-to-month variability is present, these changes remain modest and do not indicate any systematic upward trend in shift mismatches.
+
+```{r shift_moved_monthly, echo=F, fig.cap="Monthly percentage of surgeries moved to another shift \\label{fig:shift_moved_monthly}", fig.pos='H'}
+genk %>%
+  filter(!is.na(moved_to_other_shift)) %>%
+  mutate(Month = lubridate::floor_date(SurgeryDateTime, "month")) %>%
+  group_by(Month) %>%
+  summarize(PercentMoved = mean(moved_to_other_shift == 1, na.rm = TRUE) * 100) %>%
+  ggplot(aes(x = Month, y = PercentMoved)) +
+  geom_line(linewidth = 1, color = "steelblue") +
+  geom_point(color = "steelblue") +
+  labs(
+    title = "Monthly percentage of surgeries moved to another shift",
+    x = "Month",
+    y = "% of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+Overall, the data suggest a moderate improvement in schedule adherence since 2022, followed by a period of relative stability. The month-to-month variation likely reflects normal fluctuations in workload and case mix rather than structural scheduling issues.
+
+## How much idle time occurs between consecutive surgeries?
+
+Idle or gap time represents the short pause between the end of one surgery and the start of the next within the same operating room during the regular day shift (08:00–16:30). It captures how efficiently rooms are prepared for the next case and how well surgical schedules are synchronised in daily practice. For each room-day combination, gap time measures either the delay between shift start and the first case or the interval between consecutive cases, excluding breaks longer than 60 minutes that reflect planned downtime.
+
+At Campus Maaseik, the average idle time between consecutive surgeries is 4.1 minutes, while the median is 2 minutes, as shown in Table \ref{tab:idle_summary}. These low values indicate that room turnover is generally fast and tightly managed. The interquartile range of 5 minutes shows that most changeovers occur within a narrow window, with little variation across cases. The 95th percentile of 15 minutes indicates that only a small subset of transitions take meaningfully longer, and the upper extreme of 60 minutes corresponds to the applied cutoff for excluding planned breaks rather than reflecting typical operational performance.
+
+```{r idle summary, echo=F, table.pos='H'}
+genk %>%
+  summarise(
+    Mean = round(mean(gap_time, na.rm = TRUE), 1),
+    Median = round(median(gap_time, na.rm = TRUE), 1),
+    SD = round(sd(gap_time, na.rm = TRUE), 1),
+    IQR = round(IQR(gap_time, na.rm = TRUE), 1),
+    Min = round(min(gap_time, na.rm = TRUE), 1),
+    Max = round(max(gap_time, na.rm = TRUE), 1),
+    P95 = round(quantile(gap_time, 0.95, na.rm = TRUE), 1),
+    P99 = round(quantile(gap_time, 0.99, na.rm = TRUE), 1),
+    P99.9 = round(quantile(gap_time, 0.999, na.rm = TRUE), 1)
+  ) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Summary statistics of idle time between consecutive surgeries (minutes). \\label{tab:idle_summary}"
+  )
+```
+
+As shown in Figure \ref{fig:idle_distribution}, the histogram confirms that most idle intervals are very short. Nearly half of all turnovers fall below 5 minutes, and roughly three quarters remain under 10 minutes. Beyond that point, the frequency drops sharply, with only a small number of transitions extending into the 20–30 minute range. The right-hand tail is thin, reflecting the exclusion of gaps longer than one hour, which correspond to planned downtime rather than operational turnover.
+
+Overall, the distribution demonstrates that turnover between consecutive cases is highly efficient and stable across operating rooms. Short idle periods dominate the workflow, while occasional longer pauses occur infrequently and stay well within operational boundaries. These patterns suggest that changeover processes are tightly managed rather than indicative of systematic underutilisation.
+
+```{r idle_distribution, echo=F, fig.cap="Distribution of idle time between surgeries (grouped per 5 min) \\label{fig:idle_distribution}", fig.pos='H'}
+upper <- quantile(genk$gap_time, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(gap_time),
+         gap_time > 0,
+         gap_time <= upper) %>%
+  mutate(gap_bin = floor(gap_time / 5) * 5) %>%   
+  count(gap_bin) %>%
+  arrange(gap_bin) %>%                             
+  mutate(gap_label = paste0(gap_bin, "–", gap_bin + 5, " min")) %>%
+  ggplot(aes(x = factor(gap_label, levels = gap_label), y = n)) +
+  geom_col(fill = "#2C77B2") +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+  labs(
+    title = "Distribution of idle time between surgeries (grouped per 5 min)",
+    x = "Idle time interval",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+## How does idle time vary across operating rooms?
+
+As shown in Figure \ref{fig:idle_or}, the mean and median idle times vary moderately across operating rooms at Campus Maaseik. In every room, the median idle time is lower than the mean, confirming that most intervals between consecutive surgeries are short while a smaller number of longer pauses pull the average upward. This consistent gap illustrates the right-skewed nature of idle-time distributions, where brief turnovers are the norm but longer gaps still appear occasionally.
+
+The absolute differences between rooms are limited. Median values are tightly grouped, indicating comparable turnover performance across much of the OR complex. The highest idle times occur in rooms such as MKI1 and MO06, where both mean and median values sit above the overall pattern. In the remaining rooms, mean and median idle times cluster at lower levels, reflecting fast and uniform transitions between cases.
+
+Overall, idle time across rooms is contained and stable. The few longer gaps visible in certain rooms appear to stem from isolated extended turnovers rather than systematic inefficiencies. The figure therefore highlights a well-coordinated workflow, with only minor room-to-room variation in turnover performance.
+
+```{r idle_or, echo=F, fig.cap="Mean and median idle time per operating room \\label{fig:idle_or}", fig.pos='H'}
+# ---- Bereid de data ----
+data_idle <- genk %>%
+  filter(!is.na(ActualOR), !is.na(gap_time)) %>%
+  group_by(ActualOR) %>%
+  summarise(
+    Cases = n(),
+    MeanIdle = mean(gap_time, na.rm = TRUE),
+    MedianIdle = median(gap_time, na.rm = TRUE)
+  ) %>%
+  arrange(MedianIdle) %>%
+  mutate(ActualOR = factor(ActualOR, levels = ActualOR)) %>%
+  tidyr::pivot_longer(
+    cols = c("MeanIdle", "MedianIdle"),
+    names_to = "Metric",
+    values_to = "Minutes"
+  )
+
+# ---- Plot ----
+ggplot(data_idle, aes(x = Minutes, y = ActualOR, fill = Metric)) +
+  geom_col(position = "stack") +
+  geom_text(
+    data = data_idle %>%
+      group_by(ActualOR) %>%
+      summarise(
+        Minutes = sum(Minutes, na.rm = TRUE),
+        Cases = first(Cases)
+      ),
+    mapping = aes(x = Minutes, y = ActualOR, label = paste0("n=", Cases)),
+    inherit.aes = FALSE,
+    hjust = -0.1,
+    size = 3
+  ) +
+  scale_fill_manual(
+    values = c("MeanIdle" = "steelblue", "MedianIdle" = "darkblue"),
+    labels = c("Mean", "Median"),
+    name = "Metric"
+  ) +
+  labs(
+    title = "Mean and median idle time per operating room",
+    x = "Idle time (minutes)",
+    y = "Operating room"
+  ) +
+  coord_cartesian(xlim = c(0, max(data_idle$Minutes) * 2)) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+As shown in Table \ref{tab:idle_variability}, the standard deviation (SD) and coefficient of variation (CV) describe how much idle times fluctuate around their typical value for each operating room, sorted by median idle time. Across most rooms, the SD falls between roughly 5 and 9 minutes, while CV values generally range from about 90 to 150 percent. These levels indicate that although idle intervals are short, they still vary meaningfully from case to case.
+
+Some rooms—such as MO03 and MO05—show comparatively higher SD and CV values, reflecting wider spreads in turnover times and less uniform changeover performance. In contrast, rooms like MO02, MO01, and MKI3 have lower SDs and CVs, suggesting that their idle times are more tightly clustered around the median.
+
+Overall, variability in idle time differs across rooms but stays within a contained range for most of the OR complex. The results confirm that short turnover intervals are the norm, while only a limited number of rooms exhibit broader distributions that may reflect more diverse workflows or less predictable scheduling environments.
+
+```{r idle variability, echo=F, table.pos='H'}
+genk %>%
+  filter(!is.na(ActualOR), !is.na(gap_time)) %>%
+  group_by(ActualOR) %>%
+  summarise(
+    Cases = n(),
+    MeanIdle = mean(gap_time, na.rm = TRUE),
+    `Standard deviation` = round(sd(gap_time, na.rm = TRUE), 1),
+    `Coefficient of variation` = round(100 * (sd(gap_time, na.rm = TRUE) / MeanIdle), 1)
+  ) %>%
+  arrange(desc(MeanIdle)) %>%
+  select(-MeanIdle) %>%
+  pander::pander(
+    split.table = 120,
+    caption = "Standard deviation and coefficient of variation of idle time per operating room (minutes), sorted by median idle time. \\label{tab:idle_variability}"
+  )
+```
+
+# Conclusion
+
+This analysis of Campus Maaseik provides a detailed and data driven account of how surgical activity unfolds from planning to execution within the operating theatre. By examining timing accuracy, room allocation, after hours activity, urgent case dynamics, shift transitions, and turnover performance, the report highlights both the system’s strengths and its operational sensitivities.
+
+Across sections, planned and observed durations align well on average, though notable variability persists between procedure types. Start time delays are common and tend to accumulate throughout the day, contributing to later finishing times even when procedure durations remain close to plan. While the overall program remains reliable, these small deviations illustrate how tightly sequenced operating room schedules at Maaseik respond to routine sources of disruption.
+
+After hours activity forms a recurring but contained part of the workload, with approximately 3.8 percent of surgeries extending beyond regular operating hours. Most overruns are modest, with median overtime equal to zero and only a limited share of cases exceeding one hour. A small number of longer and more complex procedures account for a disproportionate share of total overtime. Room assignments are highly stable: room swaps are infrequent and concentrated in a small set of closely related operating rooms, with minimal downstream impact on duration or overtime.
+
+Urgent cases represent a modest share of activity, accounting for roughly 6 percent of surgeries, and frequently coincide with elective work. Although their overall volume is limited, overlaps occur regularly throughout the week, underscoring their continuous operational relevance. These overlaps can introduce start time variability for elective cases but rarely trigger broader rescheduling or systematic room reallocation, indicating effective coordination between planned and unplanned care.
+
+Shift transitions and idle times point to an efficient process. Approximately 3 to 4 percent of surgeries are performed in a different shift than originally planned, a small but operationally meaningful group primarily linked to delays earlier in the day rather than extended procedure durations. Idle periods between cases remain short and consistent across rooms, with a median gap time of 2 minutes and limited variability over time. Turnover is therefore fast and well stabilised, although a small number of rooms show wider distributions reflecting lower volumes or more diverse local workflows.
+
+Taken together, the findings present a comprehensive picture of operating room performance at Campus Maaseik. Surgical planning generally translates well into real world execution, with a system that balances predictability and flexibility in a mixed elective and non elective environment. Opportunities for improvement remain targeted rather than systemic and relate mainly to stabilising start times, managing occasional urgent insertions, and smoothing day level scheduling variability.

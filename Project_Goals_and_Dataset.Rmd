@@ -1,0 +1,341 @@
+---
+title: "Goal of the Project & Description of the Data"
+subtitle: "Leveraging Data Analytics for Efficient OR Planning at ZOL"
+date: "October 2025"
+geometry: margin=1in
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: false
+header-includes:
+  - |
+    \usepackage{graphicx}
+    \usepackage{booktabs}
+    \usepackage{float}
+    \usepackage{titling}
+
+    % Logo's bovenaan
+    \pretitle{%
+      \begin{center}
+      \includegraphics[width=4cm]{figures/BINF.png}\hfill
+      \includegraphics[width=6cm]{figures/PAIH.png}\\[2cm]
+      \huge
+    }
+    \posttitle{\end{center}}
+---
+
+\begin{center}
+\vspace{2cm}
+
+Niels MARTIN\\
+niels.martin@uhasselt.be\\[0.5em]
+Maxim RIEBUS\\
+maxim.riebus@uhasselt.be\\[0.5em]
+Haroon THARWAT\\
+haroon.tharwat@uhasselt.be\\
+
+\vspace{6cm}
+
+\textbf{Hasselt University} \\
+Faculty of Business Economics \\
+Research Group Business Informatics \\
+Process Analytics in Healthcare
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+knitr::opts_chunk$set(out.width = "70%")
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.asp = 0.618)
+
+kable <- function(x, ...) {
+  knitr::kable(x, booktabs = T, format = "latex",  position = "H", ...)
+}
+
+knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+source("packages.R")
+
+```
+
+```{r data import, include=FALSE}
+# run data cleaning script
+source("data_cleaning.R")
+
+# load cleaned data from the 'modified data' folder
+data    <- read_excel("modified data/data_cleaned.xlsx")
+genk    <- read_excel("modified data/genk_cleaned.xlsx")
+lanaken <- read_excel("modified data/lanaken_cleaned.xlsx")
+maaseik <- read_excel("modified data/maaseik_cleaned.xlsx")
+```
+
+# Context and goals of the project
+
+In a high-volume hospital such as Ziekenhuis Oost-Limburg (ZOL), where more than 50,000 surgical procedures are performed annually across three campuses, the operating theatre is a critical and resource-intensive component of care delivery. Efficient use of operating rooms is directly linked to patient safety, quality of care, and staff workload. At the same time, it represents one of the most expensive areas of the hospital, making surgical planning not only a clinical concern but also a strategic and financial one.
+
+This project aims to provide a comprehensive, data-driven analysis of the relationship between planned and actual operating room activity. The intention is to quantify the extent to which surgical schedules match observed reality, and to identify structural inefficiencies that place additional burden on staff and resources.
+
+## Research motivation
+
+Despite the scale of surgical activity at ZOL, decision-making is often constrained by uncertainty. Planned surgical times are based on historical averages, personal estimates by surgeons, and practical experience. However, there is strong evidence in the literature that predicted and actual durations can differ substantially, leading to cascading delays, cancellations, and overtime. A better understanding of these discrepancies is required to improve both efficiency and staff well-being.
+
+## Key research questions
+
+Based on the available dataset and the priorities discussed with the hospital, the following research questions are considered feasible and relevant:
+
+-   **Planned versus observed timing**
+    -   How closely do planned surgery durations match actual durations?\
+    -   How stable is the coefficient of variation for the durations and for the duration difference?\
+    -   What is the typical deviation between the planned start time and the actual entry into the operating room?\
+    -   Which specialties or procedure types show the largest deviations?\
+-   **Adherence to working hours**
+    -   How often do cases extend beyond their assigned time window?\
+    -   When does overtime occur, and how heavy is it?\
+    -   How do these deviations vary across campuses?
+-   **Room allocation**
+    -   How frequently are procedures performed in a different room than initially planned?\
+    -   Are these reallocations concentrated in certain rooms or specialties?\
+    -   What is the operational impact of these reallocations?
+-   **Urgency and scheduling**
+    -   When and where do urgent surgeries occur?\
+    -   Do urgent cases drive after-hours activity?\
+    -   Do urgent cases interrupt elective planning?
+-   **How stable is the surgical schedule in execution?**
+    -   How often are surgeries moved to another shift?\
+    -   How much idle time occurs between consecutive surgeries?\
+    -   How does idle time vary across operating rooms?
+
+These questions are deliberately focused on measurable discrepancies between planned and observed activity, as well as the structural characteristics of the schedule. They provide a realistic foundation for developing key performance indicators (KPIs) that are both data-driven and directly actionable for operating theatre management.
+
+# Description of the dataset
+
+## General dataset
+
+After data cleaning, the table exists of 258.517 observations, each having 21 variables. Variables 'Plan_24u_StartDT' and 'Plan_24u_EindDT' are deleted from the data, since they are not relevant.
+
+Table \ref{tab:variables} provides an overview of all remaining variables in the cleaned dataset.
+
+```{r variables, echo = F} 
+
+variabelen_df <- tibble::tribble(
+  ~Variable,                       ~Description,                                      ~Type,
+  "PatientID",                     "Anonymized unique patient ID",                    "Character",
+  "SurgeryDateTime",               "Date and time of the surgery",                    "Datetime",
+  "Year",                          "Year in which the surgery took place",            "Numeric (int)",
+  "Weekday",                       "Abbreviated day of the week",                     "Character",
+  "StartHour",                     "Scheduled hour of the day (0–23)",                "Numeric",
+  "ProcedureCode",                 "Internal code of the surgical procedure",         "Character",
+  "ProcedureName",                 "Descriptive name of the surgical procedure",      "Character",
+  "AdmissionType",                 "Admission type: DAY, HOS, EMERG",           "Character",
+  "LengthOfStay",                  "Number of inpatient days",                        "Numeric",
+  "LengthOfStayWithoutRevalidation","Number of inpatient days without revalidation",  "Numeric",
+  "UrgencyType",                   "Urgency classification of the request",           "Character",
+  "PlannedStartDT",                "Final planned surgery start time",                "Datetime",
+  "PlannedEndDT",                  "Final planned surgery end time",                  "Datetime",
+  "PlannedDurationMinutes",        "Planned surgery duration (in minutes)",           "Numeric",
+  "PlannedOR",                     "Pre-assigned operating room",                     "Character",
+  "ActualOR",                      "Operating room actually used",                    "Character",
+  "ORIn",                          "Time the patient entered the operating room",     "Datetime",
+  "OROut",                         "Time the patient left the operating room",        "Datetime",
+  "DurationMinutes",               "Actual time spent in operating room (in minutes)","Numeric",
+  "HeadSurgeonID",                 "Anonymized ID of the lead surgeon",               "Character",
+  "AnesthesiologistID",            "Anonymized ID of the anesthesiologist",           "Character"
+)
+
+knitr::kable(
+  variabelen_df,
+  booktabs = TRUE,
+  caption = "Variable descriptions used in the dataset \\label{tab:variables}"
+)
+
+```
+
+
+\newpage
+
+## Newly derived variables: definitions and interpretation
+
+The following variables were derived to quantify discrepancies between planned and observed activity, to place each case within operational shifts, and to characterise room allocation and in-room flow. Together, they provide a more granular perspective on the day-to-day functioning of the operating theatre. The derived variables will support the calculation of some of the KPIs.
+
+### Shifts
+
+Each surgical case is assigned to a shift window to assess whether it falls within regular working hours. The **effective shift** (`shift_label`) is determined by the actual in-room entry time (`ORIn`). The hospital day is divided into three shifts:  
+- 08:00–16:30  
+- 16:30–22:00  
+- 22:00–08:00 (ending the following day).  
+
+These boundaries serve as the operational reference for evaluating overtime. `shift_start` and `shift_end` are helping variables based on `shift_label` to calculate overtime, which will be covered soon. 
+
+In parallel, a **planned shift** (`planned_shift_label`) is assigned based on the scheduled start time (`PlannedStartDT`). This allows us to check whether a case moved from one shift to another. The variable `moved_to_other_shift` indicates this explicitly (1 if the planned and effective shifts differ, 0 if they do not). Identifying such cases is important, since they reveal when planned daytime activity is pushed into the evening or night, potentially leading to staffing stress and increased costs. For this case, `planned_shift_start` and `planned_shift_end` are also helping variables, but now based on `planned_shift_label`.
+
+### Planned versus observed timing and duration
+
+Several variables capture deviations between planned and observed timings. These are essential for evaluating the reliability of scheduling and the accuracy of duration estimates.
+
+- **Start deviation (`start_diff`)** measures the difference in minutes between actual in-room time and planned start. Positive values mean the case started later than planned, negative values mean it started earlier. 
+
+  Formally:
+\[
+\text{start\_diff} = {\text{ORIn} - \text{PlannedStartDT}} 
+\]
+
+- **End deviation (`end_diff`)** measures the deviation between the actual end and the planned end time, with the same sign convention. 
+
+  Formally:
+\[
+\text{end\_diff} = {\text{OROut} - \text{PlannedEndDT}} 
+\]
+
+- **Duration difference (`duration_diff`)** shows how many minutes longer or shorter the actual case was compared to the plan. 
+
+  Formally:
+\[
+\text{duration\_diff} = {\text{DurationMinutes} - \text{PlannedDurationMinutes}} 
+\]
+
+Because procedures vary greatly in expected length, it is often useful to also express this difference in relative terms. The variable **percentage deviation (`percentage_deviation`)** does exactly that:  
+
+\[
+\text{percentage\_deviation} = \frac{\text{DurationMinutes} - \text{PlannedDurationMinutes}}{\text{PlannedDurationMinutes}} \times 100
+\]
+
+This makes it possible to compare very short and very long cases on equal footing. For example, an overrun of 15 minutes is minor for a 5-hour procedure but critical for a 30-minute one. For example, a percentage deviation of 20% means that the surgery took about one fifth longer than planned.
+
+Finally, the **deviation ratio (`deviation_ratio`)** captures the same idea as a ratio rather than a percentage:  
+
+\[
+\text{deviation\_ratio} = \frac{\text{DurationMinutes}}{\text{PlannedDurationMinutes}}
+\]
+
+A value close to 1.0 means that the observed duration matched the planned duration well. Ratios above 1.0 indicate overruns, while values below 1.0 signal cases that finished sooner than expected. For example, a deviation ratio of 1.2 means that the surgery lasted about 20% longer than planned. This is particularly useful in dashboards or benchmarking, since it gives an intuitive sense of alignment. 
+
+### Overtime work
+
+Overtime occurs when surgeries continue beyond the official end of a shift. At ZOL, the regular working hours run from 08:00 to 16:30. After this, activity gradually decreases: fewer operating rooms remain open between 16:30 and 22:00, and during the night (22:00–08:00) only a minimal on-call service is active. Measuring overtime therefore provides direct insight into how often the planned schedule spills over into evening or night work. 
+
+- The **overtime flag (`overtime_flag`)** is a binary indicator that marks whether a case extended beyond the official end of its assigned shift.   It equals 1 if the operation ended after 16:30 (for day shift), after 22:00 (for evening shift), or after 08:00 (for night shift cases). Missing timestamps result in `NA`. Formally:
+
+  \[
+  \text{overtime\_flag} =
+  \begin{cases}
+  1, & \text{if } 
+  \begin{cases}
+  \text{shift\_label = '08:00-16:30' and } \text{OROut} > 16{:}30 \\
+  \text{shift\_label = '16:30-22:00' and } \text{OROut} > 22{:}00 \\
+  \text{shift\_label = '22:00-08:00' and } \text{OROut} > 08{:}00
+  \end{cases} \\[1em]
+  0, & \text{if } \text{OROut} \leq \text{shift\_end} \\
+  NA, & \text{if OROut is missing}
+  \end{cases}
+  \]
+
+- **The overtime minutes (`overtime_minutes`)** quantifies the number of minutes worked after the shift officially ended.  
+  By definition, this value is never negative:
+
+  \[
+  \text{overtime\_minutes} = \max(0, \ \text{OROut} - \text{shift\_end})
+  \]
+
+- **Planned overtime (`planned_overtime_minutes`)** indicates how many minutes were already expected to fall outside the shift. If a case was fully planned within the shift, this value is zero; if it was planned entirely after the shift, it equals the full planned duration. In mixed cases, only the part exceeding the shift boundary is counted. Formally:
+
+  \[
+  \text{planned\_overtime\_minutes} = 
+  \max(0, \ \text{PlannedEnd} - \text{shift\_end})
+  \]
+
+- **Relative overtime (`relative_overtime_minutes`)** puts the actual overtime into context by comparing it with the planned overtime:  
+  \[
+  \text{relative\_overtime\_minutes} = \frac{\text{overtime\_minutes}}{\text{planned\_overtime\_minutes}}
+  \]
+
+  A value of 1.0 means that the case ran as long after hours as was already anticipated. Values above 1.0 indicate more unplanned overtime than expected, while 0 means that no overtime occurred even though the case had overtime planned.  
+
+### Room allocation and idle times
+
+The **room swap (`room_swap`)** indicator shows whether a case was performed in a different operating room than originally assigned. A high frequency of swaps may indicate instability in the planning process or bottlenecks in specific rooms.  
+
+  \[
+  \text{room\_swap} =
+  \begin{cases}
+  1, & \text{if } \text{ActualOR} \neq \text{PlannedOR} \\
+  0, & \text{if } \text{ActualOR} = \text{PlannedOR} \\
+  NA, & \text{if any room identifier is missing}
+  \end{cases}
+  \]
+
+The **gap time (`gap_time`)** variable captures the idle minutes in an operating room during the regular day shift. It reflects how much time a room remained unused between the start of the shift and the beginning of the first surgery, or between consecutive cases. To ensure this metric reflects meaningful idle time rather than longer inactive periods, three specific rules are applied:
+
+  1. For the **first surgery of each day shift**, `gap_time` measures the difference between the room’s opening time (08:00) and the actual in-room time (`ORIn`) of that first case.  
+  2. For subsequent surgeries, the gap is measured between consecutive cases **within the same room and shift-day**, but the calculation stops at the **last surgery of that day**. It does **not** carry over to the next day.  
+  3. Extremely long idle periods (more than 60 minutes) are **excluded** from the analysis, as these represent planned downtime rather than inefficiency.
+
+  Formally:
+
+  \[
+  \text{gap\_time}_{i} =
+  \begin{cases}
+  \max(0, \ \text{ORIn}_{i} - 08{:}00), & \text{if first case of the room on that day} \\
+  \max(0, \ \text{ORIn}_{i} - \text{OROut}_{i-1}), & \text{if same room, same day, and } \text{gap} \leq 60 \text{ minutes} \\
+  NA, & \text{if timestamps missing or gap exceeds 60 minutes}
+  \end{cases}
+  \]
+
+  This definition focuses specifically on **short, operational idle periods** that influence the day-to-day efficiency of room turnover, cleaning, and preparation.
+
+\newpage
+
+### Conventions
+
+For all timing differences (start_diff, end_diff, duration_diff), positive values represent later or longer than planned activity, and negative values represent earlier or shorter durations. Missing values in the original timestamps lead to NA values in the derived variables. Table \ref{tab:newvars} provides an overview of all newly derived variables.
+
+```{r new variables, echo = F} 
+
+new_vars_df <- tibble::tribble(
+  ~Variable,                    ~Description,                                                                                                      ~Type,
+  "shift_label",                "Effective shift containing ORIn: '08:00–16:30', '16:30–22:00', or '22:00–08:00'.",                                "Character",
+  "shift_start",                "Start timestamp of the effective shift for this case (based on ORIn).",                                           "Datetime",
+  "shift_end",                  "End timestamp of the effective shift for this case (based on ORIn).",                                             "Datetime",
+  "planned_shift_label",        "Planned shift containing PlannedStartDT.",                                                                        "Character",
+  "planned_shift_start",        "Start timestamp of the planned shift.",                                                                           "Datetime",
+  "planned_shift_end",          "End timestamp of the planned shift.",                                                                             "Datetime",
+  "moved_to_other_shift",       "Indicator (0/1): 1 if planned shift label differs from effective shift label.",                                   "Integer (0/1)",
+  "start_diff",                 "Difference in minutes between ORIn and PlannedStartDT. Positive = later start; negative = earlier start.",        "Numeric (minutes)",
+  "end_diff",                   "Difference in minutes between OROut and PlannedEndDT. Positive = later finish; negative = earlier finish.",       "Numeric (minutes)",
+  "duration_diff",              "Difference between actual duration and planned duration in minutes. Positive = longer; negative = shorter.",      "Numeric (minutes)",
+  "percentage_deviation",       "Relative duration error (%) compared to planned duration.",                                                       "Numeric (percent)",
+  "deviation_ratio",          "Observed/planned duration ratio; ≈1 aligned, >1 overrun, <1 underrun; NA if planned duration missing or ≤ 0.",    "Numeric (ratio)",
+  "overtime_flag",            "Indicator (0/1): 1 if case extends outside its effective shift bounds.",                                          "Integer (0/1)",
+  "overtime_minutes",           "Minutes after the end of the effective shift.",                                                                   "Numeric (minutes)",
+  "planned_overtime_minutes", "Planned minutes scheduled after the end of the effective shift.",                                                 "Numeric (minutes)",
+  "relative_overtime_minutes",  "Overtime divided by planned overtime within the effective shift.",                                             "Numeric (ratio)",
+  "room_swap",                  "Indicator (0/1): 1 if ActualOR differs from PlannedOR.",                                                          "Integer (0/1)",
+  "gap_time",                   "Idle minutes between consecutive cases in the same OR within the 08:00–08:00 bucket.",                           "Numeric (minutes)"
+)
+
+if (knitr::is_latex_output()) {
+knitr::kable(
+new_vars_df,
+format = "latex",
+position = "H",
+booktabs = TRUE,
+align = c("p{4.5cm}", "p{7cm}", "p{3cm}"),
+caption = "Newly derived variables (units shown where applicable) \\label{tab:newvars}"
+)
+} else {
+knitr::kable(
+new_vars_df,
+caption = "Newly derived variables (units shown where applicable) \\label{tab:newvars}"
+)
+}
+
+
+
+```
+

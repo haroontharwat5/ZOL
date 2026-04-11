@@ -1,0 +1,3872 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{titling}
+
+% Logo's bovenaan
+\pretitle{%
+  \begin{center}
+  \includegraphics[width=4cm]{figures/BINF.png}\hfill
+  \includegraphics[width=6cm]{figures/PAIH.png}\\[2cm]
+  \huge
+}
+\posttitle{\end{center}}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={In-depth Analysis for Lanaken},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{In-depth Analysis for Lanaken}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Leveraging Data Analytics for Efficient OR Planning at ZOL}
+\author{}
+\date{\vspace{-2.5em}October 2025}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\vspace{2cm}
+
+Niels MARTIN\\
+niels.martin@uhasselt.be\\[0.5em]
+Maxim RIEBUS\\
+maxim.riebus@uhasselt.be\\[0.5em]
+Haroon THARWAT\\
+haroon.tharwat@uhasselt.be\\
+
+\vspace{6cm}
+
+\textbf{Hasselt University} \\
+Faculty of Business Economics \\
+Research Group Business Informatics \\
+Process Analytics in Healthcare
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}\label{introduction}
+
+Efficient management of operating rooms (ORs) requires an understanding
+of how planned surgical activity aligns with real-world execution. This
+document provides an in-depth, site-specific analysis for \textbf{Campus
+Lanaken}, serving as an analytical extension of the previous exploratory
+study. The goal is to systematically address the key research questions
+formulated in the project description:
+
+\textbf{Research questions}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Planned versus observed timing}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    How well do the planned operating durations correspond to the actual
+    durations?\\
+  \item
+    What is the typical deviation between the planned start time and the
+    actual entry into the operating room?\\
+  \item
+    Which specialisms or procedure types show the largest differences?\\
+  \item
+    How do these deviations scale relative to the planned duration
+    (proportional or percentage-wise)?
+  \end{itemize}
+\item
+  \textbf{Adherence to working hours}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    How often do procedures run beyond regular working hours (08:00 to
+    16:30)?\\
+  \item
+    What proportion of OR activity occurs in the evening or at night?\\
+  \item
+    How do these patterns differ between campuses?
+  \end{itemize}
+\item
+  \textbf{Room allocation}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    How often are procedures performed in a different room than
+    originally planned?\\
+  \item
+    Are these reallocations concentrated in specific rooms or
+    specialisms?
+  \end{itemize}
+\item
+  \textbf{Urgency and scheduling}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    How are urgent and non-elective cases distributed across campuses
+    and time periods?\\
+  \item
+    To what extent do urgent surgeries overlap with elective activity
+    and cause scheduling disruptions?
+  \end{itemize}
+\end{itemize}
+
+Each of the following sections addresses one of these themes in depth,
+focusing on the local characteristics of the Lanaken campus.
+
+\subsection{Unique values and data
+richness}\label{unique-values-and-data-richness}
+
+The dataset captures a high degree of heterogeneity in surgical
+practice. A total of 34889 unique patient IDs are recorded, spread
+across 588 distinct procedure codes and 578 procedure names. Surgeon and
+anesthesiologist coverage is broad, with 97 and 132 unique identifiers
+respectively. These numbers reflect the diversity of clinical practice
+at ZOL and underscore the importance of developing grouping strategies
+to obtain actionable insights. Table \ref{tab:uniquevalues} provides an
+overview of the number of unique values per variable.
+
+\begin{table}[H]
+
+\caption{\label{tab:unique values}Number of unique values per variable. \label{tab:uniquevalues}}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+Variable & UniqueValues\\
+\midrule
+PatientID & 34889\\
+ProcedureCode & 588\\
+ProcedureName & 578\\
+AnesthesiologistID & 132\\
+HeadSurgeonID & 97\\
+\addlinespace
+LengthOfStay & 66\\
+PlannedOR & 9\\
+ActualOR & 7\\
+Weekday & 5\\
+Year & 4\\
+\addlinespace
+AdmissionType & 3\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Surgical procedure
+durations}\label{surgical-procedure-durations}
+
+Operating time is one of the most critical variables for planning.
+Procedure durations display wide variation, both within and across
+procedure types. Percentile analysis shows that 95\% of all procedures
+finish within 86 minutes, 98\% within 114 minutes, 99\% within 133
+minutes, and 99.9\% within 196 minutes. While the majority of procedures
+are considerably shorter, the long right hand tail in the distribution
+indicates the presence of outliers and highly complex cases that drive
+variability in scheduling. Figure \ref{fig:duration} illustrates the
+distribution of procedure durations, and Table
+\ref{tab:durationpercentiles} summarizes the percentile values.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/procedure_durations-1} 
+
+}
+
+\caption{Histogram of Surgery Duration \label{fig:duration}}\label{fig:procedure_durations}
+\end{figure}
+
+\newpage
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Percentiles of surgical procedure duration (in minutes).
+\label{tab:durationpercentiles}}\tabularnewline
+\toprule\noalign{}
+Percentile & Duration (minutes) \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Percentile & Duration (minutes) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+95\% & 86 \\
+98\% & 114 \\
+99\% & 133 \\
+99.9\% & 196 \\
+\end{longtable}
+
+Looking at the most frequent procedures illustrates the large variation
+in operating times. FACO EMULSIFICATIE has an average duration of 27.6
+minutes and a median of 26 minutes, and transforaminele epidurale
+infiltratie : lumbaal averages 12.6 minutes with a median of 12 minutes.
+Facet radiofrequency lumbaal typically lasts 18.8 minutes on average
+with a median of 18 minutes. In contrast, VITRECTOMIE have an average
+duration of 55.3 minutes and a median of 53 minutes, highlighting the
+substantial difference in resource requirements between routine short
+procedures and major surgical interventions. This mix of short
+standardized cases and longer complex operations underscores the
+operational challenge of planning an efficient operating room schedule
+that accommodates both types of activity. Table \ref{tab:top10dur}
+summarizes the ten most frequent procedure types.
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Top 10 most frequent procedure types with mean and median
+duration \label{tab:top10dur}}\tabularnewline
+\toprule\noalign{}
+ProcedureName & Count & Mean & Median \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+ProcedureName & Count & Mean & Median \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+FACO EMULSIFICATIE & 11025 & 27.6 & 26 \\
+transforaminele epidurale infiltratie : lumbaal & 7186 & 12.6 & 12 \\
+facet radiofrequency lumbaal & 5577 & 18.8 & 18 \\
+facet diagnostisch lumbaal & 4962 & 13.7 & 13 \\
+proefsacrale infiltratie & 3290 & 11.5 & 11 \\
+transforaminele epidurale infiltratie : sacraal & 2363 & 12.3 & 11 \\
+epidurale infiltratie : cervicaal & 2091 & 14.0 & 13 \\
+VITRECTOMIE & 1788 & 55.3 & 53 \\
+facet radiofrequency cervicaal & 1693 & 22.8 & 22 \\
+facet diagnostisch cervicaal & 1555 & 16.6 & 16 \\
+\end{longtable}
+
+\subsection{Admission type and
+urgency}\label{admission-type-and-urgency}
+
+The majority of procedures in the dataset are performed in a planned
+setting. Ambulatory surgery accounts for 98.1\%, and inpatient
+hospitalization for 1.9\%, while emergency admissions represent only one
+recorded case. The urgency classification shows a similar pattern:
+99.6\% of procedures are elective, and 0.4\% are non elective. Although
+relatively small in number, the latter category remains important from a
+planning perspective, as urgent procedures may disrupt elective
+schedules and lead to cancellations or overtime. Table
+\ref{tab:admissiontype} and Table \ref{tab:urgencytype} summarize both
+distributions.
+
+\begin{longtable}[]{@{}lrr@{}}
+\caption{Frequency table for Admission Type
+\label{tab:admissiontype}}\tabularnewline
+\toprule\noalign{}
+AdmissionType & Count & Percentage \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+AdmissionType & Count & Percentage \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+DAG & 68108 & 98.1 \\
+HOS & 1286 & 1.9 \\
+SPOED & 1 & 0.0 \\
+\end{longtable}
+
+\begin{longtable}[]{@{}lrr@{}}
+\caption{Frequency table for Urgency Classification
+\label{tab:urgencytype}}\tabularnewline
+\toprule\noalign{}
+UrgencyType & Count & Percentage \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+UrgencyType & Count & Percentage \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+electief & 69109 & 99.6 \\
+niet-electief & 286 & 0.4 \\
+\end{longtable}
+
+\subsection{Temporal distribution of
+activity}\label{temporal-distribution-of-activity}
+
+Surgical activity is spread consistently across weekdays. Fridays
+account for 18.5 percent of weekly activity, Tuesdays for 21.5 percent,
+Thursdays for 19.1 percent, Wednesdays each for 19.8 percent, and
+Mondays each for 21.2 percent. There are no Weekend days showen in the
+data. Annual trends reveal steady growth, with the number of procedures
+increasing from 20016 in 2022 to 20636 in 2024. At the time of data
+extraction, 8702 procedures in 2025 represented 12.5 percent of the
+total. Together, Table \ref{tab:weekday} and Table \ref{tab:year}
+summarize the distribution of surgical activity across weekdays and
+years.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1389}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1806}}@{}}
+\caption{Frequency table for Day of the Week (sorted by descending
+count) \label{tab:weekday}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Weekday
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Count
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Weekday
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Count
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Di & 14902 & 21.5 \\
+Ma & 14710 & 21.2 \\
+Wo & 13742 & 19.8 \\
+Do & 13233 & 19.1 \\
+Vr & 12808 & 18.5 \\
+\end{longtable}
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.0972}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1806}}@{}}
+\caption{Frequency table for Year \label{tab:year}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Count
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Count
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2022 & 20016 & 28.8 \\
+2023 & 20041 & 28.9 \\
+2024 & 20636 & 29.7 \\
+2025 & 8702 & 12.5 \\
+\end{longtable}
+
+In summary, procedure durations show strong variability with a long
+tailed distribution driven by complex surgeries. The majority of
+procedures are elective, while non elective cases still have an
+important impact on schedule stability. Activity is distributed evenly
+across weekdays and has grown consistently in recent years. These
+findings form the baseline against which more advanced performance
+metrics such as start and end deviations, utilization rates, and
+predictive models can be developed in subsequent sections of this
+report.
+
+\newpage
+
+\section{How accurately does planning reflect reality in the
+OR?}\label{how-accurately-does-planning-reflect-reality-in-the-or}
+
+\subsection{Are planned and observed durations
+aligned?}\label{are-planned-and-observed-durations-aligned}
+
+The comparison between planned and observed surgery durations shows a
+broad spread around the one to one line. Many procedures lie close to
+the diagonal, indicating that their observed durations correspond
+reasonably well to the planned values. At the same time, a substantial
+number of points fall above or below this line, showing that both
+underestimation and overestimation occur frequently. Most deviations
+appear as longer than planned surgeries, visible in the dense area below
+the red dashed line. The dispersion increases for longer procedures,
+reflecting greater uncertainty for complex cases. Figure
+\ref{fig:planned_vs_observed} displays this relationship.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/planned vs observed-1} 
+
+}
+
+\caption{Planned vs. Observed Surgery Duration (Lanaken) \label{fig:planned_vs_observed}}\label{fig:planned vs observed}
+\end{figure}
+
+On average, surgeries at Lanaken show meaningful variation between
+planned and actual durations. Among procedures that last longer than
+planned, the mean deviation is 9 minutes with a median of 5 minutes,
+while shorter cases deviate on average 7.1 minutes with a median of 5
+minutes. The standard deviations of 11.2 minutes and 15.2 minutes
+highlight the presence of both moderate deviations and substantial
+outliers. While most differences remain within reasonable limits, a
+small number of extreme values extend the overall range.
+
+Almost half of all surgeries (41.7\%) take longer than planned, with an
+interquartile range of 8 minutes, while 58.3\% finish earlier, with an
+interquartile range of 7 minutes. This distribution shows that
+deviations occur in both directions, but the spread is larger for cases
+that finish earlier. The considerable variability within each category
+indicates that although overall planning accuracy is reasonable at the
+aggregate level, individual durations remain difficult to predict.
+Improving the consistency of duration estimates, particularly for
+procedures that frequently deviate, could help reduce daily schedule
+variability and limit delays across the operating list. Table
+\ref{tab:dur_diff_direction} provides a detailed overview of these
+differences.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.2421}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0737}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0947}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0737}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0632}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0632}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0632}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0632}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0737}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0842}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.1053}}@{}}
+\caption{Difference between actual and planned duration (minutes),
+separated by direction \label{tab:dur_diff_direction}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+direction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IQR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99\_9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percent
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+direction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IQR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99\_9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percent
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Longer than planned & 9 & 5 & 11.2 & 8 & 1 & 331 & 29 & 53.5 & 108 &
+41.7\% \\
+Shorter than planned & 7.1 & 5 & 15.2 & 7 & 0 & 890 & 21 & 40 & 80.1 &
+58.3\% \\
+\end{longtable}
+
+Expressing deviations as a percentage of the planned duration provides a
+standardized view across short and long procedures. Most cases fall
+within about ±40 percent of the planned time, indicating a generally
+acceptable level of scheduling accuracy in routine practice. The
+histogram peaks slightly below zero, showing that surgeries are on
+average completed a bit earlier than planned. The shape is roughly
+symmetrical, although the right tail extends further, indicating that
+large overruns occur less frequently but can be substantial when they
+appear. This pattern suggests that while most procedures are reasonably
+well estimated, a smaller group of cases contributes disproportionately
+to the overall variability in duration accuracy. Figure
+\ref{fig:relative_dev} shows the full distribution.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/relative_deviation_hist-1} 
+
+}
+
+\caption{Distribution of relative deviation between planned and observed duration \label{fig:relative_dev}}\label{fig:relative_deviation_hist}
+\end{figure}
+
+Duration deviations differ markedly between admission types.Inpatient,
+HOS, cases show the highest variability, with an average deviation of
+14.5 percent and a median of 6.7 percent, while the coefficient of
+variation is 3.4 This means that even if the mean deviation seems
+moderate, individual cases differ strongly from their planned duration,
+which is typical for unpredictable acute interventions.
+
+Inpatient, SPOED, surgery has a deviation of -17.8 percent and a median
+of -17.8 percent, suggesting that this case was a rare occurance. The
+coefficient of variation of cannot be calculated as there is only one
+recorded case of an emrgency surgery.
+
+Ambulatory, DAG, surgeries are the most predictable group. Their mean
+deviation is 2 percent, the median is minus 5 percent, and the
+coefficient of variation of 21.9 mainly reflects the fact that even
+moderate absolute differences translate into larger percentages for
+short procedures. These results show that standardized short-stay
+procedures are generally estimated accurately in the planning process.
+Table \ref{tab:rel_dev_admission} summarizes these patterns.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1538}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0769}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2885}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.3077}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0865}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0865}}@{}}
+\caption{Relative duration deviation and coefficient of variation by
+admission type (Lanaken) \label{tab:rel_dev_admission}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+AdmissionType
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+AdmissionType
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+HOS & 1286 & 14.5 & 6.7 & 49 & 3.4 \\
+DAG & 68108 & 2 & -5 & 42.9 & 21.9 \\
+SPOED & 1 & -17.8 & -17.8 & NA & NA \\
+\end{longtable}
+
+A similar pattern appears when comparing elective and non elective
+surgeries. Non elective procedures have an average relative deviation of
+-2.6 percent and a median of minus 7.3 percent, with a coefficient of
+variation of -12.1, highlighting their unpredictable character. Elective
+operations show smaller deviations, with an average of 2.2 percent and a
+median of minus 2.2 percent. Their coefficient of variation of 19.5
+results from the influence of a small number of extreme outliers rather
+than consistent misestimation. Overall, these findings confirm that
+while elective cases generally follow expected durations well, non
+elective surgeries remain the main source of variability in the
+operating schedule. Table \ref{tab:rel_dev_urgency} summarizes these
+results.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1538}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0769}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2885}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.3077}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0865}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0865}}@{}}
+\caption{Relative duration deviation and coefficient of variation by
+urgency type (Lanaken) \label{tab:rel_dev_urgency}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+UrgencyType
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+UrgencyType
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median relative deviation (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+electief & 69109 & 2.2 & -4.9 & 43 & 19.5 \\
+niet-electief & 286 & -2.6 & -7.3 & 31.4 & -12.1 \\
+\end{longtable}
+
+The mean relative deviation between planned and observed durations
+remains broadly stable over the observed years. In 2022 the average
+deviation is 0.1 percent, increasing slightly to 1.9 percent in 2023. A
+clearer rise appears in 2024, reaching 4.8 percent, while the partial
+data for 2025 show a decrease to 2.1 percent.
+
+This pattern indicates that planning accuracy at Lanaken has remained
+relatively consistent over time, with only moderate year to year
+fluctuations. The differences are small and likely reflect normal
+operational variation rather than systematic changes in planning
+quality. Overall, the stability of the yearly averages suggests that the
+underlying scheduling process is well established, even though
+individual level variability continues to affect day to day accuracy.
+Figure \ref{fig:reldev_year} illustrates these trends.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/rel_duration_dev_year-1} 
+
+}
+
+\caption{Relative duration deviation by year \label{fig:reldev_year}}\label{fig:rel_duration_dev_year}
+\end{figure}
+
+The relative deviation between planned and observed durations at Campus
+Lanaken shows a consistent pattern across the regular workweek. Mean
+deviations range from 0.8 percent to 3.9 percent, indicating that
+planning accuracy is generally stable from Monday through Friday. The
+slightly higher deviation on Tuesday, followed by a moderate value on
+Wednesday, likely reflects variation in the types of procedures
+performed rather than structural scheduling differences. Lower values on
+Thursday and Friday suggest that case mix later in the week may be more
+predictable. Overall, the figure shows that at Lanaken the alignment
+between planned and observed durations is steady across weekdays, with
+only modest fluctuations tied to day specific activity profiles.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/rel_dev_weekday-1} 
+
+}
+
+\caption{Relative deviation by weekday \label{fig:reldev_weekday}}\label{fig:rel_dev_weekday}
+\end{figure}
+
+Variation in deviation differs considerably across operating rooms. The
+largest average deviations are concentrated in the complex surgery rooms
+of the LO block, most notably LO03, where the mean absolute deviation is
+16.4 minutes and 45.9 percent of cases run longer than planned. Other
+high variability rooms such as LO05, LO01, and LO04 also show average
+deviations between 10.6 and 13.5 minutes, reflecting the higher
+uncertainty typical of lengthy or technically demanding procedures.
+
+By contrast, rooms such as LP01 and LP02, mainly associated with short
+and standardized interventions, display mean deviations below 6 minutes
+and a roughly balanced share of shorter and longer cases. These
+differences illustrate how the degree of procedural complexity and
+specialization strongly influences planning precision. Table
+\ref{tab:ordeviation_or} provides the detailed overview.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0917}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0667}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1250}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1083}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2417}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1167}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2500}}@{}}
+\caption{Duration deviations per operating room, ordered by mean
+absolute deviation \label{tab:ordeviation_or}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean abs dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Longer (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative dev (longer)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Shorter (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative dev (shorter)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean abs dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Longer (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative dev (longer)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Shorter (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean relative dev (shorter)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO03 & 4196 & 16.4 & 45.9 & 29.3 & 51.1 & -21.2 \\
+LO05 & 5206 & 13.5 & 41.2 & 30.8 & 55.2 & -23.4 \\
+LO01 & 5202 & 12.3 & 39.2 & 27.6 & 57.5 & -21 \\
+LO04 & 6009 & 10.6 & 45.1 & 30.7 & 50.8 & -20.9 \\
+LO02 & 9974 & 7.8 & 41.5 & 30.1 & 52.9 & -20.7 \\
+LP02 & 18619 & 5.6 & 38.6 & 43.7 & 54.8 & -31.2 \\
+LP01 & 20189 & 4.8 & 43.6 & 46.3 & 48.8 & -29.5 \\
+\end{longtable}
+
+Among the most extreme deviations in surgery duration, longer and
+shorter cases occur in almost equal proportions. Around 66.8 percent of
+the top one percent of deviations correspond to procedures that last
+longer than planned, while 33.2 percent finish earlier than expected.
+This contrasts with earlier observations based on a different dataset,
+where overruns dominated more clearly.
+
+Although both directions are represented among the extreme cases, their
+operational impact remains different. Early finishes generally create
+limited idle time, whereas overruns can delay subsequent cases and
+increase the likelihood of overtime. The near balance between longer and
+shorter cases in the current extreme deviations suggests that large
+underestimations and overestimations both contribute meaningfully to
+schedule variability, reinforcing the need to monitor procedures prone
+to substantial deviations in either direction. Table
+\ref{tab:extreme_dir} summarizes these results.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3194}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1806}}@{}}
+\caption{Direction of deviation among the 1\% most extreme cases
+(Lanaken) \label{tab:extreme_dir}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Direction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Direction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Longer than planned & 474 & 66.8\% \\
+Shorter than planned & 236 & 33.2\% \\
+\end{longtable}
+
+\subsection{A closer look on the coefficient of
+variation}\label{a-closer-look-on-the-coefficient-of-variation}
+
+The monthly coefficient of variation for planning deviation displays a
+highly volatile pattern, as shown in Figure \ref{fig:cv_planning}. Most
+months cluster around relatively low values between 1.0 and 1.5, but
+these stable periods are repeatedly interrupted by sharp, isolated
+spikes. Early 2022 shows modest variation until a sudden jump to nearly
+4, followed shortly by another month above 3. Similar single-month
+surges reappear throughout 2023 and 2024, with values that briefly
+exceed 3 before dropping back to the lower baseline.
+
+These spikes are sporadic rather than sustained. They do not form a
+rising or falling trend but instead appear as short bursts of unusually
+high proportional deviation, likely driven by temporary shifts in case
+mix or isolated outliers. By contrast, 2025 exhibits much steadier
+behaviour, with the coefficient remaining close to 1.2 and no visible
+extreme peaks.
+
+Overall, the pattern is characterised by a low, stable baseline
+punctuated by occasional large fluctuations. This indicates that
+planning accuracy at Lanaken is generally consistent, but certain months
+experience markedly higher relative dispersion, reflecting short-term
+variability rather than a structural change over time.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/cv_monthly-1} 
+
+}
+
+\caption{Monthly evolution of coefficient of variation (Planning deviation) \label{fig:cv_planning}}\label{fig:cv_monthly}
+\end{figure}
+
+\subsubsection{Variability by planned duration
+group}\label{variability-by-planned-duration-group}
+
+Variation in surgical timing can be examined from two complementary
+perspectives that describe different aspects of performance. The first
+is the coefficient of variation of observed duration, calculated as the
+standard deviation divided by the mean of the observed surgical times.
+This indicator expresses how dispersed the recorded durations are
+relative to their average. In a dataset such as this one, which contains
+a large number of both short and long operations, a high coefficient of
+variation mainly reflects the broad spread in case duration across
+procedure types rather than instability within individual surgeries.
+
+The second perspective is the coefficient of variation of the planning
+deviation, which measures the consistency of planning accuracy. It is
+computed as the standard deviation of the absolute deviation between
+planned and observed time, divided by the mean of that deviation. This
+metric focuses on how variable the alignment between planned and
+realised durations is, regardless of how long the surgeries themselves
+last.
+
+Comparing both perspectives helps disentangle two components of
+variability: the structural heterogeneity in procedure duration and the
+variability in how precisely these durations are planned. Understanding
+how these two aspects evolve provides insight into whether deviations
+primarily originate from the diversity of surgical activity or from
+variation in scheduling accuracy. The following table summarises these
+indicators across five duration categories and serves as a baseline for
+the more detailed, category-specific analyses presented in the
+subsequent subsections. All values are reported in Table
+\ref{tab:cv_group}, which provides the exact CV measures for both
+observed durations and planning deviations.
+
+The summary statistics confirm a clear scaling effect in relative
+variability. The coefficient of variation of observed durations
+decreases as planned duration increases: procedures planned for less
+than 30 minutes have a CV of 0.5210286, procedures in the 31--60 minute
+group show 0.3819727, the 61--90 minute group 0.3449165, the 91--180
+minute group 0.3180666, and the longest category over 180 minutes shows
+0.6921203 This pattern is consistent with the fact that shorter cases
+amplify small absolute fluctuations when expressed relative to their
+mean, while longer cases distribute absolute variation over a broader
+time base.
+
+For the planning deviation, coefficients of variation are considerably
+higher across all groups, reflecting the larger proportional spread in
+the differences between planned and actual duration. These values range
+from 0.9900561 in the shortest category to 0.9127430 in the 31--60
+minute group, 0.8386945 in the 61--90 minute group, 0.8976667 in the
+91--180 minute group, and 0.9899863 in procedures lasting more than 180
+minutes. This pattern suggests that longer and more complex procedures,
+while not necessarily less stable in execution, exhibit greater
+variation in planning accuracy.
+
+Together, these figures show that relative variability in observed
+duration is largely structural and reflects case mix composition,
+whereas variability in planning deviation captures the irregularity in
+scheduling precision. The distinction between the two metrics provides
+the foundation for the next analyses, which explore how these patterns
+manifest within each duration category and across operating rooms.
+
+\begin{table}
+
+\caption{\label{tab:cv group}Summary of mean duration, SD, and CV by planned duration group (Observed vs. Planning deviation) \label{tab:cv_group}}
+\centering
+\begin{tabular}[t]{lrrrrrrr}
+\toprule
+Group & n & Mean duration & SD duration & CV duration & Mean planning & SD planning & CV planning\\
+\midrule
+<30 & 50060 & 17.78666 & 9.267356 & 0.5210286 & 5.337355 & 5.284281 & 0.9900561\\
+31–60 & 12315 & 43.15436 & 16.483787 & 0.3819727 & 10.223386 & 9.331324 & 0.9127430\\
+61–90 & 4320 & 75.02523 & 25.877444 & 0.3449165 & 18.060185 & 15.146979 & 0.8386945\\
+91–180 & 2662 & 108.92186 & 34.644410 & 0.3180666 & 23.638618 & 21.219601 & 0.8976667\\
+> 180 & 38 & 109.57895 & 75.841810 & 0.6921203 & 307.578947 & 304.498936 & 0.9899863\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The monthly evolution of the coefficient of variation for observed
+durations shows a highly stable pattern for four of the five planned
+duration groups, as visible in Figure \ref{fig:cv_obs_group}. The
+\textless30, 31--60, 61--90, and 91--180 minute groups all form dense,
+nearly flat trajectories over time, with only minor month-to-month
+fluctuations. These curves remain tightly clustered: the \textless30
+minute group sits consistently around 0.4 to 0.5, whereas the three
+mid-length groups remain lower, typically between 0.25 and 0.4. The
+clear separation between short procedures and the mid-range groups
+persists throughout the entire period, reflecting stable proportional
+variability.
+
+In contrast, the \textgreater180 minute group behaves very differently.
+Instead of a continuous line, it appears only sporadically and shows
+extreme swings, from near zero to values close to 1.0. These abrupt
+jumps reflect the small number of very long procedures performed each
+month, where even a few cases can cause large shifts in the coefficient
+of variation. The volatility therefore stems from data sparsity rather
+than a structural change in duration variability.
+
+Overall, the figure reveals a stable and well-behaved pattern for the
+majority of procedure lengths, while the longest-duration category
+displays irregular and highly sensitive behaviour due to low monthly
+counts.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/cv obs group-1} 
+
+}
+
+\caption{Monthly evolution of coefficient of variation (Observed durations) \label{fig:cv_obs_group}}\label{fig:cv obs group}
+\end{figure}
+
+The coefficient of variation of planning deviation shows a dynamic
+pattern over time, with marked differences between duration groups, as
+illustrated in Figure \ref{fig:cv_planning_group}. Across most months,
+the mid-range categories (31--60, 61--90, and 91--180 minutes) form a
+compact cluster, fluctuating between roughly 0.7 and 1.1. Their tight
+trajectories indicate that planning deviations for these procedures are
+comparatively stable and change only modestly from month to month.
+
+Short procedures (\textless30 minutes) display noticeably larger swings.
+Their curve oscillates more widely than the mid-range groups and reaches
+several pronounced peaks around 1.2 to 1.3. These spikes suggest periods
+in which small absolute deviations become proportionally large for very
+short cases, making the coefficient of variation more sensitive to case
+mix shifts.
+
+The \textgreater180 minute group behaves quite differently: instead of a
+continuous trajectory, it appears intermittently with large jumps,
+sometimes falling below 0.6 and at other times rising above 1.3. These
+swings are driven by small monthly sample sizes, where just a few
+unusually short or long deviations can cause sharp changes in the
+coefficient.
+
+Overall, the figure shows that planning deviation is most stable in the
+mid-duration range, more volatile for short cases, and highly irregular
+for the longest procedures because of sparse data.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/cv planning group-1} 
+
+}
+
+\caption{Monthly evolution of coefficient of variation (Planning deviation) \label{fig:cv_planning_group}}\label{fig:cv planning group}
+\end{figure}
+
+Together, these patterns indicate that the surgical process itself is
+proportionally consistent, while planning accuracy is more sensitive to
+case mix shifts, episodic complexity, and the inherent difficulty of
+predicting very short and very long procedures. The next sections
+examine these dynamics in more detail by analysing each duration group
+separately and comparing the distribution of coefficients of variation
+across operating rooms.
+
+\vspace{1em}
+
+\noindent\textbf{Surgeries planned under 30 minutes} \vspace{0.5em}
+
+Short procedures, typically representing high volume and standardized
+interventions, show moderate relative variability across operating
+rooms. For this category, coefficients of variation of observed
+durations range roughly between 0.35 and 0.63, which reflects the
+proportional impact of small absolute timing fluctuations on short
+cases. These values are expected for brief procedures, where even
+limited variation translates into relatively large coefficients once
+expressed relative to their mean duration. Table \ref{tab:cv_room_lt30}
+summarises these indicators for all rooms with at least eleven surgeries
+in this duration group.
+
+The distribution across rooms suggests a broadly homogeneous pattern.
+Units such as LP01, LP02, and LO05 show higher CV values between 0.45
+and 0.62, while others including LO02, LO04, LO01, and LO03 show lower
+variability, with values between 0.35 and 0.36. These differences are
+small in absolute terms and mainly reflect differences in the mix of
+short procedures performed in each room rather than substantive
+disparities in timing consistency.
+
+For the coefficient of variation of planning deviation, values are
+systematically higher and span a wider range, with most rooms falling
+between approximately 0.9127 and 1.213 This confirms that relative
+fluctuations in planning accuracy exceed those associated with the
+observed durations themselves. The lowest CV deviation values appear in
+rooms such as LP02, LO01, and LO04, while higher values are found in
+rooms including LO02, LO05, and LO03
+
+Overall, short procedures are characterized by consistent execution
+times and broadly comparable planning accuracy across operating rooms.
+The relatively high coefficients primarily reflect proportional scaling
+effects inherent to short interventions rather than substantial
+operational variability. Subsequent sections examine whether similar
+patterns hold for procedures of longer planned duration, where absolute
+variability becomes more dominant and planning precision potentially
+more challenging.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0864}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0988}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1975}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1728}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1728}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1358}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1358}}@{}}
+\caption{Coefficient of variation per operating room for surgeries
+planned \textless30 minutes (only rooms with \textgreater10 surgeries
+shown) \label{tab:cv_room_lt30} (continued below)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LP01 & 20114 & 14.73 & 6.893 & 0.468 & 4.787 & 4.664 \\
+LP02 & 18090 & 15.61 & 7.157 & 0.4585 & 5.157 & 4.707 \\
+LO02 & 6504 & 25.09 & 8.913 & 0.3552 & 5.905 & 5.948 \\
+LO04 & 2714 & 29.12 & 10.28 & 0.3529 & 7.336 & 7.069 \\
+LO05 & 1291 & 22.26 & 13.96 & 0.6269 & 6.697 & 8.123 \\
+LO03 & 707 & 29.84 & 10.52 & 0.3525 & 7.395 & 7.17 \\
+LO01 & 640 & 30.76 & 11.04 & 0.3589 & 8.483 & 8.032 \\
+\end{longtable}
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.1250}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.9743 \\
+0.9127 \\
+1.007 \\
+0.9636 \\
+1.213 \\
+0.9696 \\
+0.9469 \\
+\end{longtable}
+
+\vspace{1em}
+
+\noindent\textbf{Surgeries planned 31–60 minutes} \vspace{0.5em}
+
+Procedures with a planned duration of less than 30 minutes show
+relatively high proportional variability across operating rooms,
+reflecting the sensitivity of short procedures to even small absolute
+fluctuations. For this category, coefficients of variation of observed
+durations range from about 0.35 to 0.63, as shown in Table
+\ref{tab:cv_room_under30}. The lowest values appear in LO02 (0.3552),
+LO04 (0.3529), and LO01 (0.3589), while rooms such as LP01 (0.468) and
+LP02 (0.4585) fall in the mid-range. LO05 shows the highest CV\_duration
+(0.6269), which likely reflects a more heterogeneous short-procedure mix
+rather than operational inconsistencies.
+
+For the coefficient of variation of planning deviation, values are again
+higher across all rooms, ranging from about 0.91 to 1.21. As shown in
+Table \ref{tab:cv_room_under30}, the lowest CV\_deviation values appear
+in LP02 (0.9127), LO01 (0.9469), and LO04 (0.9636), while LO03 (0.9669)
+and LP01 (0.9743) lie near the centre of the distribution. The highest
+values occur in LO02 (1.007) and LO05 (1.213), indicating that planning
+deviations for the shortest procedures often match or exceed their mean,
+which is expected because even a few minutes of difference represent a
+large proportional deviation.
+
+Taken together, these results show that procedures planned for less than
+30 minutes display predictable execution in absolute terms, but
+inherently high relative variability in both duration and planning
+deviation. The observed coefficients largely reflect the scaling effects
+typical of very short procedures rather than meaningful operational
+differences between rooms.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0805}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0805}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1839}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1609}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1609}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1264}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1034}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1034}}@{}}
+\caption{Coefficient of variation per operating room for surgeries
+planned 31--60 minutes (only rooms with \textgreater10 surgeries shown)
+\label{tab:cv_room_31_60}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO02 & 3085 & 46.58 & 16.21 & 0.348 & 10.08 & 8.62 & 0.8553 \\
+LO01 & 2915 & 44.35 & 15.1 & 0.3406 & 9.718 & 8.979 & 0.9239 \\
+LO05 & 2175 & 41.6 & 15.68 & 0.377 & 9.789 & 9.248 & 0.9448 \\
+LO04 & 2172 & 41.38 & 16.62 & 0.4017 & 9.151 & 8.786 & 0.9602 \\
+LO03 & 1467 & 43.8 & 17.72 & 0.4045 & 11.2 & 10.98 & 0.9803 \\
+LP02 & 437 & 27.64 & 14.72 & 0.5326 & 17.72 & 9.466 & 0.5341 \\
+LP01 & 64 & 28.38 & 12.31 & 0.434 & 17.88 & 9.297 & 0.5201 \\
+\end{longtable}
+
+\vspace{1em}
+
+\noindent\textbf{Surgeries planned 61–90 minutes} \vspace{0.5em}
+
+Procedures with a planned duration of 31--60 minutes show moderate
+relative variability across operating rooms. For this category,
+coefficients of variation of observed durations cluster between about
+0.34 and 0.53, as shown in Table \ref{tab:cv_room_31_60}. The lowest
+values appear in LO01 (0.3406) and LO02 (0.348), followed closely by
+LO04 (0.4017) and LO03 (0.4045). Higher variability is observed in LO05
+(0.377) and LP01 (0.434), while LP02 shows the highest CV\_duration at
+0.5326. These differences likely reflect variation in the underlying
+case mix rather than structural workflow differences between rooms.
+
+For the coefficient of variation of planning deviation, values are again
+higher across all rooms, ranging from approximately 0.52 to 0.98. The
+lowest CV\_dev values appear in LP01 (0.5201) and LP02 (0.6341), while
+rooms such as LO01 (0.9239), LO05 (0.9448), LO03 (0.9803), and LO04
+(0.9602) display substantially higher dispersion. LO02 (0.8553) lies in
+the mid-range. These patterns indicate that relative variation in
+planning accuracy generally exceeds the variation in the durations
+themselves, especially in the general-purpose rooms where procedure
+heterogeneity is greater.
+
+Taken together, these results show that procedures planned for 31--60
+minutes display consistent execution times and moderate variation in
+planning accuracy across operating rooms. The observed coefficients
+largely follow proportional scaling effects typical of medium-length
+procedures rather than substantial operational differences.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0805}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0805}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1839}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1609}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1609}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1264}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1034}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1034}}@{}}
+\caption{Coefficient of variation per operating room for surgeries
+planned 61--90 minutes (only rooms with \textgreater10 surgeries shown)
+\label{tab:cv_room_61_90}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO01 & 1312 & 67.88 & 20.3 & 0.2991 & 15.44 & 12.2 & 0.7901 \\
+LO05 & 1154 & 79.28 & 24.02 & 0.3029 & 18.96 & 14.74 & 0.7777 \\
+LO03 & 759 & 84.53 & 27.85 & 0.3295 & 19.81 & 16.72 & 0.8441 \\
+LO04 & 639 & 83.87 & 29.41 & 0.3506 & 19.53 & 18.92 & 0.969 \\
+LO02 & 354 & 59.84 & 20.3 & 0.3392 & 15.75 & 13.66 & 0.8672 \\
+LP02 & 92 & 45.33 & 15.87 & 0.3502 & 27.8 & 12.36 & 0.4444 \\
+\end{longtable}
+
+\vspace{1em}
+
+\noindent\textbf{Surgeries planned 91–180 minutes} \vspace{0.5em}
+
+Surgeries with a planned duration between 91 and 180 minutes include a
+broad mix of major inpatient operations and complex elective cases.
+Within this category, the coefficient of variation of observed durations
+is moderate, ranging mostly between 0.27 and 0.41 across operating
+rooms, as shown in Table \ref{tab:cv_room_91_180}. The lowest CV values
+are observed in LO04 (0.2768) and LO03 (0.2909), indicating a tightly
+clustered distribution of operative times. Slightly higher values appear
+in LO05 (0.3322) and LO02 (0.3759), while LO01 shows the highest
+proportional variability in this group with a CV of 0.4078. These
+differences remain limited and suggest proportionally consistent
+execution times despite the broader absolute duration range associated
+with longer procedures.
+
+The coefficient of variation of planning deviation shows a similarly
+narrow dispersion. Most rooms fall between 0.76 and 1.01, with the
+lowest values seen in LO02 (0.7677) and LO04 (0.8273). LO05 (0.8459) and
+LO03 (0.8973) occupy the mid-range, while LO01 shows the largest
+relative dispersion in planning deviation (1.005). Despite these
+differences, the overall spread remains constrained, indicating stable
+planning accuracy across rooms even as case mix becomes more
+heterogeneous.
+
+Across operating rooms, both indicators show restrained variability,
+implying that once surgeries reach this duration range, timing
+performance becomes comparatively stable. In contrast to shorter
+procedures, proportional variation in duration and planning deviation
+becomes smaller relative to total operative time. These mid- to
+long-duration operations therefore represent one of the most consistent
+segments of the surgical program in terms of timing reliability.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0805}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0805}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1839}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1609}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1609}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1264}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1034}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1034}}@{}}
+\caption{Coefficient of variation per operating room for surgeries
+planned 91--180 minutes (only rooms with \textgreater10 surgeries shown)
+\label{tab:cv_room_91_180}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO03 & 1251 & 108.9 & 31.68 & 0.2909 & 22.1 & 19.83 & 0.8973 \\
+LO05 & 573 & 109.1 & 36.23 & 0.3322 & 25.3 & 21.4 & 0.8459 \\
+LO04 & 482 & 105.4 & 29.17 & 0.2768 & 22.67 & 18.75 & 0.8273 \\
+LO01 & 326 & 114.5 & 46.68 & 0.4078 & 26.8 & 26.94 & 1.005 \\
+LO02 & 29 & 105.8 & 39.78 & 0.3759 & 34.79 & 26.71 & 0.7677 \\
+\end{longtable}
+
+\vspace{1em}
+
+\noindent\textbf{Surgeries planned over 180 minutes} \vspace{0.5em}
+
+Procedures with a planned duration exceeding three hours represent the
+most complex and resource intensive part of the surgical program. Within
+this group, the coefficient of variation of observed durations remains
+moderate, ranging from 0.67 to 0.80 across operating rooms, as shown in
+Table \ref{tab:cv_room_over180}. The lowest CV value appears in LO03
+(0.6698), while LO05 shows the highest proportional variability at
+0.7981. Interpretation remains cautious because both rooms have
+relatively small case counts, which can amplify variability in these
+proportional measures.
+
+The coefficient of variation of planning deviation is generally close to
+or above one. The rooms fall between 0.8391 and 1.027, with LO03 showing
+the lowest value (0.8391) and LO05 the highest (1.027). These
+differences reflect the wide absolute spread in deviations that
+naturally accompanies long and complex procedures rather than systematic
+inconsistencies in planning accuracy.
+
+Overall, surgeries longer than three hours display stable and
+proportionally uniform duration patterns across the operating complex.
+Observed durations show limited relative variability, and planning
+deviations exhibit consistent proportional spread. The higher
+coefficients observed in a few rooms likely result from the
+concentration of rare or high complexity procedures rather than
+persistent scheduling issues.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0824}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0588}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1882}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1647}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1647}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1294}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1059}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1059}}@{}}
+\caption{Coefficient of variation per operating room for surgeries
+planned \textgreater{} 180 minutes (only rooms with \textgreater10
+surgeries shown) \label{tab:cv_room_over180}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV duration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD dev
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+CV dev
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO05 & 13 & 112.3 & 89.64 & 0.7981 & 298.4 & 306.4 & 1.027 \\
+LO03 & 12 & 104.2 & 69.82 & 0.6698 & 365.6 & 306.7 & 0.8391 \\
+\end{longtable}
+
+\subsubsection{Relationship between variability and mean operative
+duration}\label{relationship-between-variability-and-mean-operative-duration}
+
+Examining how variability scales with operative duration provides
+insight into whether dispersion in surgical times increases
+proportionally with the length of a procedure. By analysing this
+relationship at the level of procedure types, it becomes possible to
+distinguish structural scaling effects from differences in planning
+performance. The following figures present three complementary
+perspectives: the standard deviation of operative duration, the
+coefficient of variation of observed duration, and the coefficient of
+variation of planning deviation. Together, they describe how both
+absolute and relative variability evolve as surgeries become longer or
+more complex.
+
+The first figure shows a strong positive linear relationship between
+mean operative time and its standard deviation, as illustrated in Figure
+\ref{fig:sd_mean_relation}. As the average duration increases, the
+absolute spread of recorded times expands almost proportionally. This
+scaling effect is expected, since longer procedures allow for greater
+absolute variation while maintaining a similar proportional spread. For
+instance, procedures with a mean duration near one hundred minutes
+typically show standard deviations around forty to fifty minutes, while
+operations exceeding three hundred minutes often vary by more than one
+hundred minutes. This pattern confirms that absolute variability grows
+with case length without implying greater relative unpredictability.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/sd mean relation-1} 
+
+}
+
+\caption{Standard deviation in operative time relative to mean duration \label{fig:sd_mean_relation}}\label{fig:sd mean relation}
+\end{figure}
+
+When variability is expressed relative to mean duration, a clear inverse
+pattern emerges, as illustrated in Figure \ref{fig:cv_mean_relation}.
+The coefficient of variation decreases gradually as procedures become
+longer, indicating that proportional dispersion diminishes with case
+length. Short procedures often show CV values above 0.4, while most long
+operations fall below 0.3. This relationship reflects a simple scaling
+property, where longer procedures display greater absolute variability
+but proportionally more stability compared with their expected duration.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/cv mean relation-1} 
+
+}
+
+\caption{Coefficient of variation (operative duration) relative to mean duration \label{fig:cv_mean_relation}}\label{fig:cv mean relation}
+\end{figure}
+
+A similar downward trend is visible when plotting the coefficient of
+variation of planning deviation against mean duration, as shown in
+Figure \ref{fig:cv_planning_relation}. For shorter procedures, the
+relative spread in planning deviations is wide, with CV values sometimes
+exceeding 3.0 to 5.0. These high coefficients occur because small
+absolute deviations represent large proportional differences when the
+planned duration is short. As procedure length increases, this
+proportional effect diminishes, and the CV of planning deviation
+stabilizes around 1.0 or lower. The negative slope therefore reflects
+the same scaling principle observed for operative duration, rather than
+a systematic improvement in planning accuracy.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/cv planning relation-1} 
+
+}
+
+\caption{Coefficient of variation (planning deviation) relative to mean duration \label{fig:cv_planning_relation}}\label{fig:cv planning relation}
+\end{figure}
+
+Taken together, the three figures show that while absolute variability
+in surgical time increases with case length, relative variability tends
+to decrease. This pattern indicates that proportional uncertainty is
+greatest for short procedures, where small timing differences represent
+a large share of the total duration, and least for long surgeries, where
+absolute deviations are diluted across extended operating periods.
+
+\subsection{How large are start-time delays, and when do they
+happen?}\label{how-large-are-start-time-delays-and-when-do-they-happen}
+
+Start time deviations show a wide spread, with late starts occurring
+slightly more often than early ones, as summarised in Table
+\ref{tab:start_diff}. About 56.8 percent of all surgeries begin later
+than scheduled, with an average delay of 32.2 minutes and a median of 21
+minutes. Early starts occur in 43.2 percent of cases, with an average
+lead of 33.5 minutes and a median of 20 minutes. The dispersion is
+considerable: standard deviations reach 38.8 minutes for late starts and
+47.3 minutes for early starts, illustrating substantial variability in
+when cases begin. A few extreme outliers exceed 1,100 minutes in the
+late direction, highlighting the presence of rare but very large
+deviations.
+
+These results confirm that punctuality at the start of the surgical
+schedule remains a recurrent operational challenge. Even moderate delays
+early in the day can cascade into later sessions, reducing scheduling
+flexibility and overall room efficiency.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.1628}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0814}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.1047}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0814}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0698}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0698}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0814}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0698}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0698}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0930}}
+  >{\centering\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.1163}}@{}}
+\caption{Difference between actual and planned start time (absolute
+minutes), separated by direction \label{tab:start_diff}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+direction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IQR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99.9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percent
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+direction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IQR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99.9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percent
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Late start & 32.2 & 21 & 38.8 & 32 & 1 & 1119 & 99 & 186 & 338.2 &
+56.8\% \\
+Early start & 33.5 & 20 & 47.3 & 34 & 0 & 822 & 113 & 225 & 462 &
+43.2\% \\
+\end{longtable}
+
+The distribution of start-time differences is centered around zero, as
+shown in Figure \ref{fig:start_diff_hist}, with a clear peak at small
+deviations, indicating that most surgeries start close to their planned
+time. However, the shape of the histogram is slightly skewed toward
+positive values, showing that late starts are more frequent than early
+ones. Most cases begin within approximately half an hour of schedule,
+but the gradual widening of the distribution toward the right reveals
+that a smaller subset experiences significant delays.
+
+The presence of a long right-hand tail confirms that occasionally,
+extreme delays still occur. These outliers have a limited frequency but
+can affect overall operating room throughput and schedule stability. The
+symmetrical appearance around the center, combined with a mild skew,
+suggests that deviations are not random but follow a consistent pattern
+of minor delay accumulation across the day.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/start diff hist-1} 
+
+}
+
+\caption{Start time deviations (grouped per 10 minutes) \label{fig:start_diff_hist}}\label{fig:start diff hist}
+\end{figure}
+
+Average start-time delays show moderate variation across weekdays, as
+illustrated in Figure \ref{fig:start_delay_weekday}, ranging from minus
+1.8 to 7.4 minutes during regular working days. Monday and Tuesday have
+mean delays of 7.4 and 6.1 minutes, while Wednesday reaches 6.8 minutes.
+Thursday and Friday follow with minus 0.7 and minus 1.8 minutes,
+respectively. These differences indicate that start-time punctuality is
+relatively consistent throughout the first three days of the week, with
+fluctuations on Thursday and Friday that are likely to reflect
+structural scheduling issues.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/start delay weekday-1} 
+
+}
+
+\caption{Mean start delay by weekday \label{fig:start_delay_weekday}}\label{fig:start delay weekday}
+\end{figure}
+
+Late starts occur more frequently than early starts on every day of the
+week, as summarized in Table \ref{tab:start_diff_weekday}. Across
+regular weekdays, about three fifths of surgeries begin later than
+planned, with mean delays between 28.6 and 35.4 minutes and median
+delays around 18 to 23 minutes. Early starts are less common,
+representing roughly 37.6 to 46.7\% of all cases, and typically begin
+between 32.1 and 40 minutes before the scheduled time. These small
+variations between weekdays indicate that overall punctuality during the
+workweek is relatively stable, with no clear day standing out as an
+outlier.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0917}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1651}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1193}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1376}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1743}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1101}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1284}}@{}}
+\caption{Start-time deviation patterns per weekday (minutes).
+\label{tab:start_diff_weekday}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Weekday
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Late starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Early starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean lead
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median lead
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Weekday
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Late starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Early starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean lead
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median lead
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Ma & 14710 & 59.7 & 32.8 & 21 & 37.9 & -32.1 & -19 \\
+Di & 14902 & 60.1 & 35.4 & 23 & 37.8 & -40 & -22 \\
+Wo & 13742 & 60 & 32.1 & 21 & 37.6 & -33.2 & -20 \\
+Do & 13233 & 51.7 & 28.6 & 18 & 45.9 & -33.8 & -22 \\
+Vr & 12808 & 51.2 & 30.7 & 20 & 46.7 & -37.6 & -23 \\
+\end{longtable}
+
+Start-time reliability varies widely between operating rooms, as shown
+in Table \ref{tab:start_diff_or}. The proportion of late starts ranges
+from 47.5\% to 66\%, indicating that punctuality is evenly distributed
+across the OR complex. Some rooms, such as LO04 and LP01, stand out with
+high shares of late starts, 66\% and 63.5\%, respectively. In LO03, the
+mean delay among late cases reaches 50.5 minutes, driven by a small
+number of outliers that strongly influence the average.
+
+At the opposite end, rooms such as LO01 and LP02 display a balanced
+distribution, where early starts occur roughly as often as late ones.
+These contrasts suggest that certain rooms operate under more stable and
+predictable timing conditions, while others experience recurring or
+structural delays. Overall, start-time deviations appear concentrated in
+a limited set of operating rooms, where occasional long postponements
+account for much of the overall variability in punctuality.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1000}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0727}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1636}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1182}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1364}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1727}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1091}}
+  >{\centering\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1273}}@{}}
+\caption{Start-time deviation patterns per operating room (minutes).
+\label{tab:start_diff_or}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Late starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Early starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean lead
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median lead
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Late starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median delay
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Early starts (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean lead
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median lead
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO04 & 6009 & 66 & 43.2 & 26 & 32.1 & -52.2 & -30 \\
+LP01 & 20189 & 63.5 & 24.9 & 20 & 34.8 & -24.7 & -16 \\
+LO03 & 4196 & 59.6 & 50.5 & 31 & 38 & -53.2 & -31 \\
+LO02 & 9974 & 57.1 & 44.7 & 29 & 38.4 & -56.3 & -33 \\
+LO05 & 5206 & 56.9 & 41.3 & 23 & 40.7 & -45.3 & -26 \\
+LO01 & 5202 & 49.9 & 33.4 & 21 & 47.6 & -35.3 & -20 \\
+LP02 & 18619 & 47.5 & 21.1 & 16 & 50.9 & -26.2 & -20 \\
+\end{longtable}
+
+\subsection{Which procedures deviate most from
+plan?}\label{which-procedures-deviate-most-from-plan}
+
+Procedures differ noticeably in how accurately their duration is
+predicted, as shown in Table \ref{tab:duration_dev_proc}. The twenty
+procedure types with the largest absolute deviations display mean
+differences ranging from about 21 to nearly 39 minutes, indicating that
+for several procedure types the planned duration can diverge
+meaningfully from actual performance.
+
+The largest deviations appear in VARICES VSM and LASER -- MK, where mean
+absolute differences exceed 38 minutes. These procedures stand out as
+the most difficult to estimate accurately, likely because their
+execution times vary with patient-specific factors or case complexity.
+Several other procedures with moderate case volumes, such as SCHOUDEER,
+BREDE EXCISIE MALIGNE, and EXPLORATIEVE LAPARASCOPIE, show deviations in
+the range of 26 to 29 minutes, reflecting a mix of predictable structure
+with occasional outliers.
+
+More frequently performed procedures, including VARICES, VARICES LASER,
+and PEES HAND (VINGER), show smaller deviations around 21 minutes,
+suggesting that repetition and routine support more accurate planning.
+The pattern therefore aligns with an experience-based effect: procedures
+performed often tend to have tighter planning accuracy, while less
+frequent or clinically variable procedures show greater dispersion.
+
+Across the listed procedures, the share of longer-than-planned cases
+exceeds the share of shorter ones for most items. This indicates a
+systematic tendency toward underestimation, although the magnitude
+varies between procedure types.
+
+Overall, these results show that planning accuracy at Campus Lanaken
+depends strongly on procedure type. Common, routine interventions tend
+to follow their planned durations closely, while specialized or more
+variable procedures exhibit wider deviations even when the average case
+length is not particularly long.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2619}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0556}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1667}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1032}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1508}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1508}}@{}}
+\caption{Top 20 procedures by average absolute duration deviation
+(Lanaken). \label{tab:duration_dev_proc}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ProcedureName
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean abs dev (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Longer (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean + dev (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Shorter (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean - dev (min)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ProcedureName
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean abs dev (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Longer (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean + dev (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Shorter (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean - dev (min)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+VARICES VSM LASER - MK & 49 & 38.6 & 73.5 & 34.4 & 26.5 & -50.3 \\
+SCHOUDER ROTATOR CUFF ARTROSCOPISCH & 165 & 28.7 & 46.1 & 32.8 & 52.7 &
+-25.9 \\
+CHIR.IMPLNT.ACT.IMPL & 66 & 28 & 33.3 & 12.2 & 66.7 & -36 \\
+EXPLORATIEVE LAPARASCOPIE & 47 & 26.8 & 12.8 & 11.3 & 87.2 & -29 \\
+BREDE EXCISIE MALIGNE MELANOOM MET SENT KLIERBIOPS & 44 & 26.5 & 63.6 &
+34.8 & 34.1 & -12.7 \\
+CLAVICULA FRAKTUUR AO KLEIN FRAGMENT & 47 & 26.4 & 53.2 & 27.7 & 44.7 &
+-26.2 \\
+Ganglion van Gasser : radiofrequente R & 88 & 26.1 & 1.1 & 4 & 98.9 &
+-26.3 \\
+HEELKUNDIGE CORRECTIE VAN GYNAECOMASTIE & 58 & 25.8 & 62.1 & 29.5 & 36.2
+& -20.7 \\
+REDUCERENDE MAMMAPLASTIEK & 73 & 24.6 & 46.6 & 29 & 50.7 & -21.8 \\
+LITTEKENCORRECTIE & 65 & 24.1 & 53.8 & 31.2 & 41.5 & -17.5 \\
+ABDOMENPLASTIE & 44 & 23.4 & 59.1 & 25.7 & 38.6 & -21.2 \\
+HAND DUPYTREN & 75 & 22.9 & 33.3 & 16.4 & 64 & -27.2 \\
+DESCEMET'S STRIPPING AUTOMATED ENDOTHELIAL KERTOPLASTY -
+ENDOTHEELTRANSPLANTATIE & 34 & 22.3 & 47.1 & 27.8 & 50 & -18.4 \\
+epidurale stimulatie:diagnostisch lumbaal enkele elektrode & 41 & 22.1 &
+63.4 & 26.1 & 36.6 & -15.2 \\
+Ganglion sfenopalatinum : Radiofrequente R & 78 & 22 & 0 & NA & 98.7 &
+-22.3 \\
+PEES HAND (VINGER) VOET HECHTING & 46 & 21.7 & 26.1 & 26.6 & 71.7 &
+-20.5 \\
+VARICES & 689 & 21.3 & 52.5 & 25.2 & 46 & -17.5 \\
+VARICES LASER & 1351 & 21.3 & 49.3 & 24.8 & 49.4 & -18.4 \\
+EXC MALIGNE HUIDLETSEL MT RECONST HUIDGR HFD/GEZIC & 45 & 21.2 & 48.9 &
+23.8 & 51.1 & -18.7 \\
+epidurale stimulatie: batterij implantatie & 54 & 21.1 & 64.8 & 25 &
+33.3 & -14.9 \\
+\end{longtable}
+
+The scatter plot in Figure \ref{fig:volume_deviation} shows an inverse
+relationship between procedure volume and average deviation. Procedures
+that occur more frequently tend to have lower mean absolute deviations,
+while rare procedures show much greater variability in duration. This
+pattern is visible in the downward trend of the points as procedure
+volume increases.
+
+High-volume procedures, which appear toward the right of the chart,
+cluster at lower deviation values, indicating more stable and
+predictable planning performance. In contrast, low-volume procedures on
+the left display a much wider range of deviations that can exceed 25
+minutes. The relationship suggests that familiarity and repetition
+contribute to more accurate duration estimates, whereas infrequent
+procedures are harder to predict due to limited historical data.
+Overall, the figure highlights that case volume is an important factor
+in explaining the variability of planning accuracy across procedure
+types.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/volume_deviation-1} 
+
+}
+
+\caption{Relationship between procedure volume and mean deviation \label{fig:volume_deviation}}\label{fig:volume_deviation}
+\end{figure}
+
+The distribution of duration deviations across surgeons reveals notable
+variation in planning accuracy, as shown in Table
+\ref{tab:surgeon_deviation}. Among those with at least fifty recorded
+procedures, the average absolute deviation ranges from 15.7 to 25
+minutes, while the average relative deviation spans 20.2\% to 28.5\%. A
+few surgeons show comparatively lower mean deviations below 19 minutes,
+whereas most fall between 19 and 24 minutes, indicating that planning
+performance differs across individuals but remains within a moderate
+range for the majority.
+
+No clear relationship appears between the number of recorded cases and
+the size of the deviation, suggesting that factors beyond case volume
+influence the observed variation. Overall, the results show that
+duration deviations are not uniformly distributed across surgeons,
+emphasizing that planning accuracy can vary meaningfully even within a
+shared operational environment.
+
+\begin{longtable}[]{@{}lccc@{}}
+\caption{Top 15 surgeons by average absolute and relative duration
+deviation (pseudonymized). \label{tab:surgeon_deviation}}\tabularnewline
+\toprule\noalign{}
+Surgeon & n & Mean absolute dev (min) & Mean relative dev (\%) \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Surgeon & n & Mean absolute dev (min) & Mean relative dev (\%) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Surgeon 1 & 353 & 25.0 & 25.9 \\
+Surgeon 2 & 223 & 24.5 & 25.1 \\
+Surgeon 3 & 597 & 24.2 & 25.4 \\
+Surgeon 4 & 728 & 23.9 & 24.5 \\
+Surgeon 5 & 151 & 23.3 & 26.8 \\
+Surgeon 6 & 361 & 21.8 & 28.5 \\
+Surgeon 7 & 73 & 21.6 & 28.0 \\
+Surgeon 8 & 202 & 20.5 & 21.8 \\
+Surgeon 9 & 603 & 19.0 & 23.2 \\
+Surgeon 10 & 128 & 18.7 & 22.9 \\
+Surgeon 11 & 270 & 18.6 & 20.9 \\
+Surgeon 12 & 376 & 18.4 & 20.2 \\
+Surgeon 13 & 361 & 16.5 & 24.2 \\
+Surgeon 14 & 132 & 16.4 & 21.6 \\
+Surgeon 15 & 297 & 15.7 & 25.3 \\
+\end{longtable}
+
+\newpage
+
+\section{Do surgeries stay within regular working
+hours?}\label{do-surgeries-stay-within-regular-working-hours}
+
+\subsection{How often do cases extend beyond their assigned time
+window?}\label{how-often-do-cases-extend-beyond-their-assigned-time-window}
+
+Only a very small share of surgeries at Lanaken extends beyond the
+scheduled shift end, as shown in Table \ref{tab:overtime_summary}. Out
+of nearly seventy thousand procedures, 0.5 percent continue into
+after-hours, indicating that overtime is an exceptional rather than
+routine event in this campus. When it does occur, overtime remains
+limited: the mean extension is 15.7 minutes, and the median is 10
+minutes, showing that most overruns are brief and operationally
+contained. A smaller subset of cases lasts longer, with the 95th
+percentile reaching 48.5 minutes, illustrating that occasional outliers
+contribute disproportionately to the total overtime minutes.
+
+These results highlight a scheduling system that operates with very high
+temporal adherence. The extremely low percentage of after-hours cases
+suggests that the daily program rarely spills over into the next shift,
+and when it does, the additional time required is usually modest. The
+distribution nevertheless shows that a few atypical procedures or
+unexpected delays can still push individual cases into the after-hours
+window, but such events remain rare within the overall workflow at
+Lanaken.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2708}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1354}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1875}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1562}}@{}}
+\caption{Overall share and duration of after-hours surgeries (Lanaken).
+\label{tab:overtime_summary}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Surgeries with overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95 Overtime
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Surgeries with overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95 Overtime
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+69395 & 371 & 0.5 & 15.7 & 10 & 48.5 \\
+\end{longtable}
+
+The distribution of overtime duration, shown in Figure
+\ref{fig:overtime_dist}, is strongly right-skewed. Most extended cases
+end within the first 30 minutes beyond the scheduled shift, and the
+highest frequency occurs between 0 and 20 minutes of overtime. Beyond
+that, the number of cases declines steadily, with only a small fraction
+exceeding 60 minutes. A few extreme cases surpass 100 minutes, but these
+are rare.
+
+This pattern confirms that while overtime is a recurring operational
+feature, it is typically limited in duration. The long right tail
+illustrates that a small group of prolonged procedures accounts for a
+disproportionate share of total overtime minutes. These outliers can
+heavily affect staff workload and room turnover late in the day, but
+they do not represent the typical case. Overall, overtime at Lanaken
+mainly consists of brief extensions of planned activity rather than
+frequent, sustained night work.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overtime_dist-1} 
+
+}
+
+\caption{Distribution of overtime duration for after-hours surgeries \label{fig:overtime_dist}}\label{fig:overtime_dist}
+\end{figure}
+
+The share of surgeries extending beyond scheduled shift hours remains
+steady throughout the regular workweek, as shown in Figure
+\ref{fig:afterhours_weekday}, fluctuating between 0.3 and 0.8 percent
+from Monday to Friday. This indicates that weekday operations are
+largely contained within their planned time frames, with only a small
+proportion of cases requiring additional time beyond shift boundaries.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/afterhours_weekday-1} 
+
+}
+
+\caption{Share of after-hours surgeries by weekday \label{fig:afterhours_weekday}}\label{fig:afterhours_weekday}
+\end{figure}
+
+The proportion of surgeries extending beyond scheduled shift hours
+remains extremely low and shows no structural change over time, as
+illustrated in Figure \ref{fig:afterhours_trend}. In 2022 and 2023,
+about 0.5 percent of surgeries at Lanaken exceeded their scheduled
+shift. This share increases slightly to 0.6 percent in 2024 before
+returning to 0.5 percent in the partial dataset for 2025.
+
+These values represent the percentage of all procedures performed in
+each year that continued past the official end of their assigned shift.
+The near-identical year-to-year percentages demonstrate that after-hours
+activity at Lanaken is highly stable, with only minimal variation across
+the observed period.
+
+Because overtime is so rare, these small fluctuations are unlikely to
+signal operational changes. Instead, they probably reflect routine
+variability in low-frequency events rather than shifts in throughput,
+planning accuracy, or case mix. Overall, after-hours work at Lanaken is
+a consistently marginal component of surgical activity, indicating very
+strong adherence to scheduled shift boundaries and efficient daily
+workflow management.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/afterhours_trend-1} 
+
+}
+
+\caption{Evolution of after-hours activity over time \label{fig:afterhours_trend}}\label{fig:afterhours_trend}
+\end{figure}
+
+The proportion of surgeries extending beyond scheduled shift hours
+differs markedly across operating rooms, as summarized in Table
+\ref{tab:overtime_or}. Most rooms show overtime rates between 0.6 and
+1.2 percent, while one stands out with slightly higher shares. LO03
+records the highest proportion of overtime cases at 1.7 percent, with a
+mean duration of 18.9 minutes and a 95th percentile of 51.8 minutes,
+indicating frequent and occasionally prolonged extensions. Such high
+figures likely reflect the type of procedures performed in this room,
+which are often complex and less predictable in length.
+
+Several other rooms, including LO05, LO01, and LO04, show overtime in
+roughly 1.1 to 1.2 percent of cases, with mean durations between 15.2
+and 18 minutes. These values suggest that while most surgeries in these
+rooms finish within their allocated shift, a small share still extends
+well into the next operational block.
+
+Overall, the data indicate that overtime at Lanaken is concentrated in a
+limited number of high-volume or complex operating rooms. While many
+rooms complete their scheduled activity within the planned shift most of
+the time, a small subset still experiences overtime in 0.1 to 1.7
+percent of surgeries, showing that after-shift extensions remain a
+recurring part of daily operations rather than isolated exceptions.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1294}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0941}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2941}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1882}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2118}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0824}}@{}}
+\caption{Operating rooms by after-hours activity (Lanaken).
+\label{tab:overtime_or}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Cases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage of overtime surgeries
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Cases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage of overtime surgeries
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO03 & 4196 & 1.7 & 18.9 & 14 & 51.8 \\
+LO05 & 5206 & 1.2 & 18 & 15 & 46 \\
+LO01 & 5202 & 1.1 & 20.7 & 15 & 63.8 \\
+LO04 & 6009 & 1.1 & 15.2 & 9 & 37.6 \\
+LO02 & 9974 & 0.6 & 12 & 9 & 38.7 \\
+LP01 & 20189 & 0.1 & 9.1 & 8 & 19.8 \\
+LP02 & 18619 & 0.1 & 7.7 & 5 & 19.6 \\
+\end{longtable}
+
+\subsection{When does overtime occur, and how heavy is
+it?}\label{when-does-overtime-occur-and-how-heavy-is-it}
+
+The distribution of overtime surgeries, shown in Figure
+\ref{fig:overtime_timing}, displays a clear concentration of cases
+ending shortly after 16:30. This peak primarily represents procedures
+that started during the regular day shift and finished later than
+planned. The number of surgeries declines rapidly as the evening
+progresses, indicating that most cases extending beyond their scheduled
+shift end within the first one to two hours afterward.
+
+After 22:00, only a smaller number of surgeries continue to appear,
+suggesting that operations ending during the late evening or night are
+relatively infrequent. Very few procedures extend past midnight, and
+only isolated cases finish after 07:00.
+
+Overall, the pattern demonstrates that overtime activity is dominated by
+operations that conclude soon after the end of the regular working day,
+while surgeries finishing later in the night represent a much smaller
+portion of total activity.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overtime_timing-1} 
+
+}
+
+\caption{Timing of overtime surgeries \label{fig:overtime_timing}}\label{fig:overtime_timing}
+\end{figure}
+
+Average overtime durations are highly consistent across weekdays, as
+illustrated in Figure \ref{fig:overtime_weekday}, with means ranging
+from 13.1 to 18.9 minutes from Monday to Friday. The median per weekday
+is clearly lower, between 7.5 and 12 minutes, which indicates a
+right-skewed distribution where a small number of long cases raises the
+mean.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overtime_weekday-1} 
+
+}
+
+\caption{Average and median overtime duration by weekday \label{fig:overtime_weekday}}\label{fig:overtime_weekday}
+\end{figure}
+
+Average and median overtime durations per surgery show a largely stable
+pattern over the observed years, as illustrated in Figure
+\ref{fig:overtime_year}. The mean overtime remains close to 14--15
+minutes, ranging from 14.1 minutes in 2022 to a temporary rise of 19.2
+minutes in 2024, before returning to 14.4 minutes in 2025. The median
+follows a similar structure at lower levels, fluctuating between 9 and
+13.5 minutes.
+
+The consistent gap between the mean and median indicates a right-skewed
+distribution, where most overtime periods are short but a small number
+of longer extensions pull the average upward. In practical terms, the
+typical overtime duration (median) lies around 10 minutes, while the
+mean reflects the influence of occasional longer cases.
+
+The visible increase in 2024 represents a short-term deviation rather
+than a structural shift. Across the full period, the overall level of
+overtime duration remains remarkably stable, with only modest
+year-to-year variation. As with other campuses, the persistence of a
+mean exceeding the median underscores that a small minority of prolonged
+cases accounts for a disproportionate share of total overtime minutes,
+even in an environment where overtime is rare.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overtime_year-1} 
+
+}
+
+\caption{Average and median overtime per surgery by year \label{fig:overtime_year}}\label{fig:overtime_year}
+\end{figure}
+
+The distribution of overtime differs noticeably between shift types, as
+shown in Figure \ref{fig:overtime_shift}. The day shift (08:00--16:30)
+displays a wide spread, with most cases extending only slightly beyond
+the scheduled end but a small number continuing for several hours. This
+pattern explains why the day shift accounts for most overtime minutes
+overall.
+
+Overall, the distributions illustrate that overtime is most variable
+during the day, when activity levels are highest, and more contained
+during the later shifts. The pronounced right tails in each group
+confirm that a limited number of long-running cases account for a
+substantial share of total overtime minutes.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overtime_shift-1} 
+
+}
+
+\caption{Relative overtime per shift type \label{fig:overtime_shift}}\label{fig:overtime_shift}
+\end{figure}
+
+\subsection{How does Lanaken compare with Genk, Cathlab, and
+Maaseik?}\label{how-does-lanaken-compare-with-genk-cathlab-and-maaseik}
+
+The comparison between campuses reveals pronounced differences in
+after-hours surgical activity. As shown in Table
+\ref{tab:afterhours_campus}, Genk performs the largest share of overtime
+surgeries, with 8.4 percent of all cases extending beyond 16:30. Cathlab
+follows with 5.8 percent, while Maaseik records a more moderate 2.8
+percent. Lanaken, by contrast, shows minimal after-hours activity at 0.5
+percent, reflecting its lower surgical volume and the limited number of
+complex or time-intensive cases performed there.
+
+Overtime duration metrics further underline these contrasts. Genk shows
+the highest average and upper-percentile values, with an average
+overtime of 59 minutes and a ninety-fifth percentile of 193.8 minutes,
+indicating that prolonged extensions are not uncommon at the main
+campus. Maaseik and Cathlab display intermediate levels, while Lanaken
+again shows the shortest durations, with an average overtime of 15.7
+minutes and a ninety-fifth percentile of 48.5 minutes.
+
+Taken together, these figures show that after-hours surgical activity is
+heavily concentrated at the larger campuses, particularly Genk, while
+Lanaken contributes only marginally to extended operating room use
+within the ZOL network.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0820}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0656}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1803}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2459}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1557}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1475}}
+  >{\centering\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1230}}@{}}
+\caption{Comparison of after-hours activity between campuses.
+\label{tab:afterhours_campus}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Campus
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+AfterHour surgeries
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Share of overtime surgeries
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Average Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95 Overtime
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Campus
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+AfterHour surgeries
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Share of overtime surgeries
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Average Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median Overtime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95 Overtime
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Genk & 96044 & 8024 & 8.4 & 59 & 38 & 193.8 \\
+Cathlab & 9282 & 539 & 5.8 & 41.8 & 32 & 108.3 \\
+Maaseik & 53902 & 1494 & 2.8 & 42 & 29 & 129 \\
+Lanaken & 69395 & 371 & 0.5 & 15.7 & 10 & 48.5 \\
+\end{longtable}
+
+\newpage
+
+\section{Are surgeries performed in their assigned operating
+rooms?}\label{are-surgeries-performed-in-their-assigned-operating-rooms}
+
+\subsection{How frequently are surgeries relocated to a different
+room?}\label{how-frequently-are-surgeries-relocated-to-a-different-room}
+
+Room reallocations are relatively rare at Lanaken, as shown in Table
+\ref{tab:room_swap}. Out of 69395 recorded surgeries, around 7.5 percent
+were performed in a different operating room than originally planned.
+This low percentage indicates that room assignments are followed very
+consistently, with only a small number of last-minute adjustments
+required during daily operations.
+
+Although infrequent, these relocations are operationally important
+because they typically involve reactive scheduling decisions and
+resource coordination. Even minor disruptions can have downstream
+effects on room preparation, staff planning, and turnover time. Tracking
+their frequency provides useful insight into the stability of the
+planning process and helps identify whether reassignments occur
+sporadically or tend to cluster in specific rooms or days.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2917}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1944}}@{}}
+\caption{Overall frequency of surgeries relocated to a different room
+(Lanaken). \label{tab:room_swap}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Swapped (absolute)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Swapped (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Swapped (absolute)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Swapped (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+69395 & 5192 & 7.5 \\
+\end{longtable}
+
+The share of relocated surgeries remains low across all weekdays, as
+shown in Figure \ref{fig:room_swap_weekday}, generally fluctuating
+between 5.9 and 10.3 percent. This stability indicates that the room
+assignment process is robust during regular working days, with only
+minimal need for unplanned reallocations. The lowest rate is observed on
+Wednesday, while Monday show higher values, of 10.3 percent.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/room_swap_weekday-1} 
+
+}
+
+\caption{Share of relocated surgeries by weekday \label{fig:room_swap_weekday}}\label{fig:room_swap_weekday}
+\end{figure}
+
+The monthly percentage of surgeries that are relocated to a different
+operating room fluctuates between 5 and 15.5 percent, as shown in Figure
+\ref{fig:room_swap_month}. Despite short-term variation, no clear upward
+or downward trend is visible over the observed period. Occasional peaks
+above 10 percent indicate that some months experience more frequent
+reallocations, but these appear as structural changes rather than
+isolated events.
+
+The relatively low and stable baseline confirms that room swaps are
+infrequent and mainly driven by temporary scheduling pressures or
+logistical constraints. The absence of a consistent trend over time
+suggests that the overall stability of room assignments at Lanaken has
+remained steady throughout the study period.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/room_swap_month-1} 
+
+}
+
+\caption{Monthly percentage of surgeries with room swap \label{fig:room_swap_month}}\label{fig:room_swap_month}
+\end{figure}
+
+\subsection{Are specific rooms affected more than
+others?}\label{are-specific-rooms-affected-more-than-others}
+
+The analysis shows that only a limited number of operating rooms are
+regularly involved in relocations, as summarized in Table
+\ref{tab:room_swap_or}. A small subset of rooms accounts for nearly all
+movements, while most others experience swaps only sporadically. The
+most prominent interaction occurs between LP02 and LP01, which exchange
+cases extensively: every surgery moved out of LP02 is reassigned to
+LP01, and vice versa. This symmetry suggests that the two rooms function
+as a tightly coupled pair with interchangeable capacity, absorbing
+short-term adjustments when local scheduling pressure arises.
+
+Within the main operating block, LO03 and LO04 display a similar
+pattern, frequently receiving each other's relocated cases. LO03 also
+sends a smaller share of cases to LO01 and LO02, indicating broader
+compatibility with several rooms. LO05 participates in relocations as
+well, though at a lower frequency, generally receiving overflow from
+LO03 and LO04 rather than acting as a major source of swaps.
+
+These consistent patterns show that reallocations follow clear
+operational structures rather than occurring randomly. Rooms with
+similar procedural profiles or shared staffing arrangements naturally
+form relocation clusters. Movements therefore reflect adaptive use of
+available capacity to maintain workflow continuity, rather than
+instability in the planning process.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1165}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1262}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1942}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1942}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1845}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1845}}@{}}
+\caption{Top 10 planned ORs with the highest number of room swaps,
+showing the five most frequent new OR destinations (Lanaken).
+\label{tab:room_swap_or}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+PlannedOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+TotalMoved
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top4
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+PlannedOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+TotalMoved
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Top4
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LP02 & 2389 & LP01 (2389, 100\%) & NA & NA & NA \\
+LP01 & 1140 & LP02 (1140, 100\%) & NA & NA & NA \\
+LO03 & 588 & LO04 (248, 42.2\%) & LO05 (238, 40.5\%) & LO01 (93, 15.8\%)
+& LO02 (9, 1.5\%) \\
+LO05 & 431 & LO03 (242, 56.1\%) & LO04 (121, 28.1\%) & LO01 (65, 15.1\%)
+& LO02 (3, 0.7\%) \\
+LO04 & 358 & LO03 (216, 60.3\%) & LO05 (96, 26.8\%) & LO02 (37, 10.3\%)
+& LO01 (9, 2.5\%) \\
+LO01 & 184 & LO03 (94, 51.1\%) & LO05 (70, 38\%) & LO04 (13, 7.1\%) &
+LO02 (7, 3.8\%) \\
+LO02 & 100 & LO04 (87, 87\%) & LO03 (9, 9\%) & LO01 (2, 2\%) & LO05 (2,
+2\%) \\
+LOR0 & 2 & LO01 (1, 50\%) & LO05 (1, 50\%) & NA & NA \\
+\end{longtable}
+
+A small number of operating rooms receive the majority of relocated
+surgeries, as shown in Table \ref{tab:room_swap_dest} and Figure
+\ref{fig:room_swap_dest}. LP01 and LP02 stand out clearly: LP01 alone
+accounts for 3.44 percent of all relocated cases, and LP02 adds another
+1.64 percent. These two rooms function as the primary destinations when
+schedule adjustments require shifting procedures, reflecting their
+flexible capacity and broad procedural compatibility.
+
+Several rooms in the main surgical block also appear regularly as
+secondary destinations. LO03, LO04, and LO05 together receive a
+nontrivial share of relocated cases, though far below the volumes seen
+in LP01 and LP02. At the lower end of the distribution, rooms such as
+LO01 and LO02 receive only a small number of relocated procedures.
+
+Both the table and figure reveal a highly concentrated pattern: a small
+subset of rooms absorbs most reallocations, while the remainder sees
+minimal or occasional inflow. This concentration suggests that
+relocation decisions are not random but guided by practical constraints
+such as equipment availability, staffing configuration, and the capacity
+of specific rooms to act as operational buffers.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1528}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2222}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1528}}@{}}
+\caption{Top 15 actual operating rooms most frequently used as
+destinations after relocation (Lanaken).
+\label{tab:room_swap_dest}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ReceivedCases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SharePct
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ReceivedCases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SharePct
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LP01 & 2389 & 3.44 \\
+LP02 & 1140 & 1.64 \\
+LO03 & 561 & 0.81 \\
+LO04 & 469 & 0.68 \\
+LO05 & 407 & 0.59 \\
+LO01 & 170 & 0.24 \\
+LO02 & 56 & 0.08 \\
+\end{longtable}
+
+Procedures with the highest likelihood of being relocated mainly consist
+of short or outpatient interventions, as shown in Table
+\ref{tab:room_swap_procedure}. The top of the list is dominated by
+minor, standardised procedures such as CARPAAL TUNNEL, Echo nervus
+cutaneus femoralis lateralis PRF, and Echo perifere zenuw PRF, which
+show relocation rates ranging from about 17 to 47 percent. These values
+are several times higher than the overall relocation rate at Lanaken of
+7.5 percent, indicating that a small subset of procedures accounts for a
+disproportionate share of all room swaps.
+
+These high-swap procedures share an important operational
+characteristic: they are short, predictable, and compatible with
+multiple procedure rooms. This makes them particularly suitable for
+reassignment when minor scheduling conflicts or capacity pressures
+arise. In contrast, longer or more specialised procedures rarely appear
+among relocated cases, which reflects their greater dependence on
+specific room configurations or equipment.
+
+Overall, the table shows that relocations at Lanaken are concentrated in
+a narrow group of routine, highly transferable procedures. This pattern
+suggests that room swaps do not reflect instability in planning but
+rather the deliberate use of flexible procedure types to absorb
+day-to-day scheduling adjustments.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4583}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.0972}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1389}}@{}}
+\caption{Top 15 procedure types with the highest share of relocated
+surgeries (Lanaken). \label{tab:room_swap_procedure}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ProcedureName
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SwapPct
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ProcedureName
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SwapPct
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+CARPAAL TUNNEL & 1211 & 47.07 \\
+Echo nervus cutaneus femoralis lateralis PRF & 52 & 42.31 \\
+Echo perifere zenuw PRF & 73 & 38.36 \\
+Echo bursa trochanterica & 170 & 29.41 \\
+VARICES & 689 & 25.98 \\
+Endscopische carpaal tunnel & 124 & 25.81 \\
+NL RF facet lumbaal & 39 & 23.08 \\
+Echo nervus genicularis RF (WOMAC) & 140 & 22.86 \\
+VARICES LASER & 1351 & 22.65 \\
+ZENUW CARPAAL TUNNEL & 495 & 21.21 \\
+Ganglion sfenopalatinum : Radiofrequente R & 78 & 20.51 \\
+HAND CYSTE & 62 & 19.35 \\
+Echo buikwand/ACNES PRF & 32 & 18.75 \\
+VINGER TRIGGERVINGER & 228 & 17.62 \\
+Echo nervus ilio-inguinalis PRF & 35 & 17.14 \\
+\end{longtable}
+
+\subsection{What is the operational impact of these
+reallocations?}\label{what-is-the-operational-impact-of-these-reallocations}
+
+Relocated surgeries differ from non-relocated ones in several aspects of
+timing and scheduling performance, as summarized in Table
+\ref{tab:room_swap_impact}. For start times, relocated cases show a
+higher average delay among late starts (39.4 minutes versus 31.7
+minutes) and a larger lead among early starts (49.1 minutes versus 33.8
+minutes). This suggests that these surgeries are more often scheduled
+under atypical or time-constrained circumstances, which can result in
+greater variability in when they actually begin. The median values,
+however, remain closer together (26 versus 20 minutes for late starts,
+36 versus 20 for early starts), indicating that while some relocated
+surgeries start much later or earlier than expected, most are only
+moderately affected.
+
+For procedure duration, both relocated and non-relocated surgeries show
+comparable deviations from their planned times. Average differences are
+around 9 to 10 minutes for longer cases and 8 to 9 minutes for shorter
+ones, suggesting that relocation itself does not substantially influence
+how long a surgery takes once it begins.
+
+Overtime remains limited in both groups, with median values at zero.
+Mean overtime is identical between relocated and non-relocated cases
+(0.1), which indicates that relocations rarely lead to extended working
+hours.
+
+Overall, the results indicate that relocations are associated with
+greater variability in start timing but not with systematically longer
+or shorter surgeries. Their operational impact therefore appears to be
+primarily related to scheduling and coordination rather than to the
+procedures themselves.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2222}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2639}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.0972}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1250}}@{}}
+\caption{Comparison of start and duration deviations (early/late,
+shorter/longer) and overtime between relocated and non-relocated
+surgeries (Lanaken). \label{tab:room_swap_impact}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Metric
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Metric
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Relocated & Late start & 39.4 & 26 \\
+Not relocated & Late start & 31.7 & 21 \\
+& ---- & & \\
+Relocated & Early start & 49.1 & 36 \\
+Not relocated & Early start & 33.8 & 20 \\
+& ---- & & \\
+Relocated & Longer duration & 9.9 & 6 \\
+Not relocated & Longer duration & 8.9 & 5 \\
+& ---- & & \\
+Relocated & Shorter duration & 8.7 & 5 \\
+Not relocated & Shorter duration & 7.8 & 5 \\
+& ---- & & \\
+Relocated & Overtime & 0.1 & 0 \\
+Not relocated & Overtime & 0.1 & 0 \\
+& ---- & & \\
+\end{longtable}
+
+Overtime is slightly more common among relocated surgeries than among
+those performed in their originally assigned room, as shown in Table
+\ref{tab:overtime_relocation}. About 0.5 percent of non-relocated
+surgeries extend beyond 16:30, compared to 0.4 percent of relocated
+ones. This small difference likely reflects that some relocated cases
+are scheduled later in the day or in response to last-minute
+adjustments, which can occasionally lead to minor overruns.
+
+The similar percentages indicate that room reassignments are not a major
+driver of evening work. Although relocations require coordination, they
+do not substantially contribute to overtime or after-hours workload at
+the campus level.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2222}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1806}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4306}}@{}}
+\caption{Share of after-hours surgeries by relocation status (Lanaken).
+\label{tab:overtime_relocation}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+SwapGroup
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+AfterHours
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage of surgeries with afterhours
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+SwapGroup
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+AfterHours
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage of surgeries with afterhours
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Not relocated & 348 & 0.5 \\
+Relocated & 23 & 0.4 \\
+\end{longtable}
+
+The distribution of overtime duration for relocated surgeries, shown in
+Figure \ref{fig:overtime_relocated}, is highly concentrated near 10 to
+20, indicating that many of these cases finish slightly after regular
+working hours or shortly afterward. A steep drop is visible beyond the
+first 20 minutes of overtime, and only a few relocated surgeries extend
+beyond 40 minutes The long but sparse tail confirms that extreme cases
+are rare.
+
+This pattern supports the earlier finding that relocations mostly
+involve short procedures that can be completed quickly once a new room
+becomes available. The limited overtime associated with these cases
+suggests that room reassignments are generally managed efficiently and
+do not significantly contribute to prolonged evening work. In
+operational terms, relocated surgeries appear to represent flexible
+workload adjustments rather than sources of additional delay.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overtime_relocated-1} 
+
+}
+
+\caption{Distribution of overtime duration for relocated surgeries \label{fig:overtime_relocated}}\label{fig:overtime_relocated}
+\end{figure}
+
+\newpage
+
+\section{How do urgent cases disrupt elective
+planning?}\label{how-do-urgent-cases-disrupt-elective-planning}
+
+\subsection{When and where do urgent surgeries
+occur?}\label{when-and-where-do-urgent-surgeries-occur}
+
+The majority of surgeries at Lanaken are elective, representing about
+99.6 percent of all recorded cases, as shown in Table
+\ref{tab:urgency_dist}. Non-elective or urgent surgeries make up the
+remaining 0.4 percent of the total. This indicates that most activity
+follows a planned schedule, only a tiny portion of cases still arises
+from unplanned or time-sensitive demands.
+
+The relative size of the non-elective segment highlights its operational
+significance. Even though urgent cases form a minority, their
+unpredictable timing can affect the stability of daily planning and room
+allocation. Understanding when and where these non-elective procedures
+occur provides an important basis for evaluating how they interact with
+elective activity and whether they contribute to schedule deviations or
+after-hours work.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2222}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1528}}@{}}
+\caption{Distribution of surgeries by urgency classification (Lanaken).
+\label{tab:urgency_dist}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+UrgencyType
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SharePct
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+UrgencyType
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SharePct
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+electief & 69109 & 99.6 \\
+niet-electief & 286 & 0.4 \\
+\end{longtable}
+
+The start times of non-elective surgeries, shown in Figure
+\ref{fig:urgency_timing}, display a clear concentration during daytime
+hours, with a pronounced peak between 13:00 and 15:00. This pattern
+indicates that the majority of urgent procedures are performed within or
+near regular operating hours, often overlapping with scheduled elective
+activity.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/urgency_timing-1} 
+
+}
+
+\caption{Daily distribution of non-elective surgery start times \label{fig:urgency_timing}}\label{fig:urgency_timing}
+\end{figure}
+
+Across all weekdays, non-elective surgeries follow a consistent hourly
+pattern, as illustrated in Figure \ref{fig:urgency_weekday}. Most
+activity occurs between late morning and early evening, with peaks
+around 13:00 to 15:00 on nearly every day. This confirms that urgent
+procedures are frequently performed during regular daytime hours. The
+overlap with elective schedules suggests that urgent cases often need to
+be accommodated within existing capacity rather than outside normal
+shifts.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/urgency_weekday-1} 
+
+}
+
+\caption{Hourly distribution of non-elective surgery start times by weekday \label{fig:urgency_weekday}}\label{fig:urgency_weekday}
+\end{figure}
+
+Elective surgeries dominate the activity, as shown in Table
+\ref{tab:urgency_wd}, accounting for roughly 99 percent of all cases
+from Monday to Friday. The share of non-elective procedures remains
+stable during the workweek, between 0.2 and 0.8 percent, indicating a
+consistent and predictable pattern of urgent demand. This stability
+suggests that urgent cases are routinely managed alongside scheduled
+operations without major fluctuations across days.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1282}}
+  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1923}}
+  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2436}}
+  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1923}}
+  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2436}}@{}}
+\caption{Weekday distribution of elective vs.~non-elective surgeries
+(Lanaken). \label{tab:urgency_wd}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Weekday
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Elective (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Non-elective (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Elective (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Non-elective (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Weekday
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Elective (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Non-elective (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Elective (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Non-elective (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Ma & 14635 & 75 & 99.5 & 0.5 \\
+Di & 14878 & 24 & 99.8 & 0.2 \\
+Wo & 13683 & 59 & 99.6 & 0.4 \\
+Do & 13209 & 24 & 99.8 & 0.2 \\
+Vr & 12704 & 104 & 99.2 & 0.8 \\
+\end{longtable}
+
+\subsection{Do urgent cases drive
+overtime?}\label{do-urgent-cases-drive-overtime}
+
+Urgent cases contribute to overtime work but are not its primary driver,
+as shown in Table \ref{tab:afterhours_urgency}. While the share of
+non-elective surgeries extending beyond the shift is higher (3.8
+percent) than for elective ones (0.5 percent), the overall difference
+remains moderate. This indicates that both types of activity continue
+after the shift, although elective cases represent the majority in
+absolute numbers due to their much larger total volume.
+
+Average overtime per case is slightly higher for non-elective surgeries,
+at 0.4 minutes compared with 0.1 minutes for elective ones. The 95th
+percentile follows a different pattern, reaching 0 minutes for both
+urgent cases and for elective ones. This suggests that urgent
+procedures, much less frequent, barely require longer extensions when
+they do occur.
+
+Overall, the results imply that unplanned demand does contribute to
+extended operating hours, but most work still stems from elective cases
+that overrun their planned schedules rather than from late-arriving
+emergencies.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1376}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1101}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1651}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1651}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2018}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2202}}@{}}
+\caption{After-hours frequency and overtime duration by urgency type
+(Lanaken). \label{tab:afterhours_urgency}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Urgency type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+After-hours (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+After-hours (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean overtime (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+95th percentile (min)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Urgency type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+After-hours (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+After-hours (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean overtime (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+95th percentile (min)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Elective & 69109 & 360 & 0.5 & 0.1 & 0 \\
+NonElective & 286 & 11 & 3.8 & 0.4 & 0 \\
+\end{longtable}
+
+\subsection{Do urgent cases interrupt elective
+planning?}\label{do-urgent-cases-interrupt-elective-planning}
+
+The results in Table \ref{tab:overlap_swap} show that the frequency of
+room swaps among elective surgeries is virtually identical regardless of
+whether an overlap with a non-elective case occurred. For surgeries not
+affected by an overlap, 7.5 percent involved a room swap, compared to
+the 3.5 percent among overlapped cases.
+
+This consistency indicates that while urgent procedures occasionally
+coincide with scheduled elective activity, they do not systematically
+trigger room reallocations. Instead, such overlaps appear to be managed
+through local coordination or minor timing adjustments rather than by
+physically moving elective cases to different operating rooms. Overall,
+urgent interventions create some scheduling pressure but do not
+significantly disrupt room allocation patterns within the elective
+program.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1806}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2083}}@{}}
+\caption{Room swap frequency among elective cases: overlapped vs.~not
+overlapped. \label{tab:overlap_swap}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Overlapped
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+RoomSwaps
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ShareSwapped
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Overlapped
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+RoomSwaps
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ShareSwapped
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+No & 68652 & 5169 & 7.5 \\
+Yes & 455 & 16 & 3.5 \\
+\end{longtable}
+
+As shown in Table \ref{tab:overlap_days}, overlaps between urgent and
+elective surgeries occurred on 143 out of 853 observed days,
+corresponding to 16.8 percent of all days. This moderate frequency
+indicates that schedule interference is not an exceptional event but a
+regular characteristic of daily activity. While individual overlaps may
+vary in magnitude and operational impact, their near-daily occurrence
+highlights the continuous need for flexibility in resource allocation
+and real-time coordination between planned and urgent care.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1944}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1667}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1667}}@{}}
+\caption{Days with at least one urgent--elective overlap in the same OR.
+\label{tab:overlap_days}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OverlapDays
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+TotalDays
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SharePct
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+OverlapDays
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+TotalDays
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SharePct
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+143 & 853 & 16.8 \\
+\end{longtable}
+
+The proportion of elective surgeries affected by urgent overlaps
+fluctuates modestly over time, as shown in Figure
+\ref{fig:overlap_trend}. Monthly values generally range between 0.4 and
+0.8 percent. A gradual upward trend is visible throughout the end of
+2023 and 2024. Despite these month-to-month variations, the overall
+level remains relatively stable, suggesting that the frequency of urgent
+cases interfering with scheduled activity is a persistent feature of
+daily operations rather than a short-term anomaly.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overlap_trend-1} 
+
+}
+
+\caption{Monthly share of elective surgeries affected by urgent overlaps \label{fig:overlap_trend}}\label{fig:overlap_trend}
+\end{figure}
+
+As shown in Figure \ref{fig:overlap_hourly}, overlaps between urgent and
+elective surgeries occur during daytime hours. The frequency increases
+sharply after 12:00, peaks between 13:00 and 15:00, and then declines
+sharply toward 16:00. The clustering of overlaps in the middle of the
+day suggests that urgent admissions frequently coincide with the busiest
+elective periods, intensifying competition for operating room capacity
+during standard working hours.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overlap_hourly-1} 
+
+}
+
+\caption{Hourly frequency of urgent–elective overlaps \label{fig:overlap_hourly}}\label{fig:overlap_hourly}
+\end{figure}
+
+Figure \ref{fig:overlap_delay} shows clear differences in average start
+delays between elective surgeries with and without an urgent overlap.
+During much of 2022, the overlapped cases display strongly negative mean
+delays, in several months exceeding minus 50 minutes, which indicates
+that these surgeries tended to start significantly earlier than planned.
+In comparison, non-overlapped cases remained close to the planned
+schedule, with mean delays typically around zero to ten minutes.
+
+From 2023 onward the gap between both groups narrows, yet overlapped
+cases continue to fluctuate more widely, with repeated downward spikes
+and intermittent positive peaks. This increased volatility suggests that
+the timing of surgeries affected by urgent activity is more sensitive to
+local workflow pressures, leading them at times to start markedly
+earlier or slightly later than planned.
+
+The recurring peaks and troughs in the overlapped series indicate that
+overlaps are associated with periodic scheduling tensions rather than
+isolated irregularities. Overall, the figure shows that urgent cases
+introduce measurable variability into elective scheduling, not through
+systematic delays but through greater unpredictability in start times,
+especially during periods of high operating room utilisation.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/overlap_delay-1} 
+
+}
+
+\caption{Average start delay of elective surgeries by overlap status \label{fig:overlap_delay}}\label{fig:overlap_delay}
+\end{figure}
+
+As shown in Table \ref{tab:or_overlap}, the frequency and impact of
+urgent--elective overlaps vary substantially across operating rooms. The
+room with the highest number of overlap events is LO02, with 259
+overlapped cases, representing 2.6 percent of its elective activity.
+This confirms that LO02 is one of the primary locations where urgent
+demand intersects with scheduled work. Other rooms with notable counts
+include LO04 (108 overlaps), LP01 (33), and LO03 (19), although their
+relative shares remain below 2 percent.
+
+Median start-delay patterns show that overlaps do not affect all rooms
+in the same way. In LO04 and LO03, the median delay under overlap
+becomes negative (--16.5 and --7 minutes respectively), indicating that
+overlapped elective cases tend to start earlier than planned. LO01 shows
+a similar pattern with a median of --3 minutes. In contrast, rooms such
+as LP01 and LP02 exhibit positive median delays under overlap (12 and 9
+minutes), suggesting that overlaps in these rooms are more likely to
+push elective cases later than scheduled.
+
+A few rooms such as LO05 display extreme values (--73 minutes), but
+because these rooms have very small numbers of overlaps, these medians
+should be interpreted with caution.
+
+Overall, the results show that the operational effect of
+urgent--elective overlap is concentrated in a small number of
+high-volume rooms. Even within these rooms, the direction of the impact
+is not uniform: in some settings overlaps delay elective cases, while in
+others they coincide with earlier-than-planned starts, likely reflecting
+ad hoc rescheduling, case reordering, or opportunistic use of available
+capacity.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1165}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0777}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1262}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1262}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2913}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2621}}@{}}
+\caption{Operating rooms with urgent--elective overlap.
+\label{tab:or_overlap}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+PlannedOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Count
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n\_elective
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Med StartDelay (No Overlap)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Med StartDelay (Overlap)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+PlannedOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Count
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+n\_elective
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Percentage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Med StartDelay (No Overlap)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Med StartDelay (Overlap)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO02 & 259 & 9871 & 2.6 & 6 & 0 \\
+LO04 & 108 & 5806 & 1.9 & 13 & -16.5 \\
+LP01 & 33 & 18936 & 0.2 & 10 & 12 \\
+LO03 & 19 & 4206 & 0.5 & 5 & -7 \\
+LO01 & 17 & 5200 & 0.3 & 0 & -3 \\
+LP02 & 16 & 19863 & 0.1 & -2 & 9 \\
+LO05 & 3 & 5223 & 0.1 & 5 & -73 \\
+\end{longtable}
+
+\newpage
+
+\section{How stable is the surgical schedule in
+execution?}\label{how-stable-is-the-surgical-schedule-in-execution}
+
+Beyond accurate planning, the stability of the realised schedule is a
+key indicator of operational performance in the operating theatre. Even
+when planned start times, durations, and room assignments are correct,
+day-to-day execution may deviate because of unforeseen delays, emergency
+insertions, or coordination issues.
+
+This section evaluates how consistently the planned schedule is
+maintained throughout the day by focusing on two complementary aspects:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Shift changes}, where surgeries are executed in a different
+  shift than originally planned, indicating how often the daily
+  programme must be adjusted in real time.
+\item
+  \emph{Idle or gap times}, representing the pauses between consecutive
+  surgeries within the same room, which reflect how efficiently the
+  available capacity is utilised.
+\end{itemize}
+
+Together, these indicators capture the operational resilience of the OR
+complex and the ability to absorb disruptions and maintain smooth
+throughput despite variable circumstances. High rates of shift changes
+or long idle periods point to latent inefficiencies in daily planning
+and coordination, whereas stability across these metrics signals a
+well-synchronised workflow.
+
+\subsection{How often are surgeries moved to another
+shift?}\label{how-often-are-surgeries-moved-to-another-shift}
+
+Changes between planned and actual shifts occur when surgeries start
+significantly later than scheduled or are postponed to a later block of
+the day. The actual shift is determined based on the observed start time
+of each surgery relative to the official shift boundaries used at the
+operating department (day: 08:00--16:30, evening: 16:30--22:00, night:
+22:00--08:00).
+
+At Campus Lanaken, 578 surgeries, or 0.8 percent of all recorded cases,
+were performed in a different shift than originally planned, as shown in
+Table \ref{tab:shift_mismatch}. For these surgeries, the average start
+delay was minus 143.1 minutes, indicating that such deviations typically
+involve a substantial advance within the daily schedule. Interestingly,
+the average deviation in procedure duration was minus 11.7 minutes,
+meaning that surgeries executed in another shift tend to be somewhat
+shorter than their planned estimates once they begin.
+
+The mean overtime for these cases was 1 minute, showing that some shift
+changes result from late starts or, in other cases, procedures that
+exceed their planned duration, rather than extensive spillovers deep
+into the next shift. Although these cases represent only a small
+fraction of total surgical activity, their magnitude and timing can
+still disrupt staffing and sequencing for subsequent sessions.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0690}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1379}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1552}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2155}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2328}}
+  >{\centering\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1897}}@{}}
+\caption{Cases performed in a different shift than planned (Lanaken).
+\label{tab:shift_mismatch}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+MismatchCount
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Share moved (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Start Delay (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Duration Diff (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Overtime (min)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+MismatchCount
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Share moved (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Start Delay (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Duration Diff (min)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Mean Overtime (min)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+69395 & 578 & 0.8 & -143.1 & -11.7 & 1 \\
+\end{longtable}
+
+As shown in Figure \ref{fig:shift_moved_monthly}, the monthly share of
+surgeries performed in a different shift oscillates visibly but without
+any structural upward or downward trend. In early 2022, values generally
+range between about 0.8 and 1.3 percent, with a small number of peaks
+reaching roughly 1.5 percent. Throughout the remainder of the period,
+the pattern continues to fluctuate between approximately 0.3 and 1.3
+percent, reflecting normal month-to-month variation rather than
+systematic change. Toward 2025, the series appears to settle into a
+narrower band around 0.7 to 0.9 percent.
+
+Overall, the figure indicates that shift changes occur regularly but at
+a consistently low rate, and their frequency does not show signs of
+long-term increase or deterioration over time.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/shift_moved_monthly-1} 
+
+}
+
+\caption{Monthly percentage of surgeries moved to another shift \label{fig:shift_moved_monthly}}\label{fig:shift_moved_monthly}
+\end{figure}
+
+Overall, the data suggest a modest improvement in schedule adherence
+after the fluctuations seen in early 2022, followed by a period of
+relative stability. The recurring month-to-month peaks and dips appear
+to reflect normal variation in workload, staffing, and case mix rather
+than underlying structural scheduling issues. The absence of a
+persistent upward trend indicates that shift changes remain a controlled
+and predictable feature of daily operations.
+
+\subsection{How much idle time occurs between consecutive
+surgeries?}\label{how-much-idle-time-occurs-between-consecutive-surgeries}
+
+Idle or gap time represents the short pause between the end of one
+surgery and the start of the next within the same operating room during
+the regular day shift (08:00--16:30). It captures how efficiently rooms
+are prepared for the next case and how well surgical schedules are
+synchronised in daily practice. For each room-day combination, the gap
+time measures either the delay between shift start and the first case or
+the interval between consecutive cases, excluding breaks longer than 60
+minutes that reflect planned downtime.
+
+At Campus Lanaken, idle time between consecutive surgeries is extremely
+low. As shown in Table \ref{tab:idle_summary}, the average gap is 3.2
+minutes, but the median is 0 minutes, meaning that in at least half of
+all transitions the next case starts immediately after the previous one
+ends. The interquartile range of 3 minutes confirms that most turnover
+intervals fall within a very narrow band, reflecting tightly sequenced
+workflows and minimal unused room time.
+
+Longer gaps occur only infrequently. The 95th percentile reaches 15
+minutes, and only the extreme tail approaches the cutoff of 60 minutes,
+which is used to exclude planned breaks rather than true idle time.
+Overall, the distribution indicates a highly efficient turnover process,
+with very limited room inactivity between cases.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0972}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1250}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0833}}
+  >{\centering\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
+\caption{Summary statistics of idle time between consecutive surgeries
+(minutes). \label{tab:idle_summary}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IQR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99.9
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Median
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IQR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P95
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+P99.9
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+3.2 & 0 & 7.8 & 3 & 0 & 60 & 15 & 46 & 59 \\
+\end{longtable}
+
+As shown in Figure \ref{fig:idle_distribution}, the histogram confirms
+that idle intervals at Campus Lanaken are overwhelmingly short. The
+first bar dominates the distribution: the vast majority of all
+transitions fall below 5 minutes, indicating that turnover often occurs
+almost immediately after the previous case finishes. The next few bins
+show a rapid decline, with only a small fraction of intervals extending
+into the 5--10 or 10--15 minute range.
+
+Beyond 15 minutes, the frequency drops sharply, and the right-hand tail
+becomes extremely thin. Only isolated transitions reach higher values,
+and gaps longer than one hour are excluded by design.
+
+Overall, the distribution illustrates a highly efficient turnover
+process. Idle periods between surgeries are consistently brief, and
+longer gaps, while present, are rare and do not represent a systematic
+pattern of underutilisation.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/idle_distribution-1} 
+
+}
+
+\caption{Distribution of idle time between surgeries (grouped per 5 min) \label{fig:idle_distribution}}\label{fig:idle_distribution}
+\end{figure}
+
+\subsection{How does idle time vary across operating
+rooms?}\label{how-does-idle-time-vary-across-operating-rooms}
+
+As shown in Figure \ref{fig:idle_or}, idle times vary noticeably across
+operating rooms at Campus Lanaken. In every room, the median idle time
+is considerably lower than the mean, which reflects the strongly
+right-skewed nature of turnover intervals: most transitions occur with
+little to no idle time, while a smaller number of longer gaps pull the
+average upward.
+
+The room-to-room differences are substantial. LO03 stands out with the
+highest idle times, showing both a large mean and a clearly elevated
+median, indicating that this room experiences longer and more frequent
+pauses between cases. LO05 and LO01 also show higher mean idle times
+compared with the rest of the OR complex, though their medians remain
+relatively low, suggesting occasional extended gaps rather than
+systematically slower turnover.
+
+In contrast, rooms such as LP02, LP01, and especially LO02 display very
+short idle times, with medians at or near zero and relatively low means.
+These rooms appear to achieve consistently rapid turnover, likely
+reflecting high-throughput workflows or more predictable case sequences.
+
+Overall, the figure shows that while turnover efficiency is generally
+strong across Lanaken, a few rooms exhibit noticeably longer idle
+intervals. These differences point to room-specific scheduling patterns
+or case mixes rather than systemic inefficiency.
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.7\linewidth,]{In-Depth_Analysis_Lanaken_files/figure-latex/idle_or-1} 
+
+}
+
+\caption{Mean and median idle time per operating room \label{fig:idle_or}}\label{fig:idle_or}
+\end{figure}
+
+As shown in Table \ref{tab:idle_variability}, the standard deviation
+(SD) and coefficient of variation (CV) summarise how much idle times
+fluctuate around their typical value for each operating room. The SD
+ranges from about 5 to 11 minutes across rooms, confirming that most
+turnover intervals remain short even when variability increases. The CV
+values, however, are very high---between roughly 130 and 344
+percent---because mean and median idle times in Lanaken are extremely
+small, causing even modest fluctuations to translate into large relative
+variation.
+
+Rooms such as LO03, LO05, and LO04 stand out with the highest SDs,
+indicating broader spreads in turnover times and less predictable
+intervals between cases. These rooms experience longer gaps more
+frequently, consistent with what is seen in the mean--median patterns in
+Figure \ref{fig:idle_or}.
+
+Toward the bottom of the table, rooms such as LP01, LO02, and LP02
+display very high CVs despite relatively low SDs. This arises from the
+ratio-based nature of the CV: when typical idle times are extremely
+short---as they are in these rooms---even small fluctuations produce a
+disproportionately large coefficient of variation.
+
+Overall, variability in idle time differs meaningfully between rooms,
+but the underlying distributions remain dominated by very short turnover
+intervals. Only a small subset of rooms shows broader spreads that may
+reflect more diverse schedules, irregular case sequencing, or
+room-specific workflow constraints.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1528}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2917}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3750}}@{}}
+\caption{Standard deviation and coefficient of variation of idle time
+per operating room (minutes), sorted by median idle time.
+\label{tab:idle_variability}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Cases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Standard deviation
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Coefficient of variation
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+ActualOR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Cases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Standard deviation
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Coefficient of variation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+LO03 & 3254 & 11.3 & 129.9 \\
+LO05 & 4262 & 9.5 & 141.1 \\
+LO01 & 4320 & 8.8 & 157.9 \\
+LO04 & 5058 & 9.8 & 192.4 \\
+LP02 & 17180 & 7.1 & 323.5 \\
+LP01 & 18726 & 6.4 & 343.2 \\
+LO02 & 9064 & 5.6 & 324.7 \\
+\end{longtable}
+
+\section{Conclusion}\label{conclusion}
+
+This in-depth analysis of Campus Lanaken provides a detailed and
+data-driven view of how surgical activity evolves from planning to
+execution within the operating theatre. The report systematically
+examines timing accuracy, room allocation, after-hours activity, urgent
+case dynamics, and turnover performance, offering insight into both the
+strengths and operational challenges of daily surgical practice.
+
+Across the different sections, the results show that planned and
+observed durations are generally well aligned, though variability
+between procedures remains considerable. Start-time deviations are
+frequent but relatively contained, and their accumulation throughout the
+day can still lead to later-than-expected finishes. While the overall
+schedule performs reliably, these small deviations highlight the
+operational sensitivity of tightly sequenced programs.
+
+After-hours activity is rare at Lanaken, with only about 0.5 percent of
+surgeries extending beyond regular hours. Most overruns are brief, yet a
+small number of outliers contribute disproportionately to total overtime
+minutes. Room assignments remain very stable, with roughly 7.5 percent
+of surgeries being relocated. These relocations involve mostly short,
+interchangeable procedures and therefore create limited disruption to
+the broader workflow.
+
+Urgent cases represent a small fraction of overall activity but still
+create meaningful operational interaction with the elective schedule.
+Overlaps between urgent and elective cases occur regularly, though their
+impact on elective start times is modest and varies across operating
+rooms. In most rooms, overlapped elective cases start slightly earlier
+or only marginally later than planned, suggesting that urgent
+interventions are absorbed efficiently into the daily workflow.
+
+The analysis of shift transitions and idle times further illustrates an
+efficient process. Only about 1 percent of surgeries are performed in a
+different shift than originally planned, indicating that schedule drift
+remains contained. Idle periods between surgeries are very short, with a
+median of 0 minutes and an average of 3.2 minutes, confirming
+exceptionally fast turnover performance across rooms. A few rooms
+display broader idle-time distributions, reflecting more varied case
+sequencing or temporary bottlenecks, but these represent exceptions
+rather than systemic issues.
+
+Altogether, this document offers a comprehensive quantitative picture of
+operating room performance at Campus Lanaken. It shows how surgical
+planning translates into real-world execution within a largely stable
+and highly efficient environment. The findings confirm strong overall
+performance, with targeted opportunities to further stabilise start
+times and maintain smooth coordination between elective and urgent
+surgical activity.
+
+\end{document}
