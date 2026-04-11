@@ -1,0 +1,950 @@
+---
+title: "Explorative Data Analysis - Cathlab"
+subtitle: "Leveraging Data Analytics for Efficient OR Planning at ZOL"
+date: "October 2025"
+geometry: margin=1in
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: false
+header-includes:
+  - |
+    \usepackage{graphicx}
+    \usepackage{booktabs}
+    \usepackage{float}
+    \usepackage{titling}
+
+    % Logo's bovenaan
+    \pretitle{%
+      \begin{center}
+      \includegraphics[width=4cm]{figures/BINF.png}\hfill
+      \includegraphics[width=6cm]{figures/PAIH.png}\\[2cm]
+      \huge
+    }
+    \posttitle{\end{center}}
+---
+
+\begin{center}
+\vspace{2cm}
+
+Niels MARTIN\\
+niels.martin@uhasselt.be\\[0.5em]
+Maxim RIEBUS\\
+maxim.riebus@uhasselt.be\\[0.5em]
+Haroon THARWAT\\
+haroon.tharwat@uhasselt.be\\
+
+\vspace{6cm}
+
+\textbf{Hasselt University} \\
+Faculty of Business Economics \\
+Research Group Business Informatics \\
+Process Analytics in Healthcare
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+knitr::opts_chunk$set(out.width = "70%")
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.asp = 0.618)
+
+kable <- function(x, ...) {
+  knitr::kable(x, booktabs = T, format = "latex",  position = "H", ...)
+}
+
+knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+source("packages.R")
+```
+
+
+```{r data import, include=FALSE}
+# run data cleaning script
+source("data_cleaning.R")
+
+# load cleaned data from the 'modified data' folder
+genk    <- read_excel("modified data/cathlab_cleaned.xlsx")
+```
+
+```{r functions, echo = F}
+# table
+numericals <- function(df, var, label) {
+  df %>%
+    summarize(
+      Minimum = min({{ var }}, na.rm = TRUE),
+      Mean = mean({{ var }}, na.rm = TRUE),
+      Median = median({{ var }}, na.rm = TRUE),
+      Maximum = max({{ var }}, na.rm = TRUE),
+      StandardDeviation = sd({{ var }}, na.rm = TRUE),
+      InterquartileRange = IQR({{ var }}, na.rm = TRUE),
+      P95 = quantile({{ var }}, 0.95, na.rm = TRUE),
+      P99 = quantile({{ var }}, 0.99, na.rm = TRUE),
+      P99_9 = quantile({{ var }}, 0.999, na.rm = TRUE)
+    ) %>%
+    pander(split.table = 120)
+}
+
+# barplot
+barplot_simple <- function(df, var, label) {
+  df %>%
+    count({{ var }}, sort = TRUE) %>%
+    slice_head(n = 20) %>%
+    ggplot(aes(x = reorder({{ var }}, n), y = n)) +
+    geom_col(fill = "steelblue") +
+    coord_flip() +
+    labs(title = label, x = NULL, y = "Count") +
+    theme_minimal()
+}
+
+# Histogram
+histogram_simple <- function(df, var, label) {
+  upper <- quantile(df[[deparse(substitute(var))]], 0.99, na.rm = TRUE)
+
+  ggplot(df, aes(x = {{ var }})) +
+    geom_histogram(binwidth = 10, fill = "steelblue", color = "white") +
+    coord_cartesian(xlim = c(0, upper)) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    labs(title = label, x = deparse(substitute(var)), y = "Count") +
+    theme_minimal()
+}
+
+```
+
+# Introduction
+
+This document provides an exploratory overview of the dataset used for analyzing operating room (OR) efficiency at Ziekenhuis Oost-Limburg, campus Cathlab. The aim is to describe the main temporal, clinical, and operational characteristics of the data before moving toward more specific performance metrics. By systematically reviewing the distributions, frequencies, and summary statistics of key variables, we gain a first impression of how surgical activity is structured across time, departments, and procedure types.
+
+The analysis follows a descriptive approach, highlighting patterns that may explain later deviations between planned and observed activity. Each visualization or table is accompanied by a short interpretation that connects numerical trends to the daily practice of the operating theatre. Together, these insights form the empirical foundation for subsequent modelling and the development of operational key performance indicators (KPIs) focused on scheduling accuracy, resource allocation, and overtime work.
+
+# Descriptive analysis
+
+The descriptive analysis provides a structured overview of the main variables of the dataset before moving to more advanced comparisons between planning and execution. It summarizes how surgical activity is distributed across time, procedure types, and operational variables, offering a factual foundation for interpreting later results. By examining these baseline distributions, we can better understand the context in which deviations, overtime, and scheduling inefficiencies occur.
+
+## Temporal information
+
+Understanding when surgeries take place is essential for interpreting overall operating room performance. Temporal variables provide insight into how surgical activity is distributed across years, weekdays, and hours of the day. These patterns reflect both organizational planning and patient demand, and they influence key operational factors such as staff allocation, overtime work, and resource utilization. The following subsections explore these temporal dimensions to establish a baseline view of how surgical activity is structured over time.
+
+### Year
+
+Surgical activity at the Cathlab campus remained relatively stable across the observed years, with a gradual increase from 2022 (27.7 percent) to 2024 (30.8 percent). This steady rise reflects a consistent growth in case volume and suggests stable utilisation of Cathlab capacity over time. The lower proportion recorded for 2025 (12.9 percent) is expected, since the dataset contains only partial data for that year. Table \ref{tab:year} provides the yearly counts and percentages.
+
+```{r year, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(Year)) %>%
+  count(Year) %>%
+  mutate(Percentage = scales::percent(n / sum(n), 0.1)) %>%
+  arrange(Year) %>%
+  pander(
+    split.table = 120,
+    caption = "Number of surgeries per year (count and percentage) \\label{tab:year}"
+  )
+```
+
+### Weekday
+
+Surgical activity at the Cathlab campus is clearly concentrated during regular weekdays, with each weekday from Monday to Friday accounting for a substantial share of all procedures. The distribution shows notable variation across days, ranging from 15.1 percent on Mondays to 24.9 percent on Wednesdays, which emerges as the busiest day of the week. Thursday and Tuesday also show high activity levels at 21.9 and 19.5 percent respectively, followed by Friday at 17.2 percent. Weekend activity remains minimal, with only 0.6 percent of surgeries performed on Saturdays and 0.8 percent on Sundays, consistent with the hospital’s scheduling practice of reserving weekends primarily for urgent or emergency cases. Table \ref{tab:weekday} provides the detailed counts and percentages.
+
+```{r weekday, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(Weekday)) %>%
+  count(Weekday, name = "Count") %>%
+  mutate(Percentage = scales::percent(Count / sum(Count), 0.1)) %>%
+  arrange(Weekday) %>%
+  pander(
+    split.table = 120,
+    caption = "Number of surgeries per weekday (count and percentage) \\label{tab:weekday}"
+  )
+```
+
+
+### StartHour
+
+Most surgeries at the Cathlab begin between 07:00 and 15:00, aligning closely with standard daytime operating hours. The pronounced peak at 08:00 marks the coordinated start of the daily program, where a large share of cases commence simultaneously. After this initial surge, activity gradually tapers through the late morning and early afternoon, with a steady but declining number of starts up to around 14:00. Only a very small number of procedures begin after 15:00, and evening or night time starts are nearly absent, indicating that unplanned or urgent interventions form only a minimal part of Cathlab activity. This concentrated pattern of start times reflects a workflow that is tightly organized around daytime scheduling with limited off-hour surgical demand. Figure \ref{fig:starthour} shows the full distribution of start hours.
+
+
+```{r starthour, echo=F, fig.cap="Distribution of surgery start times \\label{fig:starthour}", fig.pos='H'}
+genk %>%
+  filter(!is.na(StartHour)) %>%
+  mutate(
+    StartHour = factor(
+      as.integer(StartHour),
+      levels = c(7:23, 0:6),
+      labels = sprintf("%02d", c(7:23, 0:6))
+    )
+  ) %>%
+  ggplot(aes(x = StartHour)) +
+  geom_bar(fill = "steelblue") +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    x = "Start hour",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal()
+```
+
+## Clinical characteristics
+
+Clinical characteristics describe the type of surgical activity captured in the dataset. These variables outline what procedures were performed, under which admission conditions, and with what urgency level. Together, they provide an overview of the clinical composition of the surgical workload and highlight how case types and patient pathways influence planning complexity. Understanding this context is essential before interpreting operational performance or scheduling outcomes.
+
+### ProcedureName
+
+The dataset includes a total of 140 unique procedure names. On average, each procedure type was performed 66.3 times, while the median equals 5 cases. The large gap between the mean and the median shows that activity is heavily concentrated in a small group of highly frequent procedures, whereas most procedure types occur only a limited number of times. This skewed distribution reflects the specialized nature of the Cathlab, where a core set of recurring interventions dominates the workload. Table \ref{tab:procedures} provides an overview of these summary statistics.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(ProcedureName)) %>%
+  count(ProcedureName, name = "Count") %>%
+  summarize(
+    `Unique procedures` = n(),
+    `Average cases per procedure` = round(mean(Count), 1),
+    `Median cases per procedure` = median(Count)
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Overview of surgical procedures \\label{tab:procedures}"
+  )
+```
+
+The twenty most frequent procedure names account for a large share of all Cathlab activity. The most common interventions, such as ABLATIE VKF and DILATATIE FEMORALIS, each exceed two thousand cases, while even the lowest ranked procedures in the top twenty still occur several hundred times. This pattern reflects a steep concentration of workload in a small group of high volume cardiovascular procedures that recur consistently throughout the study period. The clear gap between the highest and lowest frequencies within the top twenty confirms that most surgical volume in the Cathlab is driven by a limited set of core interventions, whereas many other procedure types appear far less frequently. Figure \ref{fig:top20procedures} displays the twenty most frequently recorded procedure names.
+
+```{r procedure name, echo=F, fig.cap="Top 20 most frequent surgical procedures \\label{fig:top20procedures}", fig.pos='H'}
+genk %>%
+  filter(!is.na(ProcedureName)) %>%
+  count(ProcedureName, sort = TRUE) %>%
+  slice_head(n = 20) %>%
+  ggplot(aes(x = reorder(ProcedureName, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top 20 most frequent surgical procedures",
+    x = "Procedure name",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+### AdmissionType
+
+Most surgeries in the Cathlab dataset are recorded as inpatient admissions, accounting for 8222 procedures or 88.6 percent of all activity. Day cases represent a smaller share, with 1053 procedures or 11.3 percent. Only 7 procedures, or 0.1 percent, are registered as emergency admissions. This distribution shows that the vast majority of Cathlab activity involves planned inpatient care, while day admissions form a limited but meaningful component of the workload. Emergency interventions are extremely rare, reflecting the largely scheduled and protocol driven nature of Cathlab procedures. Table \ref{tab:admissiontype} provides the detailed counts and percentages.
+
+```{r admission type, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(AdmissionType)) %>%
+  count(AdmissionType, name = "Count") %>%
+  mutate(Percentage = scales::percent(Count / sum(Count), 0.1)) %>%
+  arrange(desc(Count)) %>%
+  pander(
+    split.table = 120,
+    caption = "Number of surgeries per admission type (count and percentage) \\label{tab:admissiontype}"
+  )
+```
+
+
+### UrgencyType
+
+The vast majority of Cathlab procedures are classified as elective, representing 9050 cases or 97.5 percent of all activity. Non elective cases account for only 232 procedures, or 2.5 percent. This very limited share of urgent activity indicates that Cathlab operations are predominantly scheduled in advance and follow a stable, predictable workflow. Although non elective interventions are relatively rare, they can still introduce operational pressure, as they often require immediate accommodation within an otherwise tightly planned program. Table \ref{tab:urgencytype} provides the detailed counts and percentages.
+```{r urgency type, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(UrgencyType)) %>%
+  count(UrgencyType, name = "Count") %>%
+  mutate(Percentage = scales::percent(Count / sum(Count), 0.1)) %>%
+  arrange(desc(Count)) %>%
+  pander(
+    split.table = 120,
+    caption = "Number of surgeries per urgency type (count and percentage) \\label{tab:urgencytype}"
+  )
+```
+
+## Hospital stay
+
+Hospital stay variables capture how long patients remain admitted after surgery. Analyzing these distributions helps identify whether short- or longstay cases dominate the dataset and how different admission or urgency types affect discharge timing. The results in this section provide a bridge between surgical scheduling and patient flow within the hospital.
+
+### LengthOfStay
+
+The average hospital stay after a Cathlab procedure is 4.78 days, while the median equals 2 days, indicating that most patients are discharged relatively quickly even though a subset requires longer observation. The distribution is strongly right skewed, as shown by the large gap between the mean and the median. Most stays fall within a narrow range, reflected by an interquartile range of 1 day, yet a small number extend considerably longer, up to 232 days. These long admissions represent rare outliers and likely correspond to complex cardiovascular conditions or prolonged postoperative monitoring rather than typical Cathlab recoveries. Table \ref{tab:los} summarises the main descriptive statistics for length of stay.
+
+```{r, length of stay stats, echo=FALSE, table.pos='H'}
+genk %>%
+  summarize(
+    n = sum(!is.na(LengthOfStay)),
+    Mean = mean(LengthOfStay, na.rm = TRUE),
+    Median = median(LengthOfStay, na.rm = TRUE),
+    SD = sd(LengthOfStay, na.rm = TRUE),
+    IQR = IQR(LengthOfStay, na.rm = TRUE),
+    Min = min(LengthOfStay, na.rm = TRUE),
+    Max = max(LengthOfStay, na.rm = TRUE),
+    P95 = quantile(LengthOfStay, 0.95, na.rm = TRUE),
+    P99 = quantile(LengthOfStay, 0.99, na.rm = TRUE),
+    P99_9 = quantile(LengthOfStay, 0.999, na.rm = TRUE)
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Length of stay, summary statistics \\label{tab:los}"
+  )
+```
+
+The distribution of hospital stay without revalidation shows that Cathlab patients are typically discharged after a very short admission. The highest bar at one day reflects that most stays are minimal in length, and the frequency declines steeply as duration increases. Only a relatively small group of patients remains in the hospital for more than a few days, and very long admissions are rare. This strongly right skewed pattern indicates that short, focused episodes of care dominate the Cathlab workflow, with extended recoveries occurring only in a limited number of clinically complex cases. Figure \ref{fig:los_noreval} displays the truncated distribution.
+
+```{r lenth of stay bar, echo=F, fig.cap="Distribution of hospital stay duration without revalidation \\label{fig:los_noreval}", fig.pos='H'}
+upper <- quantile(genk$LengthOfStayWithoutRevalidation, 0.96, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(LengthOfStayWithoutRevalidation),
+         LengthOfStayWithoutRevalidation <= upper) %>%
+  ggplot(aes(x = LengthOfStayWithoutRevalidation)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "white") +
+  labs(
+    title = "Distribution of hospital stay duration (excluding revalidation)",
+    x = "Length of stay without revalidation (days)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )
+
+
+```
+
+When comparing length of stay across admission and urgency types, the Cathlab shows marked differences between day cases and hospitalized patients. Day admissions have uniformly short stays, with virtually no variation between elective and non elective cases, reflecting the highly standardized nature of these interventions. In contrast, hospitalized patients display a much broader spread, particularly among non elective admissions, where stays extend higher and show considerably more variability. This wider distribution indicates that unplanned or clinically complex cases in the Cathlab often require longer recovery periods. Emergency cases are extremely rare at this campus, and their limited observations do not show clear deviations from the surrounding patterns. Overall, these distributions illustrate that length of stay in the Cathlab is primarily shaped by whether the patient requires hospitalization rather than by urgency alone. Figure \ref{fig:los_violin} summarizes these differences.
+
+```{r violin, echo=F, fig.cap="Length of stay without revalidation by urgency type and admission category \\label{fig:los_violin}", fig.pos='H'}
+genk %>%
+  filter(!is.na(LengthOfStayWithoutRevalidation), LengthOfStayWithoutRevalidation > 0) %>%
+  ggplot(aes(x = UrgencyType, y = LengthOfStayWithoutRevalidation, fill = AdmissionType)) +
+  geom_violin(trim = TRUE, show.legend = FALSE, alpha = 0.8) +
+  facet_wrap(~ AdmissionType, scales = "free_y") +
+  scale_y_log10() +
+  labs(
+    title = "Length of stay (excluding revalidation) by urgency type and admission category",
+    x = "Urgency type",
+    y = "Length of stay without revalidation (log scale, days)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )
+
+```
+
+## Planned surgery information
+
+This section summarises all variables related to the planned part of the surgical workflow. It describes how surgeries were initially scheduled in terms of expected duration, operating room assignment, and distribution across rooms. Examining these metrics allows us to understand how operating capacity is allocated in advance and to what extent planning patterns differ between rooms. These insights serve as a reference point for comparing planned versus actual execution later in the report.
+
+### PlannedDurationMinutes
+
+The planned duration of surgeries varies widely across the Cathlab dataset. On average, procedures are scheduled for 94.1 minutes, while the median is 86 minutes, indicating that most interventions cluster around medium lengths but a smaller group of very long procedures increases the mean. The interquartile range of 44 minutes shows moderate variation within the middle 50 percent of cases. Most procedures are planned for relatively short to medium durations, although a small number extend to much longer planned times, with values up to 1420 minutes. At the upper end of the distribution, the ninety fifth percentile equals 151.9 minutes, the ninety ninth percentile 202 minutes, and the ninety nine point nine percentile 1097 minutes. These rare outliers represent exceptionally long planned procedures. Table \ref{tab:planned_duration} summarises these statistics.
+
+```{r summary planned minutes, echo=FALSE, table.pos='H'}
+genk %>%
+  summarize(
+    Mean = mean(PlannedDurationMinutes, na.rm = TRUE),
+    Median = median(PlannedDurationMinutes, na.rm = TRUE),
+    SD = sd(PlannedDurationMinutes, na.rm = TRUE),
+    IQR = IQR(PlannedDurationMinutes, na.rm = TRUE),
+    Min = min(PlannedDurationMinutes, na.rm = TRUE),
+    Max = max(PlannedDurationMinutes, na.rm = TRUE),
+    P95 = quantile(PlannedDurationMinutes, 0.95, na.rm = TRUE),
+    P99 = quantile(PlannedDurationMinutes, 0.99, na.rm = TRUE),
+    P99.9 = quantile(PlannedDurationMinutes, 0.999, na.rm = TRUE)
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Planned duration of surgeries in minutes, summary statistics \\label{tab:planned_duration}"
+  )
+```
+
+The distribution of planned surgery durations shows a clear right-skewed pattern at the Cathlab. Most procedures fall within the medium-length range, where the bars reach their highest frequencies, after which the counts gradually decline toward longer durations. Only a small fraction of surgeries appears in the upper end of the distribution, reflecting that very long planned interventions are relatively uncommon. This indicates that the planned workload is dominated by procedures of moderate duration, while extended cases represent a much smaller share of the overall schedule. Figure \ref{fig:planned_duration} shows the trimmed distribution up to the ninety ninth percentile.
+
+```{r histogram planned duration, echo=F, fig.cap="Distribution of planned surgery durations (trimmed at P99) \\label{fig:planned_duration}", fig.pos='H'}
+upper <- quantile(genk$PlannedDurationMinutes, 0.99, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(PlannedDurationMinutes), PlannedDurationMinutes <= upper) %>%
+  ggplot(aes(x = PlannedDurationMinutes)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "white") +
+  labs(
+    title = "Distribution of planned surgery durations (trimmed at P99)",
+    x = "Planned duration (minutes)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal()
+
+```
+
+### PlannedOR
+
+The table below provides a detailed overview of surgical planning across all operating rooms. For each room, it lists the number of planned surgeries, summary statistics of planned durations, and the number of unique procedure names. This offers a comprehensive view of both workload and procedural diversity in the planned program. Table \ref{tab:planned_or} summarises these metrics.
+
+Planned activity is unevenly distributed across rooms. A few Cathlab rooms, notably KO02 and KO05, handle the largest share of scheduled activity, each accounting for close to one third of all planned procedures. Other rooms, such as KO01, KO06, and KO07, follow at a substantially lower volume, while several remaining rooms register only a handful of scheduled cases. Average planned durations also vary meaningfully between rooms, with some rooms showing relatively short mean values and others much longer ones. This variation indicates that certain rooms are used for high throughput interventions, while others accommodate more time-consuming or complex procedures.
+
+The coefficient of variation displayed in Table \ref{tab:planned_or} shows substantial differences in variability between rooms, reflecting heterogeneity in procedure mix and planning consistency. Procedure diversity likewise differs strongly, with high-volume rooms registering several dozen unique procedure names, while some low-volume rooms show only one or two. Together, these patterns highlight that surgical planning at the Cathlab is far from uniform across operating rooms, with clear differences in both workload and procedural variety.
+
+
+```{r planned OR summary, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(PlannedOR)) %>%
+  group_by(PlannedOR) %>%
+  summarize(
+    Count = n(),
+    Percentage = scales::percent(Count / nrow(genk %>% filter(!is.na(PlannedOR))), 0.1),
+    Mean = round(mean(PlannedDurationMinutes, na.rm = TRUE), 1),
+    Median = round(median(PlannedDurationMinutes, na.rm = TRUE), 1),
+    SD = round(sd(PlannedDurationMinutes, na.rm = TRUE), 1),
+    CV = round(sd(PlannedDurationMinutes, na.rm = TRUE) / mean(PlannedDurationMinutes, na.rm = TRUE), 2),
+    IQR = round(IQR(PlannedDurationMinutes, na.rm = TRUE), 1),
+    P95 = round(quantile(PlannedDurationMinutes, 0.95, na.rm = TRUE), 1),
+    UniqueProcedures = n_distinct(ProcedureName)
+  ) %>%
+  arrange(desc(Count)) %>%
+  pander(
+    split.table = 120,
+    caption = "Per operating room: number of planned surgeries, planned duration metrics (minutes), and procedure diversity \\label{tab:planned_or}"
+  )
+```
+
+The distribution of planned surgeries across operating rooms is highly uneven. Only a few rooms account for the largest share of scheduled activity, as shown by the clearly taller bars on the left side of the figure. After these high volume rooms, the number of planned surgeries drops substantially, with the remaining operating rooms showing progressively lower activity. Toward the right side of the chart, several rooms have only minimal planned volume, reflected in the very short bars. This steep decline illustrates that planned surgical activity in the Cathlab is concentrated in a limited subset of rooms, while many others are used far less intensively. Figure \ref{fig:planned_or_bar} shows the full distribution across rooms.
+
+```{r bar planned or, echo=F, fig.cap="Number of planned surgeries per planned operating room \\label{fig:planned_or_bar}", fig.pos='H'}
+genk %>%
+  filter(!is.na(PlannedOR)) %>%
+  count(PlannedOR, sort = TRUE) %>%
+  ggplot(aes(x = reorder(PlannedOR, -n), y = n)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Number of planned surgeries per planned operating room",
+    x = "Planned operating room",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 6),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+## Actual surgery information
+
+The actual surgery information provides an overview of how surgical activity was ultimately carried out in practice. By examining actual durations, operating room use, and volume distribution, this section highlights how the execution of surgeries compares to the initial plan. Understanding these real-world patterns is essential for interpreting deviations, overtime, and workflow efficiency in the following analyses.
+
+### ActualOR
+
+Similar to the planning data, surgical activity is concentrated in a small group of rooms. The highest volumes are performed in KOO2 and KOO5, with 2852 and 2665 surgeries respectively, followed closely by KOO1 at 1846 cases. KOO6 and KOO7 form a secondary tier with 961 and 914 surgeries, while KOO3 and KOO4 handle only very limited numbers of procedures. This sharp decline in counts across rooms confirms that the actual workload at the Cathlab is highly clustered within a few core operating rooms.
+
+The distribution of mean durations is broad, with some rooms showing relatively short average procedure times and others substantially longer ones, as visible from the variation in Table \ref{tab:actual_or}. These differences highlight clear variation in case mix, with certain rooms handling faster, standardized procedures and others performing more time intensive interventions.
+
+The coefficient of variation likewise shows meaningful variability between rooms, indicating that some rooms experience more consistent procedure durations while others display wider fluctuation. Procedure diversity also differs strongly: some rooms register only a handful of unique procedures, while others accommodate more than sixty. Together, these patterns show that actual OR utilisation at the Cathlab is far from uniform, with substantial heterogeneity in both activity volume and procedural complexity across operating rooms.
+
+
+```{r table actual or, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(ActualOR)) %>%
+  group_by(ActualOR) %>%
+  summarize(
+    Count = n(),
+    Percent = scales::percent(n() / nrow(genk %>% filter(!is.na(ActualOR))), 0.1),
+    Mean = round(mean(DurationMinutes, na.rm = TRUE), 1),
+    Median = round(median(DurationMinutes, na.rm = TRUE), 1),
+    SD = round(sd(DurationMinutes, na.rm = TRUE), 1),
+    CV = round(sd(DurationMinutes, na.rm = TRUE) / mean(DurationMinutes, na.rm = TRUE), 2),
+    IQR = round(IQR(DurationMinutes, na.rm = TRUE), 1),
+    P95 = round(quantile(DurationMinutes, 0.95, na.rm = TRUE), 1),
+    UniqueProc = n_distinct(ProcedureName)
+  ) %>%
+  arrange(desc(Count)) %>%
+  pander(
+    split.table = 120,
+    caption = "Per operating room: number of actual surgeries, duration metrics (minutes), and procedure diversity \\label{tab:actual_or}"
+  )
+```
+
+The distribution of actual surgeries across operating rooms closely mirrors the planning data. The highest levels of activity are concentrated in KOO2 and KOO5, which form the two tallest bars on the left of the figure, followed by KOO1 at a somewhat lower volume. After these core rooms, the number of surgeries decreases markedly, with KOO6 and KOO7 showing moderate activity and the remaining rooms registering only minimal counts. This steep drop toward the right side of the chart highlights how actual utilisation is concentrated in a small subset of heavily used operating rooms, while others are activated far less frequently or for more specialised purposes. Figure \ref{fig:actual_or_bar} displays the full distribution.
+
+
+```{r bar actual or, echo=F, fig.cap="Number of actual surgeries per actual operating room \\label{fig:actual_or_bar}", fig.pos='H'}
+genk %>%
+  filter(!is.na(ActualOR)) %>%
+  count(ActualOR, sort = TRUE) %>%
+  ggplot(aes(x = reorder(ActualOR, -n), y = n)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Number of actual surgeries per actual operating room",
+    x = "Actual operating room",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 6),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+```
+
+### DurationMinutes
+
+The average observed surgery duration at the Cathlab is 91 minutes, with a median of 84 minutes, indicating that while many procedures cluster around moderately short durations, a smaller subset of longer cases raises the mean. The interquartile range of 50 minutes confirms substantial variability within the middle portion of the distribution. Most surgeries fall well below the upper extremes, yet a limited number extend to much longer durations, reaching up to 484 minutes. At the upper end of the distribution, the ninety fifth percentile equals 166 minutes, the ninety ninth percentile 232 minutes, and the ninety nine point nine percentile 361 minutes. This pattern shows a right skewed distribution in which the majority of cases remain within predictable time frames, while a small number of lengthy procedures create a pronounced long tail. Table \ref{tab:actual_duration} summarises these statistics.
+
+```{r duration summary, echo=FALSE, table.pos='H'}
+genk %>%
+  summarize(
+    Mean = round(mean(DurationMinutes, na.rm = TRUE), 1),
+    Median = round(median(DurationMinutes, na.rm = TRUE), 1),
+    SD = round(sd(DurationMinutes, na.rm = TRUE), 1),
+    IQR = round(IQR(DurationMinutes, na.rm = TRUE), 1),
+    Min = min(DurationMinutes, na.rm = TRUE),
+    Max = max(DurationMinutes, na.rm = TRUE),
+    P95 = quantile(DurationMinutes, 0.95, na.rm = TRUE),
+    P99 = quantile(DurationMinutes, 0.99, na.rm = TRUE),
+    P99.9 = quantile(DurationMinutes, 0.999, na.rm = TRUE)
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Actual surgery duration (minutes), summary statistics \\label{tab:actual_duration}"
+  )
+
+```
+
+The distribution of actual surgery durations at the Cathlab shows a pronounced right skew, with the highest bars concentrated in the shorter duration ranges. Most procedures fall between roughly 60 and 110 minutes, after which the frequency declines steadily as durations increase. Only a small share of cases occupies the longest duration intervals, confirming that extended procedures are relatively rare in this setting. This pattern reflects a workflow dominated by moderately short interventions, while long operations form a thin tail at the far end of the distribution. The trimmed view at the ninety ninth percentile, shown in Figure \ref{fig:actual_duration_hist}, captures the central mass of the data while filtering out extreme outliers that would otherwise compress the visual scale.
+
+```{r histogram duration, echo=F, fig.cap="Distribution of actual surgery durations (trimmed at P99) \\label{fig:actual_duration_hist}", fig.pos='H'}
+upper <- quantile(genk$DurationMinutes, 0.99, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(DurationMinutes), DurationMinutes <= upper) %>%
+  ggplot(aes(x = DurationMinutes)) +
+  geom_histogram(
+    binwidth = 10,
+    boundary = 0,                
+    fill = "steelblue",
+    color = "white"
+  ) +
+  labs(
+    title = "Distribution of actual surgery durations (trimmed at P99)",
+    x = "Actual duration (minutes)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+## Deviation metrics
+
+Deviation metrics capture the numerical differences between planned and actual performance at different points in the workflow. They quantify how accurately start times, end times, and total durations match the original plan. Analysing these deviations helps identify where delays or overruns of a particular surgery most often occur and whether they are systematic or random. This section provides the foundation for understanding the root causes of schedule inaccuracy.
+
+### StartDiff
+
+The difference between actual and planned start times shows substantial variability at the Cathlab. On average, surgeries begin 17.2 minutes later than scheduled, while the median delay is only 5 minutes, indicating that many cases start close to plan but a subset introduces considerable delay. The very high standard deviation of 122.2 minutes reflects the presence of extreme timestamps, which almost certainly include registration anomalies rather than true operational deviations. Table \ref{tab:startdiff} summarises these deviation metrics.
+
+In total, 28.2 percent of cases begin more than 30 minutes late, while 21.1 percent start more than 30 minutes early. This reveals that meaningful deviations occur in both directions, with late starts somewhat more common but early starts also frequent. These figures provide a first quantitative indication of how often the planned start time is not met in practice, highlighting the inherent variability in coordinating Cathlab procedures.
+
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  summarize(
+    Mean = round(mean(start_diff, na.rm = TRUE), 1),
+    Median = round(median(start_diff, na.rm = TRUE), 1),
+    SD = round(sd(start_diff, na.rm = TRUE), 1),
+    IQR = round(IQR(start_diff, na.rm = TRUE), 1),
+    Min = round(min(start_diff, na.rm = TRUE), 1),
+    Max = round(max(start_diff, na.rm = TRUE), 1),
+    P95 = round(quantile(start_diff, 0.95, na.rm = TRUE), 1),
+    P99 = round(quantile(start_diff, 0.99, na.rm = TRUE), 1),
+    P99_9 = round(quantile(start_diff, 0.999, na.rm = TRUE), 1),
+    `> 30 min late` = scales::percent(mean(start_diff > 30, na.rm = TRUE), 0.1),
+    `< -30 min early` = scales::percent(mean(start_diff < -30, na.rm = TRUE), 0.1)
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Difference between actual and planned start time in minutes \\label{tab:startdiff}"
+  )
+
+```
+
+The distribution of start time deviations is centred around zero but displays a noticeable skew toward positive values, indicating that delays occur more frequently than early starts. The tallest bars cluster tightly around zero, showing that many Cathlab procedures begin close to their scheduled time. As the bars extend outward in both directions, the distribution forms long tails that reflect the presence of substantial early and late deviations. The right tail, however, is clearly more pronounced than the left, confirming that large delays are more common than equally large early starts. Overall, the pattern suggests that while day to day planning captures the general timing reasonably well, maintaining start time punctuality remains challenging for a considerable share of procedures. Figure \ref{fig:startdiff_hist} shows the distribution grouped in ten minute intervals.
+
+```{r, echo=F, fig.cap="Start time deviations grouped per ten minutes \\label{fig:startdiff_hist}", fig.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), start_diff <= 200, start_diff >= -200) %>%
+  mutate(start_diff_bin = round(start_diff / 10) * 10) %>%     # groepeer per 10 min
+  count(start_diff_bin) %>%
+  ggplot(aes(x = start_diff_bin, y = n)) +
+  geom_col(fill = "steelblue") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  scale_x_continuous(
+    breaks = seq(-180, 180, by = 30),
+    labels = function(x) ifelse(x > 0, paste0("+", x), x)
+  ) +
+  labs(
+    title = "Start time deviations (grouped per 10 minutes)",
+    x = "Start difference in minutes",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+
+```
+
+Among the one percent most extreme start time deviations, a small group of procedure types appears more frequently than others. Table \ref{tab:extreme_start_procedures} shows that Recanalisatie intracranieel stroke accounts for by far the largest number of outliers, with 39 cases, followed by embolisatie visceraal with 16 cases. Several other procedures, including RX interventionele perifeer, RX interventionele neuro, and various vascular dilatations, also appear among the most extreme deviations, though in much smaller numbers. This pattern indicates that large start time deviations are concentrated in a limited set of complex or time sensitive interventions, while most other procedure types contribute only a handful of outlier cases.
+
+```{r, echo=FALSE, table.pos='H'}
+threshold <- quantile(abs(genk$start_diff), 0.99, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(start_diff), abs(start_diff) >= threshold) %>%
+  count(ProcedureName, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pander(
+    split.table = 120,
+    caption = "Top 10 procedure types among the one percent most extreme start time deviations \\label{tab:extreme_start_procedures}"
+  )
+```
+
+The analysis of operating rooms with the most extreme start time deviations shows that a small number of rooms account for a large share of the outliers. KO06 stands out clearly, with 69 extreme cases, far exceeding any other room. KO05 follows at a distance with 14 cases, while the remaining rooms including KO01, KO02, KO03, and KO07 contribute only a handful of occurrences each. This pattern suggests that start time deviations are not evenly distributed across the Cathlab complex but tend to cluster in a limited subset of rooms. Table \ref{tab:extreme_start_or} provides an overview of the operating rooms most frequently involved.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), abs(start_diff) >= threshold) %>%
+  count(ActualOR, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pander(
+    split.table = 120,
+    caption = "Top 10 operating rooms among the one percent most extreme start time deviations \\label{tab:extreme_start_or}"
+  )
+```
+
+Among the most extreme one percent of start time deviations, the vast majority are late starts. A total of 80 cases, or 86.0 percent, begin later than planned, while only 13 cases, or 14.0 percent, start earlier. This clear imbalance confirms that extreme deviations almost always occur in the direction of delay rather than early execution. It suggests that structural or operational factors within the Cathlab more often lead to postponed starts than unexpectedly early ones, making delayed openings the dominant source of major scheduling disruptions. Table \ref{tab:extreme_start_direction} summarises this distribution.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(start_diff), abs(start_diff) >= threshold) %>%
+  mutate(Direction = ifelse(start_diff > 0, "Late", "Early")) %>%
+  count(Direction) %>%
+  mutate(Percentage = scales::percent(n / sum(n), 0.1)) %>%
+  pander(
+    split.table = 120,
+    caption = "Distribution of direction, early versus late, among the one percent most extreme cases \\label{tab:extreme_start_direction}"
+  )
+```
+
+### EndDiff
+
+The difference between actual and planned end times shows a clear tendency toward delayed finishes. On average, procedures end 14.2 minutes later than planned, with a median delay of 4 minutes. The very large standard deviation of 121.4 minutes reflects the presence of extreme timestamps that fall outside realistic operating times. In total, 33.2 percent of cases finish more than 30 minutes late, while 25.5 percent end more than 30 minutes early. These results indicate that moderate delays are common, whereas very large deviations occur in a more limited number of cases. Table \ref{tab:enddiff} summarises these results.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  summarize(
+    Mean = round(mean(end_diff, na.rm = TRUE), 1),
+    Median = round(median(end_diff, na.rm = TRUE), 1),
+    SD = round(sd(end_diff, na.rm = TRUE), 1),
+    IQR = round(IQR(end_diff, na.rm = TRUE), 1),
+    Min = round(min(end_diff, na.rm = TRUE), 1),
+    Max = round(max(end_diff, na.rm = TRUE), 1),
+    P95 = round(quantile(end_diff, 0.95, na.rm = TRUE), 1),
+    P99 = round(quantile(end_diff, 0.99, na.rm = TRUE), 1),
+    P99_9 = round(quantile(end_diff, 0.999, na.rm = TRUE), 1),
+    `> 30 min late` = scales::percent(mean(end_diff > 30, na.rm = TRUE), 0.1),
+    `< -30 min early` = scales::percent(mean(end_diff < -30, na.rm = TRUE), 0.1)
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Difference between actual and planned end time in minutes \\label{tab:enddiff}"
+  )
+```
+
+The distribution of end time deviations is centred around zero but slightly skewed toward positive values, indicating that delays are more frequent than early completions. The tallest bars appear near zero, showing that many procedures finish close to the planned time, while the distribution tapers off gradually in both directions. The right tail is visibly more extended than the left, confirming that some cases run substantially longer than expected. This pattern closely resembles the distribution observed for start time deviations, suggesting that delays occurring earlier in the workflow often carry through to the end of the procedure. Figure \ref{fig:enddiff_hist} shows the distribution grouped in ten minute intervals.
+
+```{r end_diff_hist, echo=F, fig.cap="End time deviations grouped per ten minutes \\label{fig:enddiff_hist}", fig.pos='H'}
+genk %>%
+filter(!is.na(end_diff), end_diff <= 200, end_diff >= -200) %>%
+mutate(end_diff_bin = round(end_diff / 10) * 10) %>%     # groepeer per 10 min
+count(end_diff_bin) %>%
+ggplot(aes(x = end_diff_bin, y = n)) +
+geom_col(fill = "steelblue") +
+geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+scale_x_continuous(
+breaks = seq(-180, 180, by = 30),
+labels = function(x) ifelse(x > 0, paste0("+", x), x)
+) +
+labs(
+title = "End time deviations (grouped per 10 minutes)",
+x = "End difference in minutes",
+y = "Number of surgeries"
+) +
+theme_minimal() +
+theme(
+axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+plot.title = element_text(hjust = 0.5)
+)
+
+```
+
+Among the one percent most extreme end time deviations, a small number of procedure types appear more frequently than others. Table \ref{tab:extreme_end_procedures} shows that Recanalisatie intracranieel stroke and embolisatie visceraal are the most common, with 31 and 17 cases respectively. Several other high-complexity interventions also recur among the outliers, including Dilatatie femoralis, RX interventionele neuro, RX interventionele perifeer, and RX angio 4-vaten. A few ablation procedures, such as Ablatie persisterende VKF, Ablatie VKF, Dilatatie tibialis, and Ablatie atriale tachycardie, also appear in smaller numbers. This diverse set of interventions shows that large deviations are not confined to a single procedural category but emerge across a range of technically demanding cardiology and radiology procedures.
+
+```{r, echo=FALSE, table.pos='H'}
+threshold_end <- quantile(abs(genk$end_diff), 0.99, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(end_diff), abs(end_diff) >= threshold_end) %>%
+  count(ProcedureName, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pander(
+    split.table = 120,
+    caption = "Top 10 procedure types among the one percent most extreme end time deviations \\label{tab:extreme_end_procedures}"
+  )
+```
+
+A small number of operating rooms account for most extreme end time deviations. KO06 clearly dominates, with 65 extreme cases, while the other rooms in the top group show much lower counts. These include KO05 with 20 cases, followed by KO02, KO01, and KO07, each with only a handful of occurrences. This confirms that end time overruns are not evenly distributed across the Cathlab but tend to cluster in a limited set of operating rooms. Table \ref{tab:extreme_end_or} provides an overview of the rooms most frequently involved.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(end_diff), abs(end_diff) >= threshold_end) %>%
+  count(ActualOR, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pander(
+    split.table = 120,
+    caption = "Top 10 operating rooms among the one percent most extreme end time deviations \\label{tab:extreme_end_or}"
+  )
+```
+
+Among the most extreme end time deviations, the vast majority of cases end later than planned. A total of 67 cases, or 72.0 percent, finish late, compared to 26 cases, or 28.0 percent, that end earlier than planned. This clear asymmetry confirms that schedule overruns are the dominant pattern, similar to what is observed for start times. Large early completions remain relatively rare, suggesting that delays accumulate more easily than time savings during the surgical process. Table \ref{tab:extreme_end_direction} summarises this distribution.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(end_diff), abs(end_diff) >= threshold_end) %>%
+  mutate(Direction = ifelse(end_diff > 0, "Late", "Early")) %>%
+  count(Direction) %>%
+  mutate(Percentage = scales::percent(n / sum(n), 0.1)) %>%
+  pander(
+    split.table = 120,
+    caption = "Distribution of direction, early versus late, among the one percent most extreme end time deviations \\label{tab:extreme_end_direction}"
+  )
+```
+
+
+### DurationDiff
+
+When distinguishing between longer and shorter cases, a clear asymmetry appears. A total of 43.0 percent of surgeries take longer than planned, with an average overrun of 26.9 minutes and a median of 18 minutes. In contrast, 57.0 percent finish sooner, with an average gain of 25.7 minutes and a median of 15 minutes. The standard deviation is considerably larger for cases that finish sooner (82.1 minutes) than for those that take longer (29.4 minutes), indicating that some procedures end far earlier than planned, while overruns are more tightly concentrated. Overall, most operations remain reasonably close to their planned duration, confirming that duration estimates are generally reliable. Table \ref{tab:duration_diff_direction} summarises these patterns.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(duration_diff)) %>%
+  mutate(
+    direction = ifelse(duration_diff > 0, "Longer than planned", "Shorter than planned"),
+    abs_diff = abs(duration_diff)
+  ) %>%
+  group_by(direction) %>%
+  summarize(
+    Mean = round(mean(abs_diff, na.rm = TRUE), 1),
+    Median = round(median(abs_diff, na.rm = TRUE), 1),
+    SD = round(sd(abs_diff, na.rm = TRUE), 1),
+    IQR = round(IQR(abs_diff, na.rm = TRUE), 1),
+    Min = round(min(abs_diff, na.rm = TRUE), 1),
+    Max = round(max(abs_diff, na.rm = TRUE), 1),
+    P95 = round(quantile(abs_diff, 0.95, na.rm = TRUE), 1),
+    P99 = round(quantile(abs_diff, 0.99, na.rm = TRUE), 1),
+    P99_9 = round(quantile(abs_diff, 0.999, na.rm = TRUE), 1),
+    Percent = scales::percent(
+      n() / nrow(genk %>% filter(!is.na(duration_diff))),
+      0.1
+    )
+  ) %>%
+  pander(
+    split.table = 120,
+    caption = "Difference between actual and planned duration, absolute minutes, separated by direction \\label{tab:duration_diff_direction}"
+  )
+
+```
+
+Among the one percent most extreme duration deviations, a small group of procedure types appears more frequently than others. Table \ref{tab:extreme_duration_procedures} shows that Recanalisatie intracranieel stroke is the most common, with 17 extreme cases in total, followed closely by RX interventionele neuro with 15 cases. Several vascular procedures, including Dilatatie femoralis, Dilatatie iliaca, and embolisatie visceraal, also appear regularly among the outliers, each contributing multiple shorter and longer than planned cases. Other procedures such as Ablatie structurele ventriculaire tachycardie, Lead extractie, RX angio 4 vaten, Ablatie VKF, and PTCA HOSP occur less frequently but still feature within the extreme deviations. This distribution indicates that large mismatches between planned and actual duration arise across a diverse set of interventional and electrophysiological procedures rather than being concentrated in a single category.
+
+```{r, echo=FALSE, table.pos='H'}
+threshold_dur <- quantile(abs(genk$duration_diff), 0.99, na.rm = TRUE)
+
+genk %>%
+  filter(!is.na(duration_diff), abs(duration_diff) >= threshold_dur) %>%
+  mutate(Direction = ifelse(duration_diff > 0, "Longer", "Shorter")) %>%
+  count(Direction, ProcedureName, sort = TRUE) %>%
+  tidyr::pivot_wider(
+    names_from = Direction,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  mutate(Total = Longer + Shorter) %>%
+  arrange(desc(Total)) %>%
+  slice_head(n = 10) %>%
+  pander(
+    split.table = 120,
+    caption = "Top 10 procedure types with the highest number of extreme duration deviations \\label{tab:extreme_duration_procedures}"
+  )
+```
+
+A limited number of operating rooms account for the majority of extreme duration deviations. KO06 shows the highest number of extreme cases, with 35 deviations in total, followed by KO05 with 25 cases and KO07 with 17 cases. The remaining rooms in the top group, including KO02, KO01, and KO03, register smaller but still noticeable numbers of deviations, ranging from four to eight cases. The balance between shorter and longer procedures differs by room: KO07, for example, records far more longer than planned surgeries, while KO06 and KO05 show a predominance of shorter than planned cases. Overall, the largest mismatches between planned and actual duration are concentrated in a small set of operating rooms. Table \ref{tab:extreme_duration_or} summarises these operating rooms.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(duration_diff), abs(duration_diff) >= threshold_dur) %>%
+  mutate(Direction = ifelse(duration_diff > 0, "Longer", "Shorter")) %>%
+  count(Direction, ActualOR, sort = TRUE) %>%
+  tidyr::pivot_wider(
+    names_from = Direction,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  mutate(Total = Longer + Shorter) %>%
+  arrange(desc(Total)) %>%
+  slice_head(n = 10) %>%
+  pander(
+    split.table = 120,
+    caption = "Top 10 operating rooms with the highest number of extreme duration deviations \\label{tab:extreme_duration_or}"
+  )
+```
+
+Among the most extreme one percent of duration deviations, 46 cases, or 48.9 percent, last longer than planned, while 48 cases, or 51.1 percent, finish sooner. This near even split shows that extreme deviations occur in both directions without a strong asymmetry. The pattern suggests that for the Cathlab, large mismatches between planned and actual duration are not dominated by systematic overruns or underruns but arise from case specific variation. Table \ref{tab:extreme_duration_direction} summarises this distribution.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(duration_diff), abs(duration_diff) >= threshold_dur) %>%
+  mutate(Direction = ifelse(duration_diff > 0, "Longer", "Shorter")) %>%
+  count(Direction) %>%
+  mutate(Percentage = scales::percent(n / sum(n), 0.1)) %>%
+  pander(
+    split.table = 120,
+    caption = "Distribution of direction among the one percent most extreme duration deviations \\label{tab:extreme_duration_direction}"
+  )
+```
+
+### percentage_deviation
+
+When expressing the differences between planned and actual durations in relative terms, a clear asymmetry appears between longer and shorter cases. Surgeries that take longer than planned deviate on average by 34.1 percent, with a median deviation of 21.8 percent, while procedures that finish sooner show an average deviation of 20.5 percent and a median of 17.9 percent. This indicates that overruns tend to be larger in magnitude than underruns, even though shorter than planned cases remain common. The interquartile ranges, 33.6 percent for longer cases and 20.8 percent for shorter ones, highlight substantial variability across procedures. The upper percentiles further show the scale of extreme deviations, with the ninety fifth percentile equal to 105 percent for longer cases and 47 percent for shorter cases. Table \ref{tab:rel_dev_direction} summarises these patterns.
+
+```{r, echo=FALSE, table.pos='H'}
+genk %>%
+  filter(!is.na(percentage_deviation)) %>%
+  mutate(
+    direction = ifelse(percentage_deviation > 0, "Longer than planned", "Shorter than planned"),
+    abs_dev   = abs(percentage_deviation)
+  ) %>%
+  group_by(direction) %>%
+  summarize(
+    Mean   = round(mean(abs_dev), 1),
+    Median = round(median(abs_dev), 1),
+    SD     = round(sd(abs_dev), 1),
+    IQR    = round(IQR(abs_dev), 1),
+    Min    = round(min(abs_dev), 1),
+    Max    = round(max(abs_dev), 1),
+    P95    = round(quantile(abs_dev, 0.95), 1),
+    P99    = round(quantile(abs_dev, 0.99), 1),
+    P99.9  = round(quantile(abs_dev, 0.999), 1),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(direction)) %>%   
+  pander(
+    split.table = 120,
+    caption = "Relative deviation, separated by direction \\label{tab:rel_dev_direction}"
+  )
+```
+
+The distribution of percentage deviations is centered around zero, indicating that many surgeries finish close to their planned duration. The peak is slightly shifted toward positive values, showing that procedures more often run longer than planned. The distribution tapers gradually on both sides, but the right tail is visibly more extended, reflecting that large overruns occur more frequently than equally large under runs. The narrow central peak suggests reasonably accurate planning for the majority of cases, while the broader spread of the bars shows that sizable deviations still arise in a meaningful subset of surgeries. Figure \ref{fig:percentage_deviation} displays the distribution grouped per ten percent.
+
+```{r, echo=F, fig.cap="Percentage deviation (grouped per 10 percent) \\label{fig:percentage_deviation}", fig.pos='H'}
+genk %>%
+  filter(!is.na(percentage_deviation), percentage_deviation <= 200, percentage_deviation >= -200) %>%
+  mutate(percentage_bin = round(percentage_deviation / 10) * 10) %>%     # groepeer per 10%
+  count(percentage_bin) %>%
+  ggplot(aes(x = percentage_bin, y = n)) +
+  geom_col(fill = "steelblue") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  scale_x_continuous(
+    breaks = seq(-180, 180, by = 30),
+    labels = function(x) paste0(ifelse(x > 0, "+", ""), x, "%")
+  ) +
+  labs(
+    title = "Percentage deviation (grouped per 10%)",
+    x = "Percentage difference (actual - planned, %)",
+    y = "Number of surgeries"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+The procedures with the highest average relative deviations show considerable differences between planned and actual durations. As shown in Figure \ref{fig:top20_rel_dev}, the largest mean deviation is observed for RX angio 4 vaten, followed by RX Vertebroplastie, LEAD EXTRACTIE, and several other procedures that also display noticeably high deviations. These procedures form a clear upper group, with deviations that are substantially larger than those seen in the remaining procedure types. These results indicate that for certain interventions, the planned duration does not consistently reflect the time actually required in practice. Some of these deviations may relate to case complexity, variation in procedural workflow, or the presence of patient specific factors that are not captured in the planning estimates. Further analysis would be needed to determine whether these deviations stem from systematic underestimation or reflect inherent unpredictability in these procedures. Figure \ref{fig:top20_rel_dev} shows the top twenty procedure types with the highest mean relative deviation.
+
+```{r, echo=F, fig.cap="Top 20 procedure types with highest relative deviation \\label{fig:top20_rel_dev}", fig.pos='H'}
+genk %>%
+filter(!is.na(percentage_deviation)) %>%
+group_by(ProcedureName) %>%
+summarize(MeanDeviation = mean(percentage_deviation, na.rm = TRUE), n = n()) %>%
+filter(n >= 30) %>% # enkel voldoende steekproefgrootte
+arrange(desc(MeanDeviation)) %>%
+slice_head(n = 20) %>%
+ggplot(aes(x = reorder(ProcedureName, MeanDeviation), y = MeanDeviation)) +
+geom_col(fill = "steelblue") +
+coord_flip() +
+labs(
+title = "Top 20 procedure types with highest relative deviation",
+x = "Procedure name",
+y = "Mean percentage deviation (%)"
+) +
+theme_minimal() +
+theme(
+axis.text.y = element_text(size = 7),
+plot.title = element_text(hjust = 0.5)
+)
+
+```
+
+The average relative deviation varies considerably across the days of the week. From Monday to Friday, deviations remain relatively low, although clear differences appear between days. Tuesday shows the smallest mean deviation, while Wednesday and Friday display slightly higher values, indicating modest variation even within regular operating days. In contrast, deviations rise sharply during the weekend. Both Saturday and especially Sunday show much larger average deviations, with Sunday reaching more than twice the level of any weekday. This pronounced increase suggests that weekend procedures are less predictable in duration, most likely because they involve a different mix of cases than those performed during the week. Figure \ref{fig:weekday_rel_dev} illustrates these day to day differences in mean relative deviation.
+
+```{r, echo=F, fig.cap="Average relative deviation per weekday \\label{fig:weekday_rel_dev}", fig.pos='H'}
+genk %>%
+  filter(!is.na(percentage_deviation)) %>%
+  group_by(Weekday) %>%
+  summarize(MeanDeviation = mean(percentage_deviation, na.rm = TRUE), n = n()) %>%
+  mutate(Weekday = factor(
+    Weekday,
+    levels = c("Ma","Di","Wo","Do","Vr","Za","Zo"),
+    labels = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")   # Engelse labels
+  )) %>%
+  ggplot(aes(x = Weekday, y = MeanDeviation)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Average relative deviation per weekday",
+    x = "Weekday",
+    y = "Mean percentage deviation (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(size = 7),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+```
+
+\newpage
+
+# Conclusion
+The exploratory analysis provides an overview of surgical activity at the Cathlab campus across multiple dimensions of time, procedure type, and operating room planning. The results show that activity is almost entirely elective, concentrated during regular daytime hours, and characterized by very short hospital stays. This pattern reflects a high throughput setting focused on planned interventions, with limited emergency involvement and a strong emphasis on short stay or day procedures.
+
+The descriptive statistics also reveal substantial variability in both planned and observed metrics across procedure types and operating rooms. Planned durations span a wide range, workload is unevenly distributed across rooms, and procedure volumes differ sharply between categories. These contrasts highlight the operational heterogeneity underlying the aggregate figures and point to the need for performance indicators that capture more than simple throughput or utilization levels.
+
+The insights from this baseline analysis form the foundation for more advanced performance evaluation. Quantifying deviations between planned and actual activity makes it possible to pinpoint where scheduling accuracy can be strengthened and where operational processes may benefit from targeted refinement.

@@ -1,0 +1,312 @@
+---
+title: "Data Quality Report"
+subtitle: "Leveraging Data Analytics for Efficient OR Planning at ZOL"
+date: "October 2025"
+geometry: margin=1in
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: false
+header-includes:
+  - |
+    \usepackage{graphicx}
+    \usepackage{booktabs}
+    \usepackage{float}
+    \usepackage{titling}
+
+    % Logo's bovenaan
+    \pretitle{%
+      \begin{center}
+      \includegraphics[width=4cm]{figures/BINF.png}\hfill
+      \includegraphics[width=6cm]{figures/PAIH.png}\\[2cm]
+      \huge
+    }
+    \posttitle{\end{center}}
+---
+
+\begin{center}
+\vspace{2cm}
+
+Niels MARTIN\\
+niels.martin@uhasselt.be\\[0.5em]
+Maxim RIEBUS\\
+maxim.riebus@uhasselt.be\\[0.5em]
+Haroon THARWAT\\
+haroon.tharwat@uhasselt.be\\
+
+\vspace{6cm}
+
+\textbf{Hasselt University} \\
+Faculty of Business Economics \\
+Research Group Business Informatics \\
+Process Analytics in Healthcare
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+knitr::opts_chunk$set(out.width = "70%")
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.asp = 0.618)
+
+kable <- function(x, ...) {
+  knitr::kable(x, booktabs = T, format = "latex",  position = "H", ...)
+}
+
+knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+source("packages.R")
+
+```
+
+```{r data import, include=FALSE}
+# run data cleaning script
+source("data_cleaning_quality.R")
+
+# load cleaned data from the 'modified data' folder
+data    <- read_excel("modified data/data_cleaned.xlsx")
+genk    <- read_excel("modified data/genk_cleaned.xlsx")
+lanaken <- read_excel("modified data/lanaken_cleaned.xlsx")
+maaseik <- read_excel("modified data/maaseik_cleaned.xlsx")
+```
+
+# Introduction
+
+This report evaluates the quality of the surgical dataset used in the study. Reliable data are essential to ensure that analyses on operating room efficiency and scheduling accurately reflect clinical practice. The focus of this document is to assess completeness, consistency, and plausibility across all relevant variables.
+
+The dataset covers all surgical procedures recorded during the study period and includes 139350 unique patients over four years. Data were collected from the three ZOL campuses: Sint Jan in Genk, Sint Barbara in Lanaken, and Maaseik. Together, they provide a comprehensive overview of surgical activity across the hospital network.
+
+In total, 2258 procedure codes and 2224 procedure names were registered, reflecting the diversity of surgical activities. Surgeries were planned in 53 operating rooms and actually performed in 49, which indicates that procedures were occasionally moved between rooms. Surgical activity was recorded on all seven days of the week, allowing for comparisons between weekdays and weekends.
+
+The dataset includes 329 head surgeons and 220 anesthesiologists, representing a large and diverse professional team. The variable Length of Stay contains 177 distinct values, offering detailed information on postoperative hospitalization. Finally, Admission Type distinguishes between elective, urgent, and emergency procedures.
+
+Table \ref{tab:unique} summarizes the number of unique values for the key variables included in the analysis. These counts provide an initial indication of the dataset’s richness and variability, which are important factors when assessing data completeness and consistency.
+
+Overall, this dataset forms a strong basis for studying how accurately surgeries are planned, how efficiently operating rooms are used, and how urgency affects operating room performance.
+
+```{r unique values, echo=F}
+
+# unique values per variable
+unique_counts <- data %>%
+  select(
+    AnesthesiologistID, ProcedureCode, ProcedureName, PlannedOR,
+    LengthOfStay, HeadSurgeonID, PatientID, Year,
+    Weekday, AdmissionType, ActualOR
+  ) %>%
+  summarise(across(everything(), ~ n_distinct(.))) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "UniqueValues") %>%
+  arrange(desc(UniqueValues))
+
+knitr::kable(
+  unique_counts,
+  caption = "Number of unique values per variable \\label{tab:unique}"
+)
+
+```
+
+
+# Data Quality
+## Missing value analysis
+
+Table \ref{tab:missing} shows the absolute and relative number of missing values per variable. Overall, the dataset is largely complete, but a few variables contain notable gaps that may influence specific analyses. All variables that are not listed in the table have no missing values at all.
+
+The variable relative_overtime_minutes has the highest proportion of missing values, with 92.83 percent of records not containing a value. This is expected and does not indicate a data quality issue. The variable can only be calculated when both planned and actual after-hours are available. In most cases, no after-hours were planned, which automatically results in missing values.
+
+The variable AnesthesiologistID is missing in 34.03 percent of records. This reduces the number of observations available for analyses related to anesthesiologist involvement, such as team composition or workload distribution.
+
+The variable gap_time is missing in 17.37 percent of cases. This variable captures the idle minutes in an operating room during the regular day shift (08:00–16:30). It measures the time a room remained unused between the start of the shift and the first surgery, or between consecutive cases. Gaps longer than 60 minutes or with missing timestamps are excluded by definition.
+
+The variables ProcedureCode and ProcedureName are missing only in a very small portion of the dataset. The missing values appear slightly more often in emergency and non elective cases, as well as in a few low volume operating rooms. This suggests that the incompleteness is mainly linked to contextual or administrative factors rather than systematic data entry issues. Given the small scale and limited concentration of these gaps, their overall impact on analyses by procedure type is expected to be minimal.
+
+Several planning related variables, such as PlannedOR, PlannedStartDT, and PlannedEndDT, show very small amounts of missing data, all below 0.25 percent. This minimal incompleteness is unlikely to affect analyses but could slightly influence comparisons between planned and observed timings when these few records are excluded.
+
+Variables such as HeadSurgeonID, LengthOfStay, and LengthOfStayWithoutRevalidation are almost fully complete, with less than 0.03 percent missing. These few gaps likely represent incomplete or ongoing hospitalizations at the time of data extraction.
+
+All other key time related and categorical variables, including ORIn, OROut, PatientID, AdmissionType, and UrgencyType, appear complete in this check. However, missingness is only one aspect of data quality. Completeness alone does not guarantee correctness, so additional checks on plausibility and internal consistency are needed in the next section.
+
+
+```{r missing values, echo=F}
+missing_data <- data %>%
+  summarise(across(everything(), ~ sum(is.na(.)))) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "MissingCount") %>%
+  mutate(MissingPerc = round((MissingCount / nrow(data)) * 100, 2)) %>%
+  filter(MissingCount > 0) %>%
+  arrange(desc(MissingPerc))
+
+knitr::kable(
+  missing_data,
+  caption = "Missing values per variable (absolute and percentage). \\label{tab:missing}")
+```
+
+## Data integrity and value plausibility
+
+Before conducting detailed analyses, it is essential to verify that the dataset is both complete and plausible. This verification ensures that the results are based on accurate, internally consistent, and clinically meaningful data. The checks focused on detecting impossible or unlikely values, such as negative or excessively long durations, missing timestamps, or inconsistencies between planned and observed timings that may reflect registration errors.
+
+Table \ref{tab:extreme} summarizes the outcome of these integrity and plausibility checks. No duplicate entries or surgeries longer than 24 hours were found, and no negative actual durations occurred. However, forty surgeries were planned for more than 24 hours and ninety seven procedures had a recorded duration of zero minutes. These records were removed from all analyses involving duration or timing variables.
+
+A total of 29 records showed implausibly large start or end deviations exceeding 3000 minutes, which clearly indicates incorrect or mismatched time registrations.
+
+To identify unrealistic procedure durations among elective surgeries, we applied explicit thresholds based on planned duration, using only records with non missing planned duration, observed duration, and percentage deviation. A case was classified as unrealistically long if the observed duration exceeded the planned duration by more than one hour for procedures planned under ten minutes, by more than seven hours for procedures planned between ten and sixty minutes, by more than six times the planned duration for procedures planned between sixty and 180 minutes, or by more than four times the planned duration for procedures planned at least 180 minutes. Conversely, a case was classified as unrealistically short if the observed duration was at least ninety five percent shorter than planned for procedures planned between ten and sixty minutes, at least ninety nine percent shorter for procedures planned between sixty and 180 minutes, or at least ninety nine point nine percent shorter for procedures planned at least 180 minutes. Using these criteria, 65 observations were flagged as unrealistically long and 260 as unrealistically short. Depending on whether a plausible clinical explanation could be verified, these records were either removed from the main analysis or retained for separate inspection.
+
+In addition, 102 elective cases had planned durations of one minute or less, and 79 contained negative planned durations, pointing to reversed or incomplete planning timestamps. Planned durations of zero were replaced by missing values to avoid invalid ratio or percentage calculations in later steps. Finally, 53 cases were identified as potential forgotten check outs, where the recorded end time occurred the following morning, consistent with late manual data entry. These records were excluded from timing analyses.
+
+Together, these checks provided a clear picture of the data quality and guided the filtering and preprocessing decisions described in the next section. After excluding or correcting these inconsistencies, the remaining dataset reliably represents the actual surgical activity at Ziekenhuis Oost Limburg and forms a robust basis for further process and performance analyses.
+
+```{r data integrity and value plausibility, echo=F}
+# ---- Counts for basic data issues ----
+n_dups <- sum(duplicated(data))
+n_neg_dur <- nrow(filter(data, DurationMinutes < 0))
+n_zero_dur <- nrow(filter(data, DurationMinutes == 0))
+n_long_durations <- nrow(filter(data, DurationMinutes > 1440))
+n_long_planned <- nrow(filter(data, PlannedDurationMinutes > 1440))
+
+
+# ---- Forgotten check-outs ----
+forgotten_checkout <- data %>%
+  filter(
+    as.Date(PlannedEndDT) == as.Date(OROut) - 1,
+    hour(OROut) >= 6,
+    duration_diff > 200
+  )
+
+# ---- Unrealistic or implausible durations ----
+unrealistic_long <- data %>%
+  filter(
+    UrgencyType == "electief",
+    !is.na(PlannedDurationMinutes),
+    !is.na(DurationMinutes),
+    !is.na(percentage_deviation),
+    (
+      (PlannedDurationMinutes < 10  & abs(duration_diff) > 60) |
+      (PlannedDurationMinutes >= 10 & PlannedDurationMinutes < 60  & abs(duration_diff) > 420) |
+      (PlannedDurationMinutes >= 60 & PlannedDurationMinutes < 180 & abs(percentage_deviation) > 600) |
+      (PlannedDurationMinutes >= 180 & abs(percentage_deviation) > 400)
+    )
+  )
+
+unrealistic_short <- data %>%
+  filter(
+    UrgencyType == "electief",
+    !is.na(PlannedDurationMinutes),
+    !is.na(DurationMinutes),
+    !is.na(percentage_deviation),
+    (
+      (PlannedDurationMinutes >= 10 & PlannedDurationMinutes < 60 & percentage_deviation < -95) |
+      (PlannedDurationMinutes >= 60 & PlannedDurationMinutes < 180 & percentage_deviation < -99) |
+      (PlannedDurationMinutes >= 180 & percentage_deviation < -99.9)
+    )
+  )
+
+# ---- Negative planned durations ----
+negative_planned <- data %>%
+  filter(!is.na(PlannedDurationMinutes), PlannedDurationMinutes < 0)
+
+# ---- Summary overview in one table ----
+integrity_summary <- tibble(
+  Metric = c(
+    "Duplicate rows",
+    "Negative durations",
+    "Zero durations",
+    "Surgeries > 24 hours",
+    "Surgeries planned > 24 hours",
+    "|start_diff| or |end_diff| > 3000 min (± 2 days)",
+    "Unrealistic long deviations",
+    "Unrealistic short deviations",
+    "PlannedDurationMinutes = 0 or ≤ 1 (elective)",
+    "Negative planned duration",
+    "Forgotten check-outs (overnight)"
+  ),
+  Count = c(
+    n_dups,
+    n_neg_dur,
+    n_zero_dur,
+    n_long_durations,
+    n_long_planned,
+    nrow(filter(data, abs(start_diff) > 3000 | abs(end_diff) > 3000)),
+    nrow(unrealistic_long),
+    nrow(unrealistic_short),
+    nrow(filter(data, UrgencyType == "electief", PlannedDurationMinutes <= 1)),
+    nrow(negative_planned),
+    nrow(forgotten_checkout)
+  )
+)
+
+# ---- Print nicely ----
+integrity_summary %>%
+  pander(
+    split.table = 120,
+    caption = "Overview of extreme, invalid, and inconsistent observations in the dataset \\label{tab:extreme}"
+  )
+
+
+```
+
+Table \ref{tab:percentiles} summarizes the upper percentiles of recorded surgery durations. Ninety five percent of all procedures last less than 155 minutes, while only one percent exceed 305 minutes. The 99.9th percentile equals 550.484 minutes, indicating that only a few procedures extend beyond typical working shifts.
+
+```{r operation-duration-percentiles, echo=F, message=FALSE, warning=FALSE}
+# Calculate percentiles of surgery duration
+duration_percentiles <- quantile(
+  data$DurationMinutes,
+  probs = c(0.95, 0.98, 0.99, 0.999),
+  na.rm = TRUE
+)
+
+# Display the results in a table
+knitr::kable(
+  as.data.frame(duration_percentiles),
+  caption = "Percentiles of surgical procedure duration (in minutes). \\label{tab:percentiles}"
+)
+
+```
+
+Figure \ref{fig:duration} shows the distribution of surgical durations, truncated at the 99th percentile for readability. Most procedures are completed within 30 to 90 minutes, with a sharp decline afterward and a long right tail representing increasingly rare long or complex cases.
+
+```{r histogram, echo=F, fig.cap="Histogram of Surgery Duration \\label{fig:duration}"}
+ggplot(data, aes(x = DurationMinutes)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "black") +
+  scale_x_continuous(limits = c(0, quantile(data$DurationMinutes, 0.99, na.rm = TRUE))) +
+  labs(
+    x = "Duration (minutes)",
+    y = "Number of Procedures"
+  )
+```
+
+# Data filtering
+
+## New data export
+
+Before analysis, the hospital’s data management team applied several preprocessing and filtering steps to ensure that the exported dataset accurately reflects surgical activity at Ziekenhuis Oost-Limburg.  
+
+According to the data manager, 28 records with observed surgery durations above 24 hours (1,440 minutes) were removed as registration errors. Both planned and observed durations were also capped at this threshold to avoid distortions in descriptive statistics.  
+
+The hospital confirmed that the data export already included only the final version of each case: when a surgery was rescheduled or re-planned, the earlier records were automatically overwritten in the source system. As a result, each entry in the dataset represents the definitive, performed procedure. 
+
+The definition of surgical urgency was standardized: surgeries are classified as non-elective when scheduled or performed within 24 hours of booking. Based on this definition, 6.4% of all cases are non-elective. 
+
+Finally, 'LengthOfStayWithoutRevalidation' has been added. 
+
+## Inclusion and exclusion rules
+
+- Procedures performed in endoscopy rooms (room codes starting with “E”) were excluded from the dataset. 
+
+- For interventional or cathlab procedures, only cases that involved an anesthesiologist were retained, so that these records could be meaningfully compared to regular operating room cases. 
+
+- Surgeries (40 in total) with a planned duration of more than 24 hours, were excluded.
+
+- Surgeries (97 in total) with a duration of zero minutes, were excluded.
+
+- Additional filtering was applied to remove implausible or invalid records identified during the integrity and plausibility checks.
+This included cases with extreme or inconsistent timing deviations (e.g., |start_diff| or |end_diff| > 3,000 minutes), negative or reversed planned durations, and clearly unrealistic duration differences between planned and observed values.
+
+- Observations flagged as “forgotten check-outs” were inspected separately and were excluded.
+
+- Planned durations equal to zero were were changed to missing values (NA). This prevents division-by-zero or implausible percentage deviations in subsequent analyses while preserving the record for descriptive completeness checks.
+
+After these steps, the remaining dataset represents all valid and internally consistent surgical cases suitable for further process and performance analyses.
+
