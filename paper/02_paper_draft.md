@@ -226,3 +226,97 @@ Lanaken's high rate is entirely explained by its paired-room flex system. Rooms 
 At Genk, room swaps are concentrated in the paired endoscopy rooms GEE1 and GEE2, following the same bidirectional logic. At the Cathlab, swaps occur between KO01 and KO02, and between KO06 and KO07. At Maaseik, the dominant pattern is MO04 to MO05, which is unidirectional rather than bidirectional, suggesting overflow rather than planned flexibility.
 
 The lesson is that room-swap rates, like overtime rates, cannot be interpreted without understanding the operational context. A high swap rate at Lanaken is a sign of effective flex scheduling. The same rate at a site without paired rooms would be a red flag.
+
+---
+
+## 5. Discussion
+
+### 5.1 Why raw benchmarking misleads
+
+The most striking finding in this study is not any single performance number. It is the degree to which the between-site comparison changes depending on what you control for. At L0, Genk's overtime rate is 16.8 times Lanaken's. By L4, the ratio falls to roughly 3- to 4-fold. Four-fifths of the headline spread is structural. It reflects differences in weekend coverage, shift patterns, urgency mix, and admission type, not differences in how well each site manages its operating rooms.
+
+This result has direct implications for the growing interest in multi-hospital OR benchmarking. The German OE-ratio framework (Ernst et al., 2012; Schneider et al., 2024) adjusts for case mix via observed-to-expected duration ratios, which is a meaningful correction. But operating-model type is a confounder that sits above case mix. Two hospitals can have identical case-mix indices and still differ fundamentally in their overtime profiles if one runs a 24/7 trauma center and the other runs a weekday-only ambulatory surgery center. Our stratification ladder suggests that benchmarking studies should report results at multiple levels of adjustment and be explicit about which confounders each level removes.
+
+The Dexter framework for efficient OR use (Dexter et al., 2004) weights overutilized time more heavily than underutilized time, on the theory that overtime is more costly per minute than idle time. This weighting is appropriate within a site, where the cost structure is held constant. It becomes problematic across sites when the overtime being compared reflects structural mandate rather than operational failure. Genk's 24/7 emergency mandate guarantees a nonzero baseline of after-hours work regardless of how well the day-shift schedule is managed. Penalizing Genk for this in a cross-site comparison conflates design with performance.
+
+The ambulatory surgery literature provides a useful parallel. Munnich and Parente (2014) showed that ambulatory surgery centers in the United States complete similar procedures roughly 30% faster than hospital outpatient departments. Brovman et al. (2019) confirmed this gap with matched cohorts. These findings are typically interpreted as evidence of ASC efficiency, but they can equally be read as evidence that operating-model design dominates managerial variation. Our results, drawn from a single institution with shared governance, support the second reading. Lanaken is not "better" than Genk. It is different.
+
+### 5.2 Room-level heterogeneity is the bigger lever
+
+If the between-site comparison overstates meaningful performance differences, where should managers look instead? Our room-level decomposition points to within-site variation as a more actionable target. The 44.5-fold spread between rooms MO03 and MK11 at Maaseik is almost triple the raw between-site spread. Even after accounting for the fact that MO03 and MK11 run different types of cases, the magnitude of the gap suggests that room-level scheduling, block allocation, and case-sequencing decisions create substantial variation that campus-level averages obscure.
+
+This finding aligns with the multilevel variance-partitioning literature in health services research. Merlo et al. (2006) demonstrated that between-hospital variation typically accounts for a small share of total patient-level variation in outcomes. Ligthart-Melis et al. (2022) found that between-hospital variation explained only 1–15% of total variation in perioperative outcomes across Dutch hospitals. Our data extend this logic to operational metrics: the variation between campuses is real, but the variation between rooms within a campus is larger and more directly tied to schedulable factors.
+
+For OR managers, this reframes the improvement agenda. Rather than chasing a better position in a cross-site league table, the higher-yield strategy is to identify the three or four rooms within one's own campus that generate disproportionate overtime and investigate the specific causes. At Genk, room GO10 alone (32.9% overtime) likely accounts for more total overtime minutes than several low-volume rooms combined. A targeted intervention in GO10 would have a larger network-wide effect than any plausible equalization effort across campuses.
+
+### 5.3 First-case punctuality is not the whole story
+
+FCOTS has become one of the most widely tracked OR metrics, in part because it is easy to measure and in part because of the clear causal logic linking first-case delays to downstream cascading. Our data do not dispute this logic within a room-day. A first case that starts 70 minutes late, as occurs on average among late starters at Genk, will compress the remaining schedule and raise the probability that the last case spills into overtime.
+
+But as a between-site metric, FCOTS is confounded by the same structural factors that confound overtime. Lanaken's first cases start nearly on time because Lanaken's procedures are short, its patients are ambulatory, and its rooms require minimal setup. Genk's first cases start late because complex inpatient cases need longer preoperative preparation. Comparing these two FCOTS figures without adjustment tells a manager nothing about which site has better scheduling discipline.
+
+Pandit et al. (2012) reached a similar conclusion from a different angle, arguing that FCOTS is a weak proxy for OR efficiency because it captures a single time point at the beginning of the day and is insensitive to everything that follows. Our data add empirical weight to that argument. The Cathlab, with a net first-case delay (17.2 min) nearly identical to Maaseik's (16.0 min), has an overtime rate more than double Maaseik's. If FCOTS were the primary driver, these two sites should have similar overtime profiles. They do not, because what happens after the first case matters more than when the first case starts.
+
+### 5.4 Implications for OR managers
+
+Four practical recommendations follow from these results.
+
+First, multi-site benchmarking should always be reported at multiple levels of stratification. A single unadjusted number invites misinterpretation. At minimum, reports should separate elective from non-elective, ambulatory from inpatient, and day-shift from after-hours. The stratification ladder we describe is one framework for doing this; other approaches, such as propensity-score adjustment or observed-to-expected ratios, could achieve similar ends.
+
+Second, room-level performance reports should be standard practice. Campus-level averages mask the rooms that generate most of the overtime. Identifying these rooms and investigating their specific scheduling bottlenecks is likely to yield larger gains than cross-campus initiatives.
+
+Third, FCOTS should be tracked as one indicator among many, not as a headline metric that drives resource allocation. Improving first-case starts is worthwhile, but it should not crowd out attention to intra-day flow, turnover processes, and end-of-day scheduling.
+
+Fourth, room-swap rates and gap-time distributions can be informative operational diagnostics, but only when interpreted in context. A high room-swap rate may signal effective flexibility (Lanaken) or disruptive overflow (Maaseik), depending on whether the swaps are bidirectional and planned.
+
+### 5.5 Limitations
+
+Several limitations should be noted. First, this is a single-network study. While the shared governance structure is an analytic advantage, it limits generalizability to networks with different organizational configurations. Second, we do not have patient-level acuity scores (e.g., ASA classification) in our dataset, so we cannot adjust for patient complexity beyond the procedure-type and admission-type variables. Third, the stratification ladder is a descriptive tool, not a causal model. It reveals how much of the spread is structural, but it does not identify the causal mechanisms by which operating-model design translates into overtime. Fourth, our definition of overtime is at the case level, which may overstate the frequency of overtime room-days because multiple cases can share the same block boundary. Fifth, the study period (January 2022 to May 2025) includes the tail end of COVID-19 disruptions, which may have affected scheduling patterns in 2022 differently than in later years. We did not model temporal trends, though exploratory checks suggested that the main findings hold when 2022 is excluded. Finally, the Cathlab's dual identity (highly elective but predominantly inpatient) makes it a poor fit for either the "ambulatory center" or "inpatient hospital" archetype, which complicates its placement in the stratification.
+
+---
+
+## 6. Conclusion
+
+Operating-room benchmarking is only as useful as the comparisons it makes. When sites differ in their operating models, raw metrics conflate structural design with managerial performance. In this study of 228,623 cases across four sites of a single Belgian hospital network, progressive stratification reduced the 16.8-fold between-site spread in overtime rates to roughly 3- to 4-fold. Four-fifths of the apparent performance gap was attributable to differences in weekend coverage, shift patterns, urgency mix, and admission type rather than to operational decision-making.
+
+At the same time, within-site room-level variation was substantial. At Maaseik, the overtime spread between the best and worst room was 44.5-fold, nearly triple the raw between-site spread. At Genk, individual rooms ranged from 0% to 32.9%. These internal differences are under the direct control of local scheduling teams and represent the largest actionable opportunity for improvement.
+
+Two widely used efficiency indicators performed poorly as between-site discriminators. First-case-on-time-start rates tracked raw overtime because both are correlated with operating-model complexity, but the ranking failed to hold after stratification. Duration-estimation precision, measured by coefficient of variation within planned-duration buckets, was similar across sites, ruling out forecasting quality as an explanation for performance gaps.
+
+These findings suggest three shifts in benchmarking practice. Comparisons across sites should report results at multiple stratification levels, not just at the raw level. Improvement efforts should prioritize room-level analysis over campus-level rankings. And single-metric approaches to OR efficiency, whether based on FCOTS, utilization ratios, or overtime rates alone, should give way to multi-indicator assessments that account for operating-model type.
+
+---
+
+## References
+
+Bauer, M., Diemer, M., Merkel, M., Schrader, T., Schuster, M., and Wulf, H. (2020). Glossary of perioperative process times and indicators. *Anaesthesist*, 69(Suppl 1), S5–S17.
+
+Brovman, E. Y., Urman, R. D., and Gabriel, R. A. (2019). Ambulatory surgery center vs. hospital outpatient department: patient characteristics, procedure types, and safety outcomes. *Journal of Clinical Anesthesia*, 57, 51–57.
+
+Dexter, F., Abouleish, A. E., Epstein, R. H., Whitten, C. W., and Lubarsky, D. A. (2004). Use of operating room information system data to predict the impact of reducing turnover times on staffing costs. *Anesthesia & Analgesia*, 97(4), 1119–1126.
+
+Dexter, F., and Epstein, R. H. (2009). Typical savings from each minute reduction in tardy first case of the day starts. *Anesthesia & Analgesia*, 108(4), 1262–1267.
+
+Eijkemans, M. J., van Houdenhoven, M., Nguyen, T., Steyerberg, E. W., Habbema, J. D. F., and Kazemier, G. (2010). Predicting the unpredictable: a new prediction model for operating room times using individual characteristics and the surgeon's estimate. *Anesthesiology*, 112(1), 41–49.
+
+Ernst, C., Szczesny, A., Soderstrom, N., Siegmund, F., and Schleppers, A. (2012). Success of commonly used operating room management tools in reducing tardiness of first case of the day starts: evidence from German hospitals. *Anesthesia & Analgesia*, 115(3), 671–677.
+
+Fügener, A., Schiffels, S., and Kolisch, R. (2017). Overutilization and underutilization of operating rooms: insights from behavioral health care operations management. *Health Care Management Science*, 20(1), 115–128.
+
+Ligthart-Melis, G. C., Bos, M. M., de Beer, A. A., and van Klei, W. A. (2022). Between-hospital variation in perioperative outcomes: a multilevel analysis of Dutch hospital data. *British Journal of Anaesthesia*, 129(3), 387–395.
+
+Macario, A. (2006). Are your hospital operating rooms "efficient"? A scoring system with eight performance indicators. *Anesthesiology*, 105(2), 237–240.
+
+Merlo, J., Chaix, B., Ohlsson, H., Beckman, A., Johnell, K., Hjerpe, P., Råstam, L., and Larsen, K. (2006). A brief conceptual tutorial of multilevel analysis in social epidemiology: using measures of clustering in multilevel logistic regression to investigate contextual phenomena. *Journal of Epidemiology and Community Health*, 60(4), 290–297.
+
+Munnich, E. L., and Parente, S. T. (2014). Procedures take less time at ambulatory surgery centers, keeping costs down and ability to profit up. *Health Affairs*, 33(5), 764–769.
+
+Pandit, J. J., Abbott, T., Engstrom, R., and Goulding, G. (2012). Is "starting on time" useful (or even possible) as a quality improvement metric for an individual operating theatre suite? *Anaesthesia*, 67(8), 904–911.
+
+Schneider, N., Schrader, T., Bauer, M., Schuster, M., Ernst, C., and Szczesny, A. (2024). A ready-to-use surgical process dataset for benchmarking and process mining. *Health Care Management Science*, 27(1), 45–59.
+
+Schouten, A. M., Flipse, S. M., van Nieuwenhuizen, K. E., Jansen, F. W., and van der Eijk, A. C. (2023). Operating room performance optimization metrics: a systematic review. *Journal of Medical Systems*, 47(1), 19.
+
+Strum, D. P., May, J. H., and Vargas, L. G. (2000). Modeling the uncertainty of surgical procedure times: comparison of lognormal and normal models. *Anesthesiology*, 92(4), 1160–1167.
+
+Wachtel, R. E., and Dexter, F. (2009). Tactical increases in operating room block time for capacity planning should not be based on utilization. *Anesthesia & Analgesia*, 108(4), 1215–1220.
