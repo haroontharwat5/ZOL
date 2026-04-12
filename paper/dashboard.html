@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZOL OR Efficiency — Paper Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --genk: #2563eb;
+    --lanaken: #16a34a;
+    --maaseik: #ea580c;
+    --cathlab: #9333ea;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+  .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; padding: 2rem 2rem 1.5rem; }
+  .header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .header p { color: #94a3b8; font-size: 0.9rem; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.75rem; }
+  .stat-card { text-align: center; }
+  .stat-card .number { font-size: 2rem; font-weight: 800; }
+  .stat-card .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+  .stat-card .sub { font-size: 0.75rem; color: var(--muted); }
+  .site-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; color: white; }
+  .site-badge.genk { background: var(--genk); }
+  .site-badge.lanaken { background: var(--lanaken); }
+  .site-badge.maaseik { background: var(--maaseik); }
+  .site-badge.cathlab { background: var(--cathlab); }
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap canvas { width: 100% !important; }
+  .section-title { font-size: 1.1rem; font-weight: 700; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 600; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .highlight { background: #fef3c7; font-weight: 600; }
+  .finding-box { padding: 1rem 1.25rem; border-left: 4px solid; margin-bottom: 0.75rem; background: #f8fafc; border-radius: 0 8px 8px 0; }
+  .finding-box.red { border-color: #ef4444; }
+  .finding-box.green { border-color: #22c55e; }
+  .finding-box.blue { border-color: #3b82f6; }
+  .finding-box .title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.25rem; }
+  .finding-box .desc { font-size: 0.85rem; color: var(--muted); }
+  .full-width { grid-column: 1 / -1; }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; margin-right: 16px; font-size: 0.8rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .flow-arrow { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; flex-wrap: wrap; }
+  .flow-step { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; text-align: center; min-width: 120px; }
+  .flow-step .step-label { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; }
+  .flow-step .step-value { font-size: 1.1rem; font-weight: 700; }
+  .flow-step .step-desc { font-size: 0.7rem; color: var(--muted); }
+  .arrow { color: var(--muted); font-size: 1.2rem; }
+  @media (max-width: 900px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ZOL OR Efficiency — Paper Dashboard</h1>
+  <p>228,623 surgical cases &middot; 4 sites &middot; Jan 2022 – May 2025 &middot; Target: Health Care Management Science</p>
+</div>
+
+<div class="container">
+
+<!-- KPI CARDS -->
+<div class="grid-4">
+  <div class="card stat-card">
+    <div class="number">228,623</div>
+    <div class="label">Total Cases</div>
+    <div class="sub">41 months of data</div>
+  </div>
+  <div class="card stat-card">
+    <div class="number">16.8&times;</div>
+    <div class="label">Raw Overtime Spread</div>
+    <div class="sub">Genk 8.4% vs Lanaken 0.5%</div>
+  </div>
+  <div class="card stat-card">
+    <div class="number">~3-4&times;</div>
+    <div class="label">After Stratification</div>
+    <div class="sub">Four-fifths is structural</div>
+  </div>
+  <div class="card stat-card">
+    <div class="number">44.5&times;</div>
+    <div class="label">Worst Room Spread</div>
+    <div class="sub">MO03 vs MK11 at Maaseik</div>
+  </div>
+</div>
+
+<!-- SITE PROFILES -->
+<div class="section-title">Site Profiles</div>
+<div class="card" style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th><span class="site-badge genk">Genk</span></th>
+        <th><span class="site-badge lanaken">Lanaken</span></th>
+        <th><span class="site-badge maaseik">Maaseik</span></th>
+        <th><span class="site-badge cathlab">Cathlab</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Cases</strong></td><td>96,044</td><td>69,395</td><td>53,902</td><td>9,282</td></tr>
+      <tr><td><strong>Operating rooms</strong></td><td>26</td><td>7</td><td>8</td><td>7</td></tr>
+      <tr><td><strong>Model</strong></td><td>24/7 tertiary</td><td>Weekday ambulatory</td><td>Hybrid (mixed)</td><td>Specialized cardiac</td></tr>
+      <tr><td><strong>Ambulatory %</strong></td><td>42.3%</td><td>98.1%</td><td>83.9%</td><td>11.3%</td></tr>
+      <tr><td><strong>Elective %</strong></td><td>85.4%</td><td>99.6%</td><td>94.3%</td><td>97.5%</td></tr>
+      <tr><td><strong>Mean planned dur.</strong></td><td>94 min</td><td>30 min</td><td>40 min</td><td>94 min</td></tr>
+      <tr><td><strong>Weekend activity</strong></td><td>Yes (4%)</td><td>No</td><td>Yes (1.2%)</td><td>Yes (1.4%)</td></tr>
+      <tr class="highlight"><td><strong>Overtime rate</strong></td><td>8.4%</td><td>0.5%</td><td>2.8%</td><td>5.8%</td></tr>
+      <tr><td><strong>Mean OT (min)</strong></td><td>59.0</td><td>15.7</td><td>42.0</td><td>41.8</td></tr>
+      <tr><td><strong>Room swap %</strong></td><td>1.1%</td><td>7.5%</td><td>0.8%</td><td>1.2%</td></tr>
+      <tr><td><strong>Median gap (min)</strong></td><td>7</td><td>0</td><td>2</td><td>4</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- STRATIFICATION -->
+<div class="section-title">Progressive Stratification — How the Gap Collapses</div>
+<div class="card">
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">Each step removes one structural confounder. The between-site spread shrinks at every level, showing that most of the raw gap is operating-model artifact, not management quality.</p>
+  <div class="flow-arrow">
+    <div class="flow-step" style="border-color:var(--genk);border-width:2px;">
+      <div class="step-label">L0 — Raw</div>
+      <div class="step-value">16.8&times;</div>
+      <div class="step-desc">All 228k cases</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-label">L1 — Weekdays</div>
+      <div class="step-value">~15&times;</div>
+      <div class="step-desc">Remove weekends</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-label">L2 — Day shift</div>
+      <div class="step-value">~10&times;</div>
+      <div class="step-desc">Remove evenings/nights</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-label">L3 — Elective</div>
+      <div class="step-value">~4-5&times;</div>
+      <div class="step-desc">Remove emergencies</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="flow-step" style="border-color:var(--lanaken);border-width:2px;">
+      <div class="step-label">L4 — Admit type</div>
+      <div class="step-value">~3-4&times;</div>
+      <div class="step-desc">Split DAG vs HOS</div>
+    </div>
+  </div>
+  <div class="chart-wrap" style="height:320px;margin-top:1rem;">
+    <canvas id="stratChart"></canvas>
+  </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="section-title">Key Findings</div>
+<div class="grid-2">
+  <!-- Overtime by site -->
+  <div class="card">
+    <h3>Overtime Rate by Site (L0)</h3>
+    <div class="chart-wrap" style="height:280px;">
+      <canvas id="overtimeChart"></canvas>
+    </div>
+  </div>
+  <!-- Room-level variation -->
+  <div class="card">
+    <h3>Room-Level Spread vs Between-Site Spread</h3>
+    <div class="chart-wrap" style="height:280px;">
+      <canvas id="roomChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- FCOTS -->
+  <div class="card">
+    <h3>First-Case Punctuality (FCOTS)</h3>
+    <div class="chart-wrap" style="height:280px;">
+      <canvas id="fcotsChart"></canvas>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;">Genk has the worst FCOTS but the ranking is driven by operating-model complexity, not scheduling discipline.</p>
+  </div>
+  <!-- Duration CV -->
+  <div class="card">
+    <h3>Duration Estimation Precision (CV by Bucket)</h3>
+    <div class="chart-wrap" style="height:280px;">
+      <canvas id="cvChart"></canvas>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;">CVs are similar across sites within each duration bucket — estimation quality does not explain the overtime gap.</p>
+  </div>
+</div>
+
+<div class="grid-3">
+  <!-- Case mix -->
+  <div class="card">
+    <h3>Case Mix: Ambulatory vs Inpatient</h3>
+    <div class="chart-wrap" style="height:250px;">
+      <canvas id="casemixChart"></canvas>
+    </div>
+  </div>
+  <!-- Gap time -->
+  <div class="card">
+    <h3>Median Gap Time (min)</h3>
+    <div class="chart-wrap" style="height:250px;">
+      <canvas id="gapChart"></canvas>
+    </div>
+  </div>
+  <!-- Cascade vs overrun -->
+  <div class="card">
+    <h3>Cascade vs Duration Overrun</h3>
+    <div class="chart-wrap" style="height:250px;">
+      <canvas id="cascadeChart"></canvas>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;">Start-time cascading wastes ~4x more OR time than duration overruns.</p>
+  </div>
+</div>
+
+<!-- KEY FINDINGS SUMMARY -->
+<div class="section-title">Three Findings That Challenge the Textbook</div>
+<div class="finding-box red">
+  <div class="title">1. FCOTS Does Not Predict Stratified Overtime</div>
+  <div class="desc">Genk has the worst first-case punctuality (25.1 min net delay) and the worst overtime (8.4%). But this correlation is spurious — both are driven by operating-model complexity. The Cathlab has similar FCOTS to Maaseik but double the overtime rate.</div>
+</div>
+<div class="finding-box blue">
+  <div class="title">2. Duration Estimation Is Not the Problem</div>
+  <div class="desc">CVs within planned-duration buckets are comparable across all four sites. The scheduling teams share the same EHR and historical data. Forecasting accuracy does not explain the between-site performance gaps.</div>
+</div>
+<div class="finding-box green">
+  <div class="title">3. Cascading Delays Waste 4x More Time Than Overruns</div>
+  <div class="desc">The dominant source of wasted OR time is not surgeries running long — it is delays stacking up through the day. A 10-minute first-case delay can snowball into 60 minutes by end of day. Process discipline is a larger lever than prediction.</div>
+</div>
+
+<!-- ROOM DETAIL -->
+<div class="section-title">Room-Level Detail — Where the Real Variation Lives</div>
+<div class="grid-2">
+  <div class="card">
+    <h3>Maaseik Rooms (campus avg: 2.8%)</h3>
+    <div class="chart-wrap" style="height:250px;">
+      <canvas id="maaseikRooms"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Lanaken Rooms (campus avg: 0.5%)</h3>
+    <div class="chart-wrap" style="height:250px;">
+      <canvas id="lanakenRooms"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PAPER ARGUMENT FLOW -->
+<div class="section-title">Paper Argument Flow</div>
+<div class="card">
+  <table>
+    <thead><tr><th style="width:30%">Finding</th><th style="width:35%">What it shows</th><th style="width:35%">Role in the paper</th></tr></thead>
+    <tbody>
+      <tr><td>16.8x raw overtime spread</td><td>Naive benchmarking makes Lanaken look 17x better than Genk</td><td>The hook — the misleading headline</td></tr>
+      <tr><td>Stratification collapses to 3-4x</td><td>Four-fifths of the gap is structural</td><td>Core contribution — progressive stratification method</td></tr>
+      <tr><td>Room spread at Maaseik = 44.5x</td><td>Within-site variation exceeds between-site variation</td><td>The actionable finding for managers</td></tr>
+      <tr><td>FCOTS paradox</td><td>Best punctuality ≠ best overtime</td><td>Challenges the dominant metric</td></tr>
+      <tr><td>Similar CVs across sites</td><td>Estimation quality is not the differentiator</td><td>Rules out a common explanation</td></tr>
+      <tr><td>Cascade:overrun = 4:1</td><td>Delays stacking up matter more than long surgeries</td><td>Points to the actual lever</td></tr>
+      <tr><td>LP01↔LP02 paired-room flex</td><td>High swap rate = good design, not failure</td><td>Context matters for every metric</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem;">
+  ZOL OR Efficiency Paper — Haroon Tharwat, Maxim Riebus, Niels Martin &middot; Target: Health Care Management Science (Q1)
+</div>
+
+</div><!-- /container -->
+
+<script>
+const COLORS = {
+  genk: '#2563eb', lanaken: '#16a34a', maaseik: '#ea580c', cathlab: '#9333ea',
+  genk20: 'rgba(37,99,235,0.2)', lanaken20: 'rgba(22,163,74,0.2)',
+  maaseik20: 'rgba(234,88,12,0.2)', cathlab20: 'rgba(147,51,234,0.2)'
+};
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+Chart.defaults.font.size = 12;
+
+// Overtime bar chart
+new Chart(document.getElementById('overtimeChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Genk', 'Cathlab', 'Maaseik', 'Lanaken'],
+    datasets: [{
+      data: [8.4, 5.8, 2.8, 0.5],
+      backgroundColor: [COLORS.genk, COLORS.cathlab, COLORS.maaseik, COLORS.lanaken],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.raw + '% overtime' }}
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Overtime rate (%)' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Room-level spread comparison
+new Chart(document.getElementById('roomChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Between sites\n(L0 raw)', 'Maaseik\n(rooms)', 'Lanaken\n(rooms)', 'Cathlab\n(rooms)'],
+    datasets: [{
+      label: 'Spread ratio (worst / best)',
+      data: [16.8, 44.5, 17, 3.9],
+      backgroundColor: ['#475569', COLORS.maaseik, COLORS.lanaken, COLORS.cathlab],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.raw + 'x spread' }}
+    },
+    scales: {
+      x: { beginAtZero: true, title: { display: true, text: 'Fold difference (worst / best)' }},
+      y: { grid: { display: false }}
+    }
+  }
+});
+
+// Stratification chart
+new Chart(document.getElementById('stratChart'), {
+  type: 'line',
+  data: {
+    labels: ['L0\nRaw', 'L1\nWeekday', 'L2\nDay shift', 'L3\nElective', 'L4\nAdmit split'],
+    datasets: [
+      { label: 'Genk', data: [8.4, 7.9, 6.5, 5.2, 3.5], borderColor: COLORS.genk, backgroundColor: COLORS.genk20, fill: false, tension: 0.3, pointRadius: 5 },
+      { label: 'Cathlab', data: [5.8, 5.6, 5.0, 4.0, 3.0], borderColor: COLORS.cathlab, backgroundColor: COLORS.cathlab20, fill: false, tension: 0.3, pointRadius: 5 },
+      { label: 'Maaseik', data: [2.8, 2.7, 2.3, 1.8, 1.5], borderColor: COLORS.maaseik, backgroundColor: COLORS.maaseik20, fill: false, tension: 0.3, pointRadius: 5 },
+      { label: 'Lanaken', data: [0.5, 0.5, 0.5, 0.5, 0.9], borderColor: COLORS.lanaken, backgroundColor: COLORS.lanaken20, fill: false, tension: 0.3, pointRadius: 5 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + '%' }}
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Overtime rate (%)' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// FCOTS chart
+new Chart(document.getElementById('fcotsChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Lanaken', 'Maaseik', 'Cathlab', 'Genk'],
+    datasets: [
+      { label: 'Net first-case delay (min)', data: [3.8, 16.0, 17.2, 25.1],
+        backgroundColor: [COLORS.lanaken, COLORS.maaseik, COLORS.cathlab, COLORS.genk], borderRadius: 6 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }},
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Net delay (min)' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Duration CV chart
+new Chart(document.getElementById('cvChart'), {
+  type: 'bar',
+  data: {
+    labels: ['<30 min', '31-60', '61-90', '91-180', '>180 min'],
+    datasets: [
+      { label: 'Genk', data: [0.61, 0.16, 0.36, 0.20, 0.42], backgroundColor: COLORS.genk, borderRadius: 3 },
+      { label: 'Lanaken', data: [0.52, 0.39, 0.34, 0.32, 0.69], backgroundColor: COLORS.lanaken, borderRadius: 3 },
+      { label: 'Maaseik', data: [1.03, 0.47, 0.36, 0.35, 0.37], backgroundColor: COLORS.maaseik, borderRadius: 3 },
+      { label: 'Cathlab', data: [0.61, 0.43, 0.39, 0.35, 0.59], backgroundColor: COLORS.cathlab, borderRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 12 }}},
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'CV of observed duration' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Case mix chart
+new Chart(document.getElementById('casemixChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Genk', 'Lanaken', 'Maaseik', 'Cathlab'],
+    datasets: [
+      { label: 'Ambulatory (DAG)', data: [42.3, 98.1, 83.9, 11.3],
+        backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 3 },
+      { label: 'Inpatient (HOS)', data: [57.7, 1.9, 16.1, 88.7],
+        backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 12 }}},
+    scales: {
+      y: { beginAtZero: true, max: 100, title: { display: true, text: '%' }, stacked: true },
+      x: { grid: { display: false }, stacked: true }
+    }
+  }
+});
+
+// Gap time chart
+new Chart(document.getElementById('gapChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Genk', 'Cathlab', 'Maaseik', 'Lanaken'],
+    datasets: [{
+      data: [7, 4, 2, 0],
+      backgroundColor: [COLORS.genk, COLORS.cathlab, COLORS.maaseik, COLORS.lanaken],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }},
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Median gap (min)' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Cascade vs overrun
+new Chart(document.getElementById('cascadeChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Start-time cascading', 'Duration overruns'],
+    datasets: [{
+      data: [80, 20],
+      backgroundColor: ['#ef4444', '#94a3b8'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12 }},
+      tooltip: { callbacks: { label: ctx => ctx.label + ': ~' + ctx.raw + '% of wasted time' }}
+    }
+  }
+});
+
+// Maaseik rooms
+new Chart(document.getElementById('maaseikRooms'), {
+  type: 'bar',
+  data: {
+    labels: ['MO03', 'MO05', 'MO04', 'MO06', 'MO01', 'MO02', 'MK13', 'MK11'],
+    datasets: [{
+      data: [8.9, 6.5, 5.2, 3.8, 2.1, 1.1, 0.4, 0.2],
+      backgroundColor: Array(8).fill(COLORS.maaseik),
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.raw + '% overtime' }}
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Overtime rate (%)' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Lanaken rooms
+new Chart(document.getElementById('lanakenRooms'), {
+  type: 'bar',
+  data: {
+    labels: ['LO03', 'LO01', 'LO02', 'LO04', 'LO05', 'LP02', 'LP01'],
+    datasets: [{
+      data: [1.7, 0.9, 0.7, 0.5, 0.3, 0.1, 0.1],
+      backgroundColor: Array(7).fill(COLORS.lanaken),
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.raw + '% overtime' }}
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Overtime rate (%)' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+</script>
+</body>
+</html>
