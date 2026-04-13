@@ -15,4 +15,6 @@
 - 228,623 surgical cases from ZOL hospital network (Belgium), Jan 2022 - May 2025
 - Four campuses: Genk (96,044), Lanaken (69,395), Maaseik (53,902), Cathlab (9,282)
 - Completed analyses are in the PDF files. Do not rerun analysis from the xlsx files unless explicitly asked.
-- Target journal: Health Care Management Science (Q1)
+- Primary target journal: BMJ Quality & Safety (Q1, IF 5.7)
+- Fallback journal: Health Care Management Science (Q1, IF ~3.0)
+- HCMS-framed versions are in `paper/` directory; BMJ QS versions are in `paper/bmjqs/`
