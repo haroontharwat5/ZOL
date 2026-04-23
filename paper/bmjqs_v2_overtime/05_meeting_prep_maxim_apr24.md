@@ -157,10 +157,28 @@ Saager 2014 and Kelz 2008 are fully verified with no corrections needed.
 
 ---
 
-## 9. Files to share with Maxim
+## 9. Big find: the hospital's original ask already contained the overtime story
+
+I re-read the 14 February 2025 kickoff presentation. It maps almost exactly onto the paper we are now writing. Key points:
+
+- **The hospital framed overtime as "area under the curve"** — how much activity spills past the staffing pyramid. This is the efficiency slide (Phase 1).
+- **The hospital's safety slide asks "Does OR staffing/efficient use of OR time correspond with mortality/outcome? Linking AUC and mortality?"** — they themselves raised the overtime-to-mortality link. Our paper's double argument answers the first half of that question and hands off the second half to the literature.
+- **Staffing pyramid:** 25 rooms 08:00–16:30 → 8 rooms 16:30–17:30 → 4 rooms 17:30–22:00 → 1 room overnight. This is crucial visual evidence for why overtime past 16:30 is not neutral. It should appear as Figure 0 in the paper.
+- **"Room in and room out are the only reliable data available"** — methodological disclosure we need to cite.
+- **Phase 1 ask: "Added value of swapping theatres?"** — we have the answer (1.1%, not a major overtime driver).
+- **Phase 1 ask: "Creating gaps for non-elective surgery?"** — we have the answer (69.7% of days have overlap, and it doubles elective start delays).
+
+This is documented in detail in `06_hospital_original_ask.md`. Worth reading before tomorrow's meeting — it reframes the paper as *delivering on the hospital's Phase 1 research questions*, which makes the narrative even more compelling for BMJ QS.
+
+**Implication for the skeleton:** I've updated it to include (1) the staffing pyramid as Figure 0, (2) the AUC framing in the Introduction, (3) the "room-in/room-out are the only reliable data" note in Methods, (4) Phase 2 positioning in the Limitations section.
+
+---
+
+## 10. Files to share with Maxim
 
 All in the GitHub repo at `paper/bmjqs_v2_overtime/`:
 - `00_pivot_decision.md` — explains the pivot (share this first for context)
 - `01_genk_overtime_facts.md` — all overtime numbers from the PDFs
-- `04_skeleton.md` — the paper structure
+- `04_skeleton.md` — the paper structure (updated with hospital-ask integration)
 - `03_new_literature.md` — new staff + patient harm references (now with verified findings)
+- `06_hospital_original_ask.md` — re-analysis of the 14 Feb 2025 kickoff presentation, showing the overtime story was in the original ask
