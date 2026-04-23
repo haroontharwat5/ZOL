@@ -131,10 +131,36 @@ These are the candidates from the exploratory and in-depth Genk analyses. We nee
 
 ---
 
-## 7. Files to share with Maxim
+## 7. BMJ QS keyword check (Niels's request)
+
+BMJ QS has published several OR-related papers, but almost all focus on safety culture, checklists, teamwork, and communication rather than on operational scheduling or overtime. Beyond Abdelfattah (2020) and Joseph (2019) which we already have, the closest operational papers are:
+
+- **Gillespie et al. (2012)** — Factors influencing expected length of operation (communication breakdowns, interruptions affecting case duration). *BMJ Qual Saf* 21(1):3–12.
+- **Koch et al. (2020)** — Workflow disruptions in OR associated with surgical outcomes, systematic review. *BMJ Qual Saf* 29(12):1033–45. Found ~20% of operating time attributable to flow disruptions.
+- **Overdyk et al. (2016)** — Video auditing in 23 ORs reduced turnover times 14–20%. *BMJ Qual Saf* 25(12):947–53.
+
+**Assessment:** There is no clear precedent in BMJ QS for a data-driven OR overtime paper. But the journal has published on duration factors (Gillespie), workflow disruptions (Koch, Abdelfattah, Joseph), and turnover time interventions (Overdyk). Our paper fits if we frame overtime as a quality and safety problem, not as an operations management problem. The Koch (2020) systematic review is particularly useful — it does for workflow disruptions what we do for overtime, and it was published in BMJ QS.
+
+**Recommendation for Niels:** BMJ QS is viable if the framing stays safety-centered. The Koch 2020 review is the best precedent to cite in the cover letter.
+
+---
+
+## 8. Reference verification update
+
+Three of the five top references needed corrections (now applied in `03_new_literature.md`):
+
+1. **Cortegiani 2020** — adjusted mortality OR is **1.16**, not ~1.4. The ~1.4 figure is the unadjusted estimate. Morbidity was not pooled. Use the adjusted number in the paper.
+2. **Griffiths 2014** — this paper reports overtime → poorer care quality and patient safety, NOT burnout/intent-to-leave. The burnout finding is in the companion paper **Dall'Ora et al. 2015, BMJ Open**. We need to cite both.
+3. **Rothschild 2009** — overall result was NOT significant. Only surgeons with <6 hours sleep showed elevated complication risk (OR 1.72). Must be cited as a subgroup finding.
+
+Saager 2014 and Kelz 2008 are fully verified with no corrections needed.
+
+---
+
+## 9. Files to share with Maxim
 
 All in the GitHub repo at `paper/bmjqs_v2_overtime/`:
 - `00_pivot_decision.md` — explains the pivot (share this first for context)
 - `01_genk_overtime_facts.md` — all overtime numbers from the PDFs
 - `04_skeleton.md` — the paper structure
-- `03_new_literature.md` — new staff + patient harm references
+- `03_new_literature.md` — new staff + patient harm references (now with verified findings)
