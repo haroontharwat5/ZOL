@@ -5,6 +5,11 @@
 - Write in natural academic prose. No AI slop: no "testament", "pivotal", "landscape", "tapestry", "delve", "crucial", "foster", "showcase", "underscore", "highlight", "interplay". Use "is/are/has" instead of "serves as/stands as". No rule-of-three. No em dash overuse. Vary sentence rhythm. Be specific, not promotional.
 - All paper documents live in `paper/` subdirectory.
 
+## Reference verification rule
+- Before citing, recommending, or commenting on any paper, verify it exists by web search or PubMed. Confirm title, authors, journal, year, DOI/PMID, and a working link before discussing it.
+- Only after the reference is confirmed to exist, assess whether the finding actually matches the paper's claim, and whether it fits the specific argument we are making.
+- Never evaluate a reference on the basis of a summary alone — even one provided by an advisor, reviewer, or external source.
+
 ## Team
 - Haroon Tharwat (PhD researcher, UHasselt)
 - Maxim Riebus (co-author, UHasselt)
