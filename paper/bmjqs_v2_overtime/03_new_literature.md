@@ -10,11 +10,11 @@ Organised by the role each reference plays in the Genk overtime argument.
 
 ### A1. Flagship after-hours outcomes evidence
 
-**[V] Cortegiani A, Ippolito M, Misseri G, et al. (2020).** Association between night/after-hours surgery and mortality: a systematic review and meta-analysis. *Br J Anaesth* 124(5):623–37.
-**Role:** The flagship reference for "surgery extending past the day shift carries elevated mortality and morbidity risk". Published in BJA, a journal BMJ QS reviewers respect. Supports the claim that our 8,024 after-hours cases at Genk are not neutral from a patient-safety standpoint.
+**[V✓] Cortegiani A, Ippolito M, Misseri G, et al. (2020).** Association between night/after-hours surgery and mortality: a systematic review and meta-analysis. *Br J Anaesth* 124(5):623–37. PMID: 32147102.
+**Role:** The flagship reference for after-hours surgery carrying elevated mortality risk. Adjusted pooled OR for mortality = **1.16 (95% CI 1.06–1.28)**; unadjusted OR = 1.47 (1.19–1.83). Published in BJA. Note: the review focused on mortality; morbidity was not a primary pooled outcome. When citing, use the adjusted estimate and do not claim a morbidity effect from this paper alone.
 
-**[V] Kelz RR, Freeman KM, Hosokawa PW, et al. (2008).** Time of day is associated with postoperative morbidity: an analysis of the National Surgical Quality Improvement Program data. *Ann Surg* 247(3):544–52.
-**Role:** NSQIP VA data, later start times associated with higher morbidity. Replicated in Kelz 2009 private-sector study. Establishes the pattern across two US cohorts.
+**[V✓] Kelz RR, Freeman KM, Hosokawa PW, et al. (2008).** Time of day is associated with postoperative morbidity: an analysis of the National Surgical Quality Improvement Program data. *Ann Surg* 247(3):544–52. PMID: 18376202.
+**Role:** Operations starting after 4 PM had elevated morbidity risk (OR 1.25, P<=0.005) in 144,740 non-emergent VA NSQIP cases (2000–2004). Replicated in Kelz 2009 private-sector study. Establishes the pattern across two US cohorts.
 
 **[V] van Zaane B, van Klei WA, Buhre WF, et al. (2015).** Nonelective surgery at night and in-hospital mortality: Prospective observational data from the European Surgical Outcomes Study. *Eur J Anaesthesiol* 32(7):477–85.
 **Role:** European multi-country confirmation of the after-hours mortality finding. Useful because our data are European.
@@ -24,8 +24,8 @@ Organised by the role each reference plays in the Genk overtime argument.
 
 ### A2. Fatigue and next-case performance
 
-**[V] Rothschild JM, Keohane CA, Rogers S, et al. (2009).** Risks of Complications by Attending Physicians After Performing Nighttime Procedures. *JAMA* 302(14):1565–72.
-**Role:** Post-call attendings had higher complication rates on next-day elective cases. Chains fatigue to patient harm even after the overtime night ends.
+**[V✓] Rothschild JM, Keohane CA, Rogers S, et al. (2009).** Risks of Complications by Attending Physicians After Performing Nighttime Procedures. *JAMA* 302(14):1565–72. PMID: 19826026.
+**Role:** Examined whether nighttime procedures impair next-day performance. The overall result was **not significant** (OR 1.09, 95% CI 0.84–1.41). However, in the subgroup of surgeons with **<6 hours sleep opportunity**, complication rates were significantly higher (6.2% vs 3.4%; OR 1.72, 95% CI 1.02–2.89). Cite carefully: do not claim a blanket effect — qualify it as a subgroup finding in sleep-deprived surgeons.
 
 **[V] Landrigan CP, Rothschild JM, Cronin JW, et al. (2004).** Effect of reducing interns' work hours on serious medical errors in intensive care units. *N Engl J Med* 351(18):1838–48.
 **Role:** Cornerstone fatigue-to-errors study. Shorter shifts reduced serious errors by 36 %. Cited whenever the overtime-fatigue-error chain is invoked.
@@ -38,8 +38,8 @@ Organised by the role each reference plays in the Genk overtime argument.
 
 ### A3. Handover as the mechanism
 
-**[V] Saager L, Hesler BD, You J, et al. (2014).** Intraoperative transitions of anesthesia care and postoperative adverse outcomes. *Anesthesiology* 121(4):695–706.
-**Role:** Each intraoperative anesthesia handover raises the odds of a major composite complication. Directly explains why long cases crossing shift boundaries carry elevated risk.
+**[V✓] Saager L, Hesler BD, You J, et al. (2014).** Intraoperative transitions of anesthesia care and postoperative adverse outcomes. *Anesthesiology* 121(4):695–706. PMID: 25102312.
+**Role:** Each intraoperative anesthesia handover raises the odds of a major composite complication (OR 1.08, 95% CI 1.05–1.10, per additional transition; composite incidence rose from 8.8% at 0 transitions to 21.2% at >=4 transitions; 138,932 patients at Cleveland Clinic). Directly explains why long cases crossing shift boundaries carry elevated risk.
 
 **[V] Starmer AJ, Spector ND, Srivastava R, et al. (I-PASS Study Group). (2014).** Changes in medical errors after implementation of a handoff program. *N Engl J Med* 371(19):1803–12.
 **Role:** Structured handover intervention reduced preventable adverse events by 30 %. The strongest causal-direction evidence that handovers matter, regardless of quality of training.
@@ -67,8 +67,8 @@ Organised by the role each reference plays in the Genk overtime argument.
 **[V] Stimpfel AW, Sloane DM, Aiken LH. (2012).** The longer the shifts for hospital nurses, the higher the levels of burnout and patient dissatisfaction. *Health Aff* 31(11):2501–9.
 **Role:** Seminal dose-response between shift length and burnout. The go-to citation when we say overtime harms nurses.
 
-**[V] Griffiths P, Dall'Ora C, Simon M, et al.; RN4CAST Consortium. (2014).** Nurses' shift length and overtime working in 12 European countries. *Med Care* 52(11):975–81.
-**Role:** European workforce, 12 countries — closest to our Belgian setting. Overtime associated with burnout, job dissatisfaction, and intent-to-leave. Strong external validity for the Belgian context.
+**[V✓] Griffiths P, Dall'Ora C, Simon M, et al.; RN4CAST Consortium. (2014).** Nurses' shift length and overtime working in 12 European countries. *Med Care* 52(11):975–81. PMID: 25226543.
+**Role:** European workforce, 12 countries — closest to our Belgian setting. This paper specifically found that overtime and long shifts were associated with **poorer perceived quality of care, worse patient safety ratings, and more care left undone**. Note: the burnout/job dissatisfaction/intent-to-leave findings come from the companion paper **Dall'Ora C, Griffiths P, et al. (2015). "Association of 12 h shifts and nurses' job satisfaction, burnout and intention to leave." *BMJ Open* 5(9):e008331.** Cite both if claiming burnout effects.
 
 **[V] Dall'Ora C, Ball J, Recio-Saucedo A, Griffiths P. (2016).** Characteristics of shift work and their impact on employee performance and wellbeing: a literature review. *Int J Nurs Stud* 57:12–27.
 **Role:** Establishes that unplanned overtime is more harmful than planned long shifts. Supports our framing that the issue is not total hours but the *unpredictability* of running past 16:30.
@@ -100,15 +100,19 @@ Organised by the role each reference plays in the Genk overtime argument.
 
 ---
 
-## To verify before submission (highest priority)
+## Verification status (completed 23 April 2026)
 
-The five single most load-bearing new references in the new paper. Each should be pulled up on PubMed and the citation details checked exactly before final submission.
+All five top-priority references have been verified against PubMed. All exist with correct bibliographic details. Three required corrections to claimed findings (now applied above):
 
-1. Cortegiani 2020, BJA — the after-hours mortality meta-analysis
-2. Saager 2014, Anesthesiology — intraoperative handover harm
-3. Rothschild 2009, JAMA — post-call physician complications
-4. Griffiths 2014, Med Care — European nurse overtime
-5. Kelz 2008, Ann Surg — NSQIP time-of-day morbidity
+| # | Reference | Exists? | Bib correct? | Finding corrected? |
+|---|---|---|---|---|
+| 1 | Cortegiani 2020, BJA | Yes (PMID: 32147102) | Yes | Yes — adjusted OR is 1.16, not ~1.4; morbidity not pooled |
+| 2 | Saager 2014, Anesthesiology | Yes (PMID: 25102312) | Yes | No correction needed |
+| 3 | Griffiths 2014, Med Care | Yes (PMID: 25226543) | Yes | Yes — paper reports care quality/patient safety, not burnout; burnout is in companion Dall'Ora 2015 BMJ Open |
+| 4 | Rothschild 2009, JAMA | Yes (PMID: 19826026) | Yes | Yes — overall result non-significant; effect only in <6h sleep subgroup |
+| 5 | Kelz 2008, Ann Surg | Yes (PMID: 18376202) | Yes | No correction needed |
+
+**Additional reference to add:** Dall'Ora C, Griffiths P, et al. (2015). Association of 12 h shifts and nurses' job satisfaction, burnout and intention to leave. *BMJ Open* 5(9):e008331. Companion to Griffiths 2014; this is where the burnout/intent-to-leave finding actually lives.
 
 ---
 

@@ -31,17 +31,20 @@
 ## 1. Introduction (~600 words)
 
 ### 1.1 Opening
-Operating-room overtime is widely tracked as an operational indicator. Less widely examined is where it comes from inside a single hospital and what it costs the people involved.
+Operating-room overtime is widely tracked as an operational indicator. Less widely examined is where it comes from inside a single hospital and what it costs the people involved. At the study hospital, the clinical leadership framed the question at project kickoff as "linking area under the curve and mortality" — quantifying how much surgical activity spills past the day-shift staffing window, and whether that spillover has consequences for patients and staff.
 
 ### 1.2 Why overtime matters for quality and safety
 Two lines of evidence.
-- **Patient side.** After-hours surgery is associated with elevated mortality and morbidity (Cortegiani 2020, BJA; Kelz 2008, Ann Surg; van Zaane 2015, Eur J Anaesthesiol). Intraoperative handovers raise the odds of major complications (Saager 2014, Anesthesiology). Structured handover programmes reduce errors (I-PASS, NEJM 2014).
-- **Staff side.** Overtime and long shifts are associated with burnout, intent-to-leave, and measurable performance decrement in OR staff (Griffiths 2014, Med Care; Stimpfel 2012, Health Aff; Barger 2006, PLOS Med; Rothschild 2009, JAMA). Unplanned overtime is more harmful than planned long shifts (Dall'Ora 2016, 2020).
+- **Patient side.** After-hours surgery is associated with elevated mortality (Cortegiani 2020, BJA: adjusted OR 1.16, 95% CI 1.06–1.28 from meta-analysis). Later start times associated with higher morbidity in NSQIP data (Kelz 2008, Ann Surg). Intraoperative handovers raise the odds of major composite complications (Saager 2014, Anesthesiology: OR 1.08 per additional transition; incidence rises from 8.8% at 0 transitions to 21.2% at ≥4). Structured handover programmes reduce preventable errors (I-PASS, NEJM 2014).
+- **Staff side.** Overtime is associated with poorer self-reported care quality and patient safety (Griffiths 2014, Med Care). Long shifts and unpredictable overtime are associated with burnout and intent-to-leave (Stimpfel 2012, Health Aff; Dall'Ora 2015, BMJ Open; Dall'Ora 2016, 2020). Unpredictable overtime is more harmful than planned long shifts.
 
-### 1.3 The gap
+### 1.3 The staffing context
+At the study hospital, Campus Genk drops from 25 operating rooms during the 08:00–16:30 day shift to 8 rooms during 16:30–17:30, 4 rooms during 17:30–22:00, and a single on-call room overnight. A case spilling past 16:30 is not merely "a bit late" — it is competing for one of a sharply diminishing set of staffed rooms, and the staff covering it are not the same staff who started the day.
+
+### 1.4 The gap
 Prior OR-overtime work treats overtime as an aggregate site-level number. Little existing literature examines how overtime is distributed within a single hospital — which rooms, which mechanisms, which cases spill into after-hours. Without that distribution, quality improvement efforts cannot target the right lever.
 
-### 1.4 Research questions
+### 1.5 Research questions
 1. How is overtime distributed across rooms and time within a single tertiary centre?
 2. What mechanism — late starts, duration overruns, or mid-day cascading — accounts for most of the overtime minutes?
 3. How do urgent cases interact with the elective schedule to produce spillover?
@@ -51,13 +54,13 @@ Prior OR-overtime work treats overtime as an aggregate site-level number. Little
 ## 2. Methods (~700 words)
 
 ### 2.1 Setting
-Campus Genk (ZOL), single tertiary hospital, 25 OR rooms covering general surgery, cardiac surgery, endoscopy, and ambulatory. Shared EHR, shared governance. Day shift 08:00–16:30.
+Campus Genk (Ziekenhuis Oost-Limburg, Belgium) is a tertiary centre performing more than 50,000 procedures per year across 18 operating theatres, 7 interventional theatres, and an ambulatory anaesthesia unit (endoscopy, IVF/MKA sedation). More than 90 anaesthesiologists (including trainees and fellows) cover all surgery except congenital cardiac surgery and transplant surgery. Staffing runs 2–3 nurses per OR during the 08:00–16:30 day shift, dropping to 8 rooms during 16:30–17:30, 4 rooms during 17:30–22:00, and a single room overnight with 3 on-call nurses. Weekends and bank holidays are covered by back-up nurse rotation.
 
 ### 2.2 Data
-Administrative OR data, January 2022 – May 2025, 96,044 cases. STROBE flow diagram of inclusion.
+Administrative OR data, January 2022 – May 2025, 96,044 cases. STROBE flow diagram of inclusion. Time registration in the hospital EHR includes multiple points (patient called, patient in department, induction start/end, operation start/end, recovery, ward); the hospital clinical team advised that **room-in and room-out are the only reliable time markers** in the registration pipeline, so all timing analyses use those two points.
 
 ### 2.3 Variables
-Per Bauer et al. (2020) glossary: shift label, planned duration, observed duration, start-time deviation, end-time, overtime flag (end-time > shift end), overtime minutes, room swap flag, urgency classification.
+Per Bauer et al. (2020) glossary: shift label, planned duration, observed duration, start-time deviation (actual room-in minus scheduled room-in), end-time (room-out), overtime flag (room-out > shift end at 16:30), overtime minutes, room swap flag (actual room ≠ planned room), urgency classification (elective vs non-elective, as recorded at planning).
 
 ### 2.4 Analyses
 Descriptive:
@@ -142,11 +145,11 @@ Cortegiani et al. (2020) reported elevated mortality for after-hours surgery acr
 
 ### 4.6 Limitations
 - Single-centre design. External validity needs testing in other hospital networks.
-- No patient outcome data. We measure exposure to overtime conditions, not the outcomes themselves.
-- No staff outcome data (burnout score, turnover). We cite published dose-response relationships rather than measuring locally.
-- No ASA acuity stratification at the case level.
+- No patient outcome data in this analysis. We measure exposure to overtime conditions, not the outcomes themselves. The hospital's own project plan names linking overtime to mortality as the Phase 2 question; this paper answers the Phase 1 question (quantifying where overtime comes from) and positions Phase 2 as the next step.
+- No staff outcome data (burnout score, turnover) collected locally. We cite published dose-response relationships from European and US nursing workforce studies (Griffiths 2014, Dall'Ora 2015, Stimpfel 2012).
+- No patient-level risk stratification (ASA, CCI, Frailty, EuroScore-II) at the case level in the current dataset. Planned for Phase 2.
 - COVID-19 tail effects in 2022 and partial 2025 data.
-- Overtime defined at case level; room-day frequency may differ.
+- Overtime defined at case level; room-day frequency may differ. Weekend overtime rates are reported but not the focus of the analysis.
 
 ---
 
@@ -158,6 +161,7 @@ At one tertiary hospital across more than 96,000 cases, overtime was concentrate
 
 ## Figures and tables
 
+- **Figure 0 (staffing pyramid).** The four-tier staffing capacity of Campus Genk: 25 rooms 08:00–16:30 → 8 rooms 16:30–17:30 → 4 rooms 17:30–22:00 → 1 room overnight. Reproduced with permission from the hospital's own project-launch materials. Sets the context for why a case running past 16:30 is meaningfully different from a case running until 16:25.
 - **Table 1.** Overtime rate by weekday and year (from Fig.16, Fig.17 in the in-depth file).
 - **Table 2.** Room-by-room overtime rate, mean, median, P95 (from Table 25 in the in-depth file).
 - **Table 3.** Overtime and start-delay by urgency and overlap status (from Tables 35, 38).
