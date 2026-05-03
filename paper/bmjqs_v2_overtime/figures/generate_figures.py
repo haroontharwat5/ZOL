@@ -1,6 +1,8 @@
 """
 Figures and tables for the BMJ QS overtime paper.
-All numbers verified against In-Depth_Analysis_Genk.pdf (Tables 24, 25, 33-40, Figures 16-20).
+All numbers verified from In-Depth_Analysis_Genk.pdf screenshots:
+Tables 24, 25, 20, 33, 35, 37, 38, 39 and Figures 16, 17.
+Surgical-room cohort: n=79,352 (18 GO rooms), 7,729 overtime (9.7%).
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -68,35 +70,29 @@ print('Figure 1 done.')
 
 # =============================================================================
 # FIGURE 2 — Room-level overtime concentration
-# Source: Table 25 (In-Depth Analysis pp.30-31), all 25 rooms (GIC7 excluded n=2)
+# Source: Table 25 (In-Depth Analysis pp.30-31), 18 surgical rooms (GO01-GO18)
+# Total n = 79,352 cases; campus average overtime = 9.7%
 # =============================================================================
 
 rooms_data = [
-    ('GO10', 1752, 32.9, 154.2),
-    ('GO09', 2640, 16.3, 71.6),
-    ('GO13', 3308, 13.8, 61.4),
-    ('GO12', 2889, 13.4, 59.2),
-    ('GO08', 2615, 12.5, 57.7),
-    ('GO05', 4905, 12.3, 54.8),
-    ('GO11', 7567, 11.7, 55.1),
-    ('GO02', 3514, 11.3, 52.1),
-    ('GO04', 4535, 10.7, 57.4),
-    ('GO03', 4204, 9.4, 45.1),
-    ('GO06', 5226, 9.4, 58.5),
-    ('GO16', 4100, 8.9, 36.9),
-    ('GO15', 4327, 8.7, 46.6),
-    ('GO07', 4751, 6.8, 37.9),
-    ('GO17', 5482, 6.8, 44.2),
-    ('GO18', 5300, 6.6, 41.4),
-    ('GO01', 6607, 5.8, 57.5),
-    ('GO14', 6896, 3.6, 31.1),
-    ('GOP2', 1316, 3.1, 24.4),
-    ('GEE1', 2330, 2.4, 14.0),
-    ('GEE2', 1646, 1.6, 16.1),
-    ('GOP1', 2739, 1.6, 22.2),
-    ('GEX1', 634,  0.3, 11.0),
-    ('GEG1', 4498, 0.0, 0.0),
-    ('GSE1', 2261, 0.0, 0.0),
+    ('GO10', 1743, 32.9, 154.2),
+    ('GO09', 2637, 16.3, 71.6),
+    ('GO13', 3298, 13.7, 61.3),
+    ('GO08', 1777, 13.6, 68.5),
+    ('GO12', 2884, 13.3, 59.4),
+    ('GO05', 4886, 12.3, 54.8),
+    ('GO11', 7482, 11.7, 55.1),
+    ('GO02', 3502, 11.4, 52.1),
+    ('GO04', 4518, 10.7, 57.4),
+    ('GO03', 4094, 9.6, 45.0),
+    ('GO06', 5217, 9.4, 58.6),
+    ('GO16', 4098, 8.9, 36.9),
+    ('GO15', 4323, 8.7, 46.6),
+    ('GO07', 4658, 6.9, 38.0),
+    ('GO17', 5480, 6.8, 44.2),
+    ('GO18', 5293, 6.5, 41.6),
+    ('GO01', 6577, 5.8, 57.8),
+    ('GO14', 6885, 3.5, 31.4),
 ]
 
 rooms_data.sort(key=lambda x: x[2])
@@ -105,10 +101,11 @@ ncases = [r[1] for r in rooms_data]
 pcts = [r[2] for r in rooms_data]
 mean_ot = [r[3] for r in rooms_data]
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 8), sharey=True,
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 7), sharey=True,
                                 gridspec_kw={'width_ratios': [3, 2], 'wspace': 0.30})
 
-colors = ['#c6dbef' if p < 8.4 else '#6baed6' if p < 15 else '#2171b5' if p < 30 else '#08306b'
+CAMPUS_AVG = 9.7
+colors = ['#c6dbef' if p < CAMPUS_AVG else '#6baed6' if p < 15 else '#2171b5' if p < 30 else '#08306b'
           for p in pcts]
 
 y_pos = np.arange(len(names))
@@ -117,8 +114,9 @@ ax1.set_yticks(y_pos)
 ax1.set_yticklabels(names, fontsize=9)
 ax1.set_xlabel('Cases with overtime (%)')
 ax1.set_title('A. Overtime rate by room', loc='left', fontweight='bold')
-ax1.axvline(8.4, color='#d62728', linestyle='--', linewidth=1, alpha=0.7)
-ax1.text(8.4 + 0.5, 0, 'Campus average 8.4%', fontsize=8, color='#d62728', va='center')
+ax1.axvline(CAMPUS_AVG, color='#d62728', linestyle='--', linewidth=1, alpha=0.7)
+ax1.text(CAMPUS_AVG + 0.5, 0, f'Campus average {CAMPUS_AVG}%',
+         fontsize=8, color='#d62728', va='center')
 ax1.set_xlim(0, 36)
 
 for i, (p, n) in enumerate(zip(pcts, ncases)):
@@ -152,6 +150,8 @@ print('Figure 2 done.')
 # =============================================================================
 # FIGURE 3 — Shift displacement mechanism
 # Source: Table 39 (In-Depth Analysis p.47)
+# n=79,352; 4,151 displaced (5.2%); mean start delay 398.3 min;
+# mean duration diff -22.3 min; mean overtime 10.4 min.
 # =============================================================================
 fig, ax = plt.subplots(figsize=(8, 3.5))
 ax.set_xlim(0, 10)
@@ -162,10 +162,10 @@ ax.text(5, 4.5, 'Shift displacement: the dominant overtime mechanism',
         ha='center', va='center', fontsize=13, fontweight='bold')
 
 boxes = [
-    (1.25, 2.5, '4,786', 'cases displaced\ninto a different shift', '5.0% of total'),
-    (3.75, 2.5, '352',   'minutes\nmean start delay', '≈ 5h 52min'),
+    (1.25, 2.5, '4,151', 'cases displaced\ninto a different shift', '5.2% of total'),
+    (3.75, 2.5, '398',   'minutes\nmean start delay', '≈ 6h 38min'),
     (6.25, 2.5, '−22',   'minutes\nduration deviation', 'shorter than planned'),
-    (8.75, 2.5, '9.2',   'minutes\nmean overtime', 'modest overrun'),
+    (8.75, 2.5, '10.4',  'minutes\nmean overtime', 'modest overrun'),
 ]
 for x, y, number, label, subtitle in boxes:
     rect = mpatches.FancyBboxPatch((x - 1.0, y - 1.2), 2.0, 2.4,
@@ -199,45 +199,53 @@ print('Figure 3 done.')
 
 # =============================================================================
 # TABLE 1 — Overtime summary by weekday and year
-# Sources: Table 24, Tables 33-34, Figures 16-17, Figures 19-20
+# Sources: Table 24 (overall), Table 20 (weekday n), Figure 16 (weekday %),
+# Figure 17 (year %).
 # =============================================================================
 print('\n' + '='*80)
-print('TABLE 1 — Overtime summary by weekday and year')
+print('TABLE 1 — Overtime summary by weekday and year (n=79,352)')
 print('='*80)
 
+# Weekday n from Table 20; OT% from Figure 16; n_overtime calculated as n*pct
 weekday = [
-    ('Monday',     17938, 1435, 8.0, 57.8),
-    ('Tuesday',    18489, 1516, 8.2, 57.4),
-    ('Wednesday',  17943, 1525, 8.5, 59.1),
-    ('Thursday',   18420, 1437, 7.8, 59.1),
-    ('Friday',     20112, 1609, 8.0, 60.8),
-    ('Saturday',    1680,  282, 16.8, 63.3),
-    ('Sunday',      1462,  227, 15.5, 59.0),
+    ('Monday',     14232, 9.8),
+    ('Tuesday',    14750, 9.6),
+    ('Wednesday',  15814, 9.5),
+    ('Thursday',   15844, 8.8),
+    ('Friday',     15615, 9.9),
+    ('Saturday',    1654, 16.8),
+    ('Sunday',      1443, 15.5),
 ]
 
-print(f'\n{"Day":<12} {"n cases":>10} {"n overtime":>12} {"OT rate":>10} {"Mean OT":>10}')
-print('-' * 60)
-total_n = total_ot = 0
-for day, n, ot, pct, mean in weekday:
-    print(f'{day:<12} {n:>10,} {ot:>12,} {pct:>9.1f}% {mean:>9.1f} min')
+print(f'\n{"Day":<12} {"n cases":>10} {"n overtime":>12} {"OT rate":>10}')
+print('-' * 50)
+total_n = 0
+total_ot = 0
+for day, n, pct in weekday:
+    ot = round(n * pct / 100)
+    print(f'{day:<12} {n:>10,} {ot:>12,} {pct:>9.1f}%')
     total_n += n
     total_ot += ot
-print('-' * 60)
-print(f'{"Total":<12} {total_n:>10,} {total_ot:>12,} {total_ot/total_n*100:>9.1f}% {59.0:>9.1f} min')
+print('-' * 50)
+print(f'{"Total":<12} {total_n:>10,} {7729:>12,} {9.7:>9.1f}%')
 
+# Year from Figure 17
 year = [
-    ('2022',     26103, 2297, 8.8, 60.6),
-    ('2023',     28522, 2453, 8.6, 57.7),
-    ('2024',     29223, 2396, 8.2, 59.6),
-    ('2025*',    12196,  878, 7.2, 57.0),
+    ('2022',     10.0),
+    ('2023',     10.0),
+    ('2024',      9.7),
+    ('2025*',     8.5),
 ]
-print(f'\n{"Year":<12} {"n cases":>10} {"n overtime":>12} {"OT rate":>10} {"Mean OT":>10}')
-print('-' * 60)
-for yr, n, ot, pct, mean in year:
-    print(f'{yr:<12} {n:>10,} {ot:>12,} {pct:>9.1f}% {mean:>9.1f} min')
-print('-' * 60)
-print(f'{"Total":<12} {96044:>10,} {8024:>12,} {8.4:>9.1f}% {59.0:>9.1f} min')
+print(f'\n{"Year":<12} {"OT rate":>10}')
+print('-' * 25)
+for yr, pct in year:
+    print(f'{yr:<12} {pct:>9.1f}%')
+print('-' * 25)
+print(f'{"All years":<12} {9.7:>9.1f}%')
 print('* 2025 data through May only.')
+
+print(f'\nOverall (Table 24): n=79,352, overtime=7,729 (9.7%), '
+      f'mean=60.3 min, median=39 min, P95=197 min')
 
 # =============================================================================
 # TABLE 2 — Urgent vs elective overtime and overlap
@@ -247,22 +255,21 @@ print('\n' + '='*80)
 print('TABLE 2 — Urgent vs elective overtime and overlap')
 print('='*80)
 
-print('\nPanel A. Overtime by urgency')
-print(f'{"Urgency":<15} {"n":>10} {"Share":>8} {"After-hrs":>12} {"OT rate":>10} {"Mean OT":>10} {"P95 OT":>10}')
+print('\nPanel A. Volume and overtime by urgency (Tables 33, 35)')
+print(f'{"Urgency":<15} {"n":>10} {"Share":>8} {"After-hrs":>12} {"AH rate":>10} {"Mean OT":>10} {"P95 OT":>10}')
 print('-' * 80)
-print(f'{"Elective":<15} {"84,028":>10} {"87.5%":>8} {"5,859":>12} {"7.0%":>10} {"4.1 min":>10} {"18 min":>10}')
-print(f'{"Non-elective":<15} {"12,016":>10} {"12.5%":>8} {"2,165":>12} {"18.0%":>10} {"10.5 min":>10} {"67.2 min":>10}')
-print(f'{"Total":<15} {"96,044":>10} {"100%":>8} {"8,024":>12} {"8.4%":>10} {"—":>10} {"—":>10}')
+print(f'{"Elective":<15} {"67,736":>10} {"85.4%":>8} {"5,620":>12} {"8.3%":>10} {"5 min":>10} {"29 min":>10}')
+print(f'{"Non-elective":<15} {"11,616":>10} {"14.6%":>8} {"2,109":>12} {"18.2%":>10} {"10.7 min":>10} {"69 min":>10}')
+print(f'{"Total":<15} {"79,352":>10} {"100%":>8} {"7,729":>12} {"9.7%":>10} {"—":>10} {"—":>10}')
 
-print('\nPanel B. Urgent-elective overlap in the same room')
-print(f'{"Days with overlap":<35} 869 / 1,247 (69.7%)')
-print(f'{"Mean elective start delay":<35} +30 min on overlap days vs no-overlap days')
-print(f'{"Highest-burden room (GO11)":<35} 485 events affecting 15.5% of its elective cases')
-print(f'{"Median start delay at GO11":<35} 29 min (no overlap) vs 60 min (overlap)')
+print('\nPanel B. Urgent-elective overlap in the same room (Tables 37, 38)')
+print(f'{"Days with overlap":<35} 858 / 1,247 (68.8%)')
+print(f'{"Highest-burden room (GO11)":<35} 475 events affecting 15.2% of its elective cases')
+print(f'{"Median start delay at GO11":<35} 28 min (no overlap) vs 60 min (overlap)')
 
 # =============================================================================
 # SUPPLEMENTARY TABLE S1 — CV by planned-duration bucket
-# Source: Table 13, p.13
+# Source: Table 13, p.13 (unchanged — refers to full Genk dataset)
 # =============================================================================
 print('\n' + '='*80)
 print('TABLE S1 — Coefficient of variation by planned-duration bucket')
