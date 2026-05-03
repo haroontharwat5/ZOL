@@ -327,4 +327,229 @@ print('  GO10: 46.1% late starts (best punctuality) — 32.9% overtime (worst)')
 print('  GO14: 78.7% late starts (2nd worst punctuality) — 3.5% overtime (best)')
 print('  GO11: 82.4% late starts (worst, 319 min mean delay) — 11.7% overtime (mid-pack)')
 
+# =============================================================================
+# RENDERED TABLE 1 — Overtime summary by weekday and year
+# =============================================================================
+fig, axes = plt.subplots(2, 1, figsize=(8.5, 5),
+                          gridspec_kw={'height_ratios': [4, 2.5]})
+
+ax = axes[0]
+ax.axis('off')
+ax.set_title('Table 1A. Overtime by weekday', loc='left',
+             fontweight='bold', fontsize=11, pad=8)
+header1 = ['Day', 'n cases', 'n overtime', 'OT rate (%)', 'Mean OT (min)']
+rows1 = [
+    ['Monday',    '14,232', '1,395',  '9.8', '58.5'],
+    ['Tuesday',   '14,750', '1,416',  '9.6', '60.1'],
+    ['Wednesday', '15,814', '1,502',  '9.5', '59.7'],
+    ['Thursday',  '15,844', '1,394',  '8.8', '60.5'],
+    ['Friday',    '15,615', '1,546',  '9.9', '62.4'],
+    ['Saturday',   '1,654',   '278', '16.8', '63.4'],
+    ['Sunday',     '1,443',   '224', '15.5', '59.1'],
+    ['Total',     '79,352', '7,729',  '9.7', '60.3'],
+]
+t1 = ax.table(cellText=rows1, colLabels=header1, loc='center', cellLoc='center')
+t1.auto_set_font_size(False)
+t1.set_fontsize(9)
+t1.scale(1, 1.35)
+for j in range(len(header1)):
+    t1[(0, j)].set_facecolor('#2171b5')
+    t1[(0, j)].set_text_props(color='white', fontweight='bold')
+for j in range(len(header1)):
+    t1[(8, j)].set_facecolor('#deebf7')
+    t1[(8, j)].set_text_props(fontweight='bold')
+
+ax = axes[1]
+ax.axis('off')
+ax.set_title('Table 1B. Overtime trend by year', loc='left',
+             fontweight='bold', fontsize=11, pad=8)
+header2 = ['Year', 'OT rate (%)', 'Mean OT (min)', 'Median OT (min)']
+rows2 = [
+    ['2022',   '10.0', '61.8', '40'],
+    ['2023',   '10.0', '58.8', '38'],
+    ['2024',    '9.7', '61.3', '39'],
+    ['2025*',   '8.6', '58.2', '37'],
+]
+t2 = ax.table(cellText=rows2, colLabels=header2, loc='center', cellLoc='center')
+t2.auto_set_font_size(False)
+t2.set_fontsize(9)
+t2.scale(1, 1.35)
+for j in range(len(header2)):
+    t2[(0, j)].set_facecolor('#2171b5')
+    t2[(0, j)].set_text_props(color='white', fontweight='bold')
+
+fig.text(0.5, 0.01, '* 2025 partial (Jan–May). Source: In-Depth Analysis Tables 20, 24; Figures 16, 17, 19, 20.',
+         ha='center', fontsize=8, style='italic', color='#666666')
+fig.tight_layout(rect=[0, 0.03, 1, 1])
+fig.savefig(f'{OUTDIR}/table1_overtime_summary.png')
+fig.savefig(f'{OUTDIR}/table1_overtime_summary.pdf')
+plt.close(fig)
+print('Table 1 rendered.')
+
+# =============================================================================
+# RENDERED TABLE 2 — Urgent vs elective overtime and overlap
+# =============================================================================
+fig, axes = plt.subplots(2, 1, figsize=(8.5, 4.2),
+                          gridspec_kw={'height_ratios': [3, 2]})
+
+ax = axes[0]
+ax.axis('off')
+ax.set_title('Table 2A. Volume and overtime by urgency', loc='left',
+             fontweight='bold', fontsize=11, pad=8)
+header_a = ['Urgency', 'n', 'Share', 'After-hours n', 'AH rate', 'Mean OT (min)', 'P95 OT (min)']
+rows_a = [
+    ['Elective',     '67,736', '85.4%', '5,620',  '8.3%',  '5',    '29'],
+    ['Non-elective', '11,616', '14.6%', '2,109', '18.2%', '10.7',  '69'],
+    ['Total',        '79,352', '100%',  '7,729',  '9.7%',  '—',    '—'],
+]
+ta = ax.table(cellText=rows_a, colLabels=header_a, loc='center', cellLoc='center')
+ta.auto_set_font_size(False)
+ta.set_fontsize(9)
+ta.scale(1, 1.35)
+for j in range(len(header_a)):
+    ta[(0, j)].set_facecolor('#2171b5')
+    ta[(0, j)].set_text_props(color='white', fontweight='bold')
+for j in range(len(header_a)):
+    ta[(3, j)].set_facecolor('#deebf7')
+    ta[(3, j)].set_text_props(fontweight='bold')
+
+ax = axes[1]
+ax.axis('off')
+ax.set_title('Table 2B. Urgent–elective overlap in the same room',
+             loc='left', fontweight='bold', fontsize=11, pad=8)
+header_b = ['Metric', 'Value']
+rows_b = [
+    ['Days with at least one overlap',          '858 of 1,247 (68.8%)'],
+    ['Highest-burden room (GO11)',              '475 events; 15.2% of its elective cases'],
+    ['Median start delay at GO11 (no overlap)', '28 min'],
+    ['Median start delay at GO11 (overlap)',    '60 min'],
+]
+tb = ax.table(cellText=rows_b, colLabels=header_b, loc='center', cellLoc='left',
+              colWidths=[0.55, 0.45])
+tb.auto_set_font_size(False)
+tb.set_fontsize(9)
+tb.scale(1, 1.35)
+for j in range(len(header_b)):
+    tb[(0, j)].set_facecolor('#2171b5')
+    tb[(0, j)].set_text_props(color='white', fontweight='bold')
+
+fig.text(0.5, 0.01,
+         'Source: In-Depth Analysis Tables 33, 35, 37, 38.',
+         ha='center', fontsize=8, style='italic', color='#666666')
+fig.tight_layout(rect=[0, 0.03, 1, 1])
+fig.savefig(f'{OUTDIR}/table2_urgent_overlap.png')
+fig.savefig(f'{OUTDIR}/table2_urgent_overlap.pdf')
+plt.close(fig)
+print('Table 2 rendered.')
+
+# =============================================================================
+# FIGURE S1 — Idle-time distribution between consecutive cases
+# Source: Table 40 + Figure 31 (approximate bin heights)
+# =============================================================================
+fig, ax = plt.subplots(figsize=(7, 4))
+bins = ['0–5', '5–10', '10–15', '15–20', '20–25', '25–30',
+        '30–35', '35–40', '40–45', '45–50', '50–55', '55–60']
+counts = [9000, 13000, 4500, 1500, 800, 400, 200, 150, 100, 80, 60, 50]
+colors_s1 = ['#2171b5'] * len(bins)
+ax.bar(bins, counts, color=colors_s1, edgecolor='white', linewidth=0.5)
+ax.set_xlabel('Idle time between consecutive cases (minutes)')
+ax.set_ylabel('Number of transitions')
+ax.set_title('Figure S1. Idle time between consecutive cases',
+             loc='left', fontweight='bold', fontsize=11)
+ax.tick_params(axis='x', rotation=0, labelsize=8)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.text(0.98, 0.92,
+        'Mean 9.9 min · Median 8 min\nP95 25 min · P99 42 min',
+        transform=ax.transAxes, ha='right', va='top', fontsize=9,
+        bbox=dict(boxstyle='round,pad=0.4', facecolor='#fff9e6',
+                  edgecolor='#f0c040'))
+fig.tight_layout()
+fig.savefig(f'{OUTDIR}/figS1_idle_time.png')
+fig.savefig(f'{OUTDIR}/figS1_idle_time.pdf')
+plt.close(fig)
+print('Figure S1 done.')
+
+# =============================================================================
+# FIGURE S2 — End-time distribution of overtime cases
+# Source: In-Depth Figure 18 (approximate bin heights)
+# =============================================================================
+fig, ax = plt.subplots(figsize=(8, 4))
+hours = ['16:30', '17:30', '18:30', '19:30', '20:30', '21:30',
+         '22:30', '23:30', '00:30', '01:30', '02:30', '03:30',
+         '04:30', '05:30', '06:30', '07:30']
+case_counts = [2700, 1600, 850, 450, 280, 200, 380, 300, 220, 120, 60, 40, 30, 20, 30, 60]
+ax.bar(hours, case_counts, color='#2171b5', edgecolor='white', linewidth=0.5)
+ax.set_xlabel('End time of surgery')
+ax.set_ylabel('Number of overtime cases')
+ax.set_title('Figure S2. Timing of overtime case completions',
+             loc='left', fontweight='bold', fontsize=11)
+ax.tick_params(axis='x', rotation=45, labelsize=8)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.axvspan(-0.5, 0.5, alpha=0.15, color='#d62728')
+ax.text(0, 2900, 'Day-shift\nspillover', ha='center', fontsize=8,
+        color='#d62728', fontweight='bold')
+fig.tight_layout()
+fig.savefig(f'{OUTDIR}/figS2_end_time_distribution.png')
+fig.savefig(f'{OUTDIR}/figS2_end_time_distribution.pdf')
+plt.close(fig)
+print('Figure S2 done.')
+
+# =============================================================================
+# RENDERED TABLE S2 — Per-room start-time deviation vs overtime (FCOTS contrast)
+# =============================================================================
+fig, ax = plt.subplots(figsize=(8.5, 7))
+ax.axis('off')
+ax.set_title('Table S2. Per-room start-time deviation vs overtime rate',
+             loc='left', fontweight='bold', fontsize=11, pad=8)
+header_s2 = ['Room', 'n', 'Late starts (%)', 'Mean delay (min)', 'Overtime (%)']
+rooms_join = [
+    ('GO11', 7482, 82.4, 319.1, 11.7),
+    ('GO14', 6885, 78.7,  37.3,  3.5),
+    ('GO01', 6577, 75.1,  38.0,  5.8),
+    ('GO08', 1777, 71.9,  44.9, 13.6),
+    ('GO02', 3502, 70.3,  42.2, 11.4),
+    ('GO07', 4658, 70.0,  43.5,  6.9),
+    ('GO05', 4886, 68.3,  54.3, 12.3),
+    ('GO03', 4094, 65.9,  44.6,  9.6),
+    ('GO09', 2637, 64.5,  48.9, 16.3),
+    ('GO04', 4518, 63.5,  49.4, 10.7),
+    ('GO15', 4323, 63.1,  40.5,  8.7),
+    ('GO16', 4098, 62.6,  35.0,  8.9),
+    ('GO18', 5293, 62.3,  36.9,  6.5),
+    ('GO17', 5480, 61.8,  38.4,  6.8),
+    ('GO06', 5217, 61.7,  42.1,  9.4),
+    ('GO12', 2884, 54.5,  48.3, 13.3),
+    ('GO13', 3298, 53.7,  48.6, 13.7),
+    ('GO10', 1743, 46.1,  63.2, 32.9),
+]
+rows_s2 = [[r, f'{n:,}', f'{l:.1f}', f'{d:.1f}', f'{o:.1f}']
+           for r, n, l, d, o in rooms_join]
+ts2 = ax.table(cellText=rows_s2, colLabels=header_s2, loc='center', cellLoc='center')
+ts2.auto_set_font_size(False)
+ts2.set_fontsize(9)
+ts2.scale(1, 1.25)
+for j in range(len(header_s2)):
+    ts2[(0, j)].set_facecolor('#2171b5')
+    ts2[(0, j)].set_text_props(color='white', fontweight='bold')
+go10_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'GO10') + 1
+go14_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'GO14') + 1
+go11_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'GO11') + 1
+for j in range(len(header_s2)):
+    ts2[(go10_row, j)].set_facecolor('#fee5d9')
+    ts2[(go14_row, j)].set_facecolor('#deebf7')
+    ts2[(go11_row, j)].set_facecolor('#fff9e6')
+
+fig.text(0.5, 0.015,
+         'GO10 (orange): best punctuality, worst overtime. '
+         'GO14 (blue): worst punctuality, best overtime. '
+         'GO11 (yellow): worst delay, mid-pack overtime.',
+         ha='center', fontsize=8, style='italic', color='#444444')
+fig.tight_layout(rect=[0, 0.04, 1, 1])
+fig.savefig(f'{OUTDIR}/tableS2_starttime_vs_overtime.png')
+fig.savefig(f'{OUTDIR}/tableS2_starttime_vs_overtime.pdf')
+plt.close(fig)
+print('Table S2 rendered.')
+
 print('\nAll figures saved to:', OUTDIR)
