@@ -206,35 +206,36 @@ print('\n' + '='*80)
 print('TABLE 1 — Overtime summary by weekday and year (n=79,352)')
 print('='*80)
 
-# Weekday n from Table 20; OT% from Figure 16; n_overtime calculated as n*pct
+# Weekday n from Table 20; OT% from Figure 16; mean OT from Figure 19;
+# n_overtime calculated as n*pct
 weekday = [
-    ('Monday',     14232, 9.8),
-    ('Tuesday',    14750, 9.6),
-    ('Wednesday',  15814, 9.5),
-    ('Thursday',   15844, 8.8),
-    ('Friday',     15615, 9.9),
-    ('Saturday',    1654, 16.8),
-    ('Sunday',      1443, 15.5),
+    ('Monday',     14232, 9.8, 58.5),
+    ('Tuesday',    14750, 9.6, 60.1),
+    ('Wednesday',  15814, 9.5, 59.7),
+    ('Thursday',   15844, 8.8, 60.5),
+    ('Friday',     15615, 9.9, 62.4),
+    ('Saturday',    1654, 16.8, 63.4),
+    ('Sunday',      1443, 15.5, 59.1),
 ]
 
-print(f'\n{"Day":<12} {"n cases":>10} {"n overtime":>12} {"OT rate":>10}')
-print('-' * 50)
+print(f'\n{"Day":<12} {"n cases":>10} {"n overtime":>12} {"OT rate":>10} {"Mean OT":>10}')
+print('-' * 60)
 total_n = 0
 total_ot = 0
-for day, n, pct in weekday:
+for day, n, pct, mean in weekday:
     ot = round(n * pct / 100)
-    print(f'{day:<12} {n:>10,} {ot:>12,} {pct:>9.1f}%')
+    print(f'{day:<12} {n:>10,} {ot:>12,} {pct:>9.1f}% {mean:>9.1f}')
     total_n += n
     total_ot += ot
-print('-' * 50)
-print(f'{"Total":<12} {total_n:>10,} {7729:>12,} {9.7:>9.1f}%')
+print('-' * 60)
+print(f'{"Total":<12} {total_n:>10,} {7729:>12,} {9.7:>9.1f}% {60.3:>9.1f}')
 
 # Year from Figure 17
 year = [
     ('2022',     10.0),
     ('2023',     10.0),
     ('2024',      9.7),
-    ('2025*',     8.5),
+    ('2025*',     8.6),
 ]
 print(f'\n{"Year":<12} {"OT rate":>10}')
 print('-' * 25)
@@ -284,5 +285,46 @@ for bucket, n, cv_obs, cv_plan in [
     ('>180 min',    7343, 0.42, 1.86),
 ]:
     print(f'{bucket:<18} {n:>10,} {cv_obs:>16.2f} {cv_plan:>20.2f}')
+
+# =============================================================================
+# SUPPLEMENTARY TABLE S2 — Start-time deviation by room (FCOTS contrast)
+# Source: Table 21 (start-time per OR) + Table 25 (overtime per OR)
+# Demonstrates the inverse relationship between punctuality and overtime
+# inside the surgical cohort.
+# =============================================================================
+print('\n' + '='*80)
+print('TABLE S2 — Start-time deviation by room vs overtime')
+print('='*80)
+
+# (room, n, late_pct, mean_delay, ot_pct) — joined from Tables 21 and 25
+rooms_join = [
+    ('GO11', 7482, 82.4, 319.1, 11.7),
+    ('GO14', 6885, 78.7,  37.3,  3.5),
+    ('GO01', 6577, 75.1,  38.0,  5.8),
+    ('GO08', 1777, 71.9,  44.9, 13.6),
+    ('GO02', 3502, 70.3,  42.2, 11.4),
+    ('GO07', 4658, 70.0,  43.5,  6.9),
+    ('GO05', 4886, 68.3,  54.3, 12.3),
+    ('GO03', 4094, 65.9,  44.6,  9.6),
+    ('GO09', 2637, 64.5,  48.9, 16.3),
+    ('GO04', 4518, 63.5,  49.4, 10.7),
+    ('GO15', 4323, 63.1,  40.5,  8.7),
+    ('GO16', 4098, 62.6,  35.0,  8.9),
+    ('GO18', 5293, 62.3,  36.9,  6.5),
+    ('GO17', 5480, 61.8,  38.4,  6.8),
+    ('GO06', 5217, 61.7,  42.1,  9.4),
+    ('GO12', 2884, 54.5,  48.3, 13.3),
+    ('GO13', 3298, 53.7,  48.6, 13.7),
+    ('GO10', 1743, 46.1,  63.2, 32.9),
+]
+print(f'\n{"Room":<8} {"n":>8} {"Late starts %":>15} {"Mean delay":>12} {"Overtime %":>12}')
+print('-' * 60)
+for r, n, late, delay, ot in rooms_join:
+    print(f'{r:<8} {n:>8,} {late:>14.1f}% {delay:>11.1f} {ot:>11.1f}%')
+
+print('\nKey contrast:')
+print('  GO10: 46.1% late starts (best punctuality) — 32.9% overtime (worst)')
+print('  GO14: 78.7% late starts (2nd worst punctuality) — 3.5% overtime (best)')
+print('  GO11: 82.4% late starts (worst, 319 min mean delay) — 11.7% overtime (mid-pack)')
 
 print('\nAll figures saved to:', OUTDIR)
