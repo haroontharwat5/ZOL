@@ -32,21 +32,21 @@
 
 - Overtime is the binding economic cost in OR operations, weighted 1.5-2× the cost of idle time [1a,2].
 - **Staff harm.** Overtime and long shifts are associated with poorer perceived care quality and higher patient-safety risk in a 12-country European nurse workforce study [3]. The companion study found that 12-hour shifts were associated with burnout and intent to leave [4]. The most recent direct evidence links mandatory overtime to intent to leave in a 2024 cross-sectional study of 264 South Korean nurses [5]. Both long shifts and overtime are associated with worse performance and wellbeing [23]; high workload and low decision latitude are established burnout predictors [24].
-- **Patient harm.** After-hours surgery carries elevated mortality in a 2020 meta-analysis (adjusted OR 1.16, 95% CI 1.06-1.28, low-certainty evidence) [6], recently replicated in a 281,717-patient propensity-matched South Korean cohort — though the effect size (OR 3.58) has been challenged on residual confounding grounds [7,26]. Each intraoperative anaesthesia handover raises the odds of a major composite complication [8]. A 2025 UK national safety investigation (citing an MDU member survey of 481 doctors) named staff fatigue as a direct patient-safety problem [9]. Overtime hours above a breakpoint threshold were associated with a 2.09% increase in pressure ulcers across 70 US hospitals [10].
-- The bridge between the two: staff fatigue and handover transitions are the mechanisms through which operational overtime becomes a clinical-safety problem.
+- **Patient harm.** After-hours surgery carries elevated mortality in a 2020 meta-analysis (adjusted OR 1.16, 95% CI 1.06-1.28, low-certainty evidence) [6], recently replicated in a 281,717-patient propensity-matched South Korean cohort, although the effect size (OR 3.58) has been challenged on residual-confounding grounds [7,26]. Each intraoperative anaesthesia handover raises the odds of a major composite complication [8]. A 2025 UK national safety investigation (citing an MDU member survey of 481 doctors) named staff fatigue as a direct patient-safety problem [9]. Overtime hours above a breakpoint threshold were associated with a 2.09% increase in pressure ulcers across 70 US hospitals [10].
+- Staff fatigue and handover transitions are the mechanisms that turn operational overtime into a clinical-safety problem.
 
 ### 1.3 The staffing-pyramid context (100 words)
 
 - At Campus Genk, 25 theatres run 08:00-16:30 (day shift). Staffing drops to 8 rooms during 16:30-17:30, then 4 rooms during 17:30-22:00, and a single overnight room with 3 on-call nurses.
-- A case spilling past 16:30 is not merely late. It is competing for one of a sharply diminishing set of staffed rooms, covered by different staff than those who started the day.
-- This staffing cliff is what makes "overtime" at this site a meaningful exposure category, not an arbitrary clock cut-off.
+- A case spilling past 16:30 is not merely late; it is competing for one of a sharply diminishing set of staffed rooms, covered by different staff than those who started the day.
+- The staffing change at the shift boundary is what gives overtime its operational meaning at this site, rather than an arbitrary clock cut-off.
 
 > **Figure 1 (MAIN slot 1) — Staffing pyramid.** Step diagram showing the four staffing tiers: 25 rooms 08:00-16:30 → 8 rooms 16:30-17:30 → 4 rooms 17:30-22:00 → 1 room overnight. Reproduced from the hospital kickoff with permission. Anchors the entire framing.
 
 ### 1.4 Research questions (80 words)
 
 - RQ1: How is overtime distributed across rooms and time within one tertiary centre?
-- RQ2: What mechanism — late starts, individual case overruns, or mid-day cascading — accounts for most of the overtime minutes?
+- RQ2: Which mechanism (late starts, individual case overruns, or mid-day cascading) accounts for most of the overtime minutes?
 - RQ3: How do urgent cases interact with the elective programme to produce spillover into staffed-down hours?
 
 **References for §1:** [1a] Strum/Vargas/May 1999, [2] McIntosh 2006, [3] Griffiths 2014, [4] Dall'Ora 2015, [5] Bae 2024, [6] Cortegiani 2020, [7] Oh 2025, [8] Saager 2014, [9] HSSIB 2025, [10] Pittman 2025, [23] Dall'Ora 2016, [24] Dall'Ora 2020, [26] Sakurai 2025.
@@ -119,7 +119,7 @@
 - Coefficient of variation by planned-duration bucket: <30 min CV 0.61, 31-60 min CV 0.46, 61-90 min CV 0.36, 91-180 min CV 0.35, >180 min CV 0.42. Planning-deviation CV follows the same pattern but more extreme: >180 min bucket has CV 1.86.
 - Mid-length cases (61-180 min) are most predictable. Very long cases carry the largest planning noise. This matters because the same complex-cardiac and oncology procedures that drive planning variability are concentrated in the rooms with the most overtime.
 - Weekend relative deviation is 23.1% (Saturday) and 23.4% (Sunday) vs 2.0-4.8% on weekdays. One sentence.
-- Top deviation procedures: DEBULKING MET HIPEC (74.4 min), AVR (73.7), CABG OFF PUMP (60.4) — the complex cardiac and oncology procedures concentrated in GO10.
+- Top deviation procedures: DEBULKING MET HIPEC (74.4 min), AVR (73.7), CABG OFF PUMP (60.4). These are the complex cardiac and oncology procedures concentrated in GO10.
 
 > **Supplementary Table S1 — CV by planned-duration bucket.** Five rows, three columns (n, CV observed, CV planning deviation). Compact and analytically interesting, but not headline. APPENDIX.
 
@@ -199,25 +199,25 @@
 ### 4.2 Finding 2 — Cascading as the dominant mechanism (250 words)
 
 - The 4,786 shift-displaced cases finish on time or early (mean duration deviation -22 min), yet they land in the evening shift because of a mean start delay of 352 min. This is not an individual-case-overrun problem. It is mid-day delay accumulation pushing cases across the shift boundary.
-- **Literature parallel.** Wachtel & Dexter (2009) showed that tardiness per case grew larger as the day progressed because the total duration of preceding cases increased — the classic cascade pattern [19]. Fugener et al. (2017) demonstrated systematic biases in surgeon duration estimates (planning fallacy, anchoring), which compound the cascade: each underestimated case pushes the next one later [20]. Our -22 min duration deviation is consistent with displaced cases being compressed or truncated to fit a shrinking window.
-- **Reframing the intervention.** If the mechanism is cascading rather than long-running individual cases, the intervention point is earlier in the day: scheduling density, buffer placement, and urgent-case routing — not end-of-list management. Joseph et al. (2019) documented how minor flow disruptions cluster and escalate into major disruptions [21]. A systematic review of OR workflow disruptions estimated that approximately 20% of operating time involves disruptions, though the evidence for direct linkage to surgical outcomes remains mixed [22].
+- **Literature parallel.** Wachtel and Dexter (2009) showed that tardiness per case grew larger as the day progressed, because the total duration of preceding cases increased; this is the classic cascade pattern [19]. Fugener et al. (2017) demonstrated systematic biases in surgeon duration estimates (planning fallacy, anchoring), which compound the cascade: each underestimated case pushes the next one later [20]. Our -22 min duration deviation is consistent with displaced cases being compressed or truncated to fit a shrinking window.
+- **Reframing the intervention.** If the mechanism is cascading rather than long-running individual cases, the intervention point is earlier in the day: scheduling density, buffer placement, and urgent-case routing, rather than end-of-list management. Joseph et al. (2019) documented how minor flow disruptions cluster and escalate into major ones [21]. A systematic review of OR workflow disruptions estimated that roughly 20% of operating time involves disruptions, although the evidence for direct linkage to surgical outcomes is mixed [22].
 
 **References for §4.2:** [19] Wachtel & Dexter 2009, [20] Fugener 2017, [21] Joseph 2019, [22] Koch 2020.
 
 ### 4.3 Finding 3 — Urgent-elective interaction (150 words)
 
 - Urgent cases run after-hours at more than twice the rate of elective cases (18% vs 7%), with heavier tails (P95 67.2 vs 18 min). When overtime does occur, however, the mean overrun length is similar in both groups (~58-59 min). Elective cases are seven times more numerous, so the absolute pool of after-hours minutes is dominated by the elective programme. Overlap occurs on 70% of days, adding 30 min to elective start times.
-- This is not an argument to restrict urgent access. It is an argument to protect the elective programme from predictable disruption — through dedicated urgent rooms or scheduling buffers on historically high-urgency days. GO11 already absorbs much of the overlap, functioning as a de facto urgent-intake room.
+- This is not an argument to restrict urgent access. It is an argument to protect the elective programme from predictable disruption, either through dedicated urgent rooms or through scheduling buffers on historically high-urgency days. GO11 already absorbs much of the overlap and functions as a de facto urgent-intake room.
 - The unpredictability of the overlap is the staff-harm dimension: both long shifts and overtime are associated with worse performance and wellbeing, and the unpredictable nature of urgent-driven overtime compounds the effect [23].
 
 **References for §4.3:** [23] Dall'Ora 2016.
 
 ### 4.4 The double-ended harm argument (200 words)
 
-- The paper does not measure outcomes directly. It characterises an exposure — cases and staff pushed into understaffed hours — and draws on published evidence for consequences at both ends.
+- The paper does not measure outcomes directly. It characterises an exposure (cases and staff pushed into understaffed hours) and draws on published evidence for consequences at both ends.
 - **Staff harm.** Overtime and long shifts are associated with burnout, reduced perceived care quality, and intent to leave [3,4,5]. Both long shifts and overtime are risk factors for worse performance and wellbeing [23]; high workload and low decision latitude are established burnout predictors [24]. In two Belgian university hospitals, workload and unit-level nurse management were the strongest predictors of burnout and job outcomes [25]. The HSSIB 2025 investigation named staff fatigue as a patient-safety problem [9].
 - **Patient harm.** After-hours surgery carries elevated mortality [6,7], though the effect size is debated [26]. Each intraoperative handover raises complication risk [8], though recent sub-specialty data are mixed [27]. Structured handover programmes reduce adverse events (the I-PASS paediatric inpatient study showed a 30% reduction in preventable adverse events) [28]. Reducing intern shifts from extended (>24 h) to intervention schedules produced 36% fewer serious medical errors [30]; extended-duration shifts were associated with 3.5- to 7.5-fold higher odds of fatigue-related significant medical errors in a prospective intern cohort [29]. A systematic review of physician fatigue found associations with physician health outcomes, with mixed evidence for direct effects on surgical patient outcomes [31]. Overtime hours above a breakpoint threshold were associated with increased pressure ulcers across 70 US hospitals [10].
-- **The bridge.** In a hospital where 25 rooms drop to 8, then 4, then 1, each case pushed past 16:30 lands in a setting with fewer staff, more handovers, and a fatigued workforce. The exposure we document is the upstream condition for both classes of harm.
+- **Linking the two.** In a hospital where 25 rooms drop to 8, then 4, then 1, each case pushed past the shift boundary lands in a setting with fewer staff, more handovers, and a fatigued workforce. The exposure we document is the upstream condition for both classes of harm.
 
 **References for §4.4:** [3] Griffiths 2014, [4] Dall'Ora 2015, [5] Bae 2024, [6] Cortegiani 2020, [7] Oh 2025, [8] Saager 2014, [9] HSSIB 2025, [10] Pittman 2025, [23] Dall'Ora 2016, [24] Dall'Ora 2020, [25] Van Bogaert 2017, [26] Sakurai 2025, [27] Guerra-Londono 2025, [28] Starmer/I-PASS 2014, [29] Barger 2006, [30] Landrigan 2004, [31] Gates 2018.
 
@@ -235,7 +235,7 @@
 ## 5. Conclusion (~200 words)
 
 - Operating-room overtime at this tertiary centre is not a diffuse hospital-wide problem. It is concentrated in a small number of rooms, driven by mid-day cascading rather than individual case overruns, and amplified by daily urgent-elective overlap.
-- The staffing pyramid — 25 rooms dropping to 8, then 4, then 1 — means every case pushed past the shift boundary lands in a setting with fewer staff and more handovers. Published evidence links both the staff exposure (fatigue, burnout, intent to leave) and the patient exposure (after-hours surgery, handover transitions) to measurable harm.
+- The staffing pyramid (25 rooms dropping to 8, then 4, then 1) means every case pushed past the shift boundary lands in a setting with fewer staff and more handovers. Published evidence links both the staff exposure (fatigue, burnout, intent to leave) and the patient exposure (after-hours surgery, handover transitions) to measurable harm.
 - These findings argue for room-level rather than hospital-level overtime targets, for scheduling interventions that address mid-day flow rather than first-case punctuality alone, and for prospective outcome linkage in Phase 2.
 - No new references in §5. The conclusion restates findings; it does not introduce new evidence.
 
