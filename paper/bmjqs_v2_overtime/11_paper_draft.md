@@ -26,7 +26,7 @@ Haroon Tharwat, Maxim Riebus, [Ben surname], [Dieter surname], Niels Martin
 
 **Results.** 7,729 cases (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes (calculated among overtime cases) and a 95th percentile of 197 minutes. Overtime was concentrated in a small number of rooms: one room (GO10) ran overtime on 32.9% of its cases with a mean overrun of 154 minutes, while the lowest-overtime room (GO14) ran overtime on 3.5%. 4,151 cases (5.2%) were performed in a different shift than originally planned, with a mean start delay of 398 minutes and a mean duration 22 minutes shorter than planned, indicating upstream displacement rather than individual overruns. Urgent-elective overlap in the same operating room occurred on 68.8% of observation days and added roughly 30 minutes to elective start times. First-case punctuality did not predict room-level overtime.
 
-**Conclusions.** At this tertiary centre, overtime was concentrated, cascading, and driven by mid-day displacement rather than by late starts or individual case overruns. Room-level and cascading-focused metrics offer a more actionable target for quality improvement than utilisation or first-case punctuality.
+**Conclusions.** At this tertiary centre, overtime was concentrated, cascading, and driven by mid-day displacement rather than by late starts or individual case overruns. Room-level overtime tracking and mid-day flow metrics are more practical targets for quality improvement than utilisation or first-case punctuality.
 
 ---
 
@@ -40,7 +40,7 @@ On the staff side, overtime and long shifts are associated with poorer perceived
 
 On the patient side, after-hours surgery carries elevated mortality. A 2020 meta-analysis reported an adjusted odds ratio of 1.16 (95% CI 1.06 to 1.28), based on low-certainty evidence.^5^ A 2024 propensity-matched cohort of 281,717 South Korean patients reported a much larger effect (OR 3.58), although that estimate has been challenged on residual-confounding grounds, given a four-fold imbalance in emergency procedures even after matching.^6,25^ Each intraoperative anaesthesia handover raises the odds of a major composite complication, with incidence rising from 8.8% at zero transitions to 21.2% at four or more.^7^ A 2025 UK national patient-safety investigation, citing a Medical Defence Union member survey of 481 doctors, reported that 22% experienced daily sleep deprivation and that 35% said tiredness had impaired their ability to treat patients.^8^ Overtime hours above a breakpoint threshold have been associated with a 2.09% increase in pressure ulcers across 70 US hospitals.^9^
 
-The staffing context is what links the two sides. At the study hospital, Campus Genk runs 25 operating rooms during the 08:00 to 16:30 day shift. At 16:30, capacity drops to 8 rooms. At 17:30, it drops again to 4. Overnight, a single room remains staffed with three on-call nurses (Figure 1). A case that runs past 16:30 is not merely a few minutes late; it is competing for one of a sharply diminishing set of staffed rooms, covered by different staff than those who started the day. The staffing change at the shift boundary is what gives overtime its operational meaning at this site, rather than an arbitrary clock cut-off.
+Staffing links the two sides. At the study hospital, Campus Genk runs 25 operating rooms during the 08:00 to 16:30 day shift. At 16:30, capacity drops to 8 rooms. At 17:30, it drops again to 4. Overnight, a single room remains staffed with three on-call nurses (Figure 1). A case that runs past 16:30 competes for one of a sharply diminishing set of staffed rooms, covered by different staff than those who started the day. The staffing change at the shift boundary gives overtime its operational meaning at this site, not an arbitrary clock cut-off.
 
 **[Figure 1. Staffing pyramid at Campus Genk. Step diagram showing the four staffing tiers: 25 rooms during the 08:00-16:30 day shift, 8 rooms during 16:30-17:30, 4 rooms during 17:30-22:00, and 1 room overnight. Reproduced with permission from the hospital's project-launch materials.]**
 
@@ -116,7 +116,7 @@ Most overtime cases ended shortly after the shift boundary. The majority of over
 
 A total of 4,151 cases (5.2%) were performed in a different shift than originally planned (Figure 3). These displaced cases had a mean start delay of 398 minutes, roughly six and a half hours. Yet their mean duration was 22.3 minutes shorter than planned, and their mean overtime was only 10.4 minutes. The displaced cases did not run long. They finished on time or early. They landed past the shift boundary because upstream cases pushed them there.
 
-Shift displacement matters for overtime because of the staffing pyramid. A case displaced past 16:30 arrives in a setting where 25 rooms have dropped to 8, covered by different staff than those who started the day. Even if the displaced case itself barely overruns, it is consuming after-hours staffing capacity and exposing its team to the handover and fatigue risks that the staffing change creates. Displacement is the mechanism by which daytime scheduling failures become overtime problems.
+Shift displacement matters for overtime because of the staffing pyramid. A case displaced past 16:30 arrives in a setting where 25 rooms have dropped to 8, covered by different staff than those who started the day. Even if the displaced case itself barely overruns, it is consuming after-hours staffing capacity and exposing its team to the handover and fatigue risks that the staffing change creates. Displacement turns daytime scheduling failures into overtime problems.
 
 The monthly trend showed modest improvement, declining from 7 to 8% of cases displaced in early 2022 to 3 to 5% by 2024 (Supplementary Figure S2).
 
@@ -140,7 +140,7 @@ First-case punctuality was not associated with room-level overtime. GO10 had the
 
 ### Concentration, not prevalence
 
-A campus-wide overtime rate of 9.7% is unremarkable. What is unusual is how uneven the distribution is. GO10 ran overtime in one of every three cases, with a mean overrun of more than two and a half hours. GO14, in the same building, ran overtime on 3.5% of cases. The spread within this single campus (3.5 to 32.9%, nearly ten-fold) was wider than the spread between campuses across the ZOL network (0.5 to 9.7%).
+A campus-wide overtime rate of 9.7% is unremarkable. The distribution, though, is strikingly uneven. GO10 ran overtime in one of every three cases, with a mean overrun of more than two and a half hours. GO14, in the same building, ran overtime on 3.5% of cases. The spread within this single campus (3.5 to 32.9%, nearly ten-fold) was wider than the spread between campuses across the ZOL network (0.5 to 9.7%).
 
 Hospital-wide targets such as "reduce overtime by 10%" will miss the problem unless they are decomposed by room. The overtime is already concentrated; the intervention should be too. Zhang, Dunstan, and Pandit made the same point in their tutorial on capped utilisation: aggregate metrics hide room-level operational reality.^12^ A separate argument that valid OR metrics are a prerequisite for quality improvement has been made elsewhere.^32^
 
@@ -176,7 +176,7 @@ This study has several limitations. It is a single-site retrospective analysis o
 
 ## Conclusion
 
-Operating-room overtime at this tertiary centre is not a diffuse hospital-wide problem. It is concentrated in a small number of rooms, driven primarily by mid-day cascading rather than individual case overruns, and amplified by daily urgent-elective overlap. The staffing pyramid, with 18 rooms dropping to 8, then 4, then 1, means every case pushed past the shift boundary lands in a setting with fewer staff and more handovers. Published evidence links both the staff exposure (fatigue, burnout, intent to leave) and the patient exposure (after-hours surgery, handover transitions) to measurable harm.
+Operating-room overtime at this tertiary centre is concentrated in a small number of rooms, driven primarily by mid-day cascading rather than individual case overruns, and amplified by daily urgent-elective overlap. Because the staffing pyramid sheds rooms rapidly after 16:30, even modest displacement pushes cases into understaffed hours where handover and fatigue risks accumulate. Published evidence links both the staff exposure (fatigue, burnout, intent to leave) and the patient exposure (after-hours surgery, handover transitions) to measurable harm.
 
 The findings argue for room-level rather than hospital-level overtime targets, for scheduling interventions that address mid-day flow rather than first-case punctuality alone, and for prospective outcome linkage in Phase 2 of this research programme.
 
