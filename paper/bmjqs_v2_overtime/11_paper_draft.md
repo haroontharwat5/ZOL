@@ -32,7 +32,7 @@ Haroon Tharwat, Maxim Riebus, [Ben surname], [Dieter surname], Niels Martin
 
 ## INTRODUCTION
 
-Operating-room (OR) overtime occurs when a surgical case extends past the end of its assigned staffing shift, requiring personnel to continue working beyond their scheduled period. Overutilised time is approximately twice as expensive as underutilised time.[1] The consequences, however, extend well beyond cost.
+Operating-room (OR) overtime occurs when a surgical case extends past the end of its assigned staffing shift. Overutilised time is approximately twice as expensive as underutilised time,[1] but overtime is more than a budget problem.
 
 On the staff side, overtime and long shifts are associated with poorer perceived care quality and higher patient-safety risk in a 12-country European nurse workforce study.[2] The companion study linked 12-hour shifts to burnout and intent to leave.[3] Mandatory overtime was significantly associated with intent to leave in a 2024 cross-sectional study of 264 South Korean nurses.[4] Both long shifts and overtime are associated with worse performance and wellbeing,[5] and high workload combined with low decision latitude is an established burnout predictor.[6]
 
@@ -127,7 +127,7 @@ The conventional view holds that first-case punctuality drives end-of-day perfor
 
 ### Implications
 
-The overtime we document exposes both staff and patients to established risks. As reviewed in the Introduction, overtime and long shifts are associated with burnout, reduced care quality, and intent to leave,[2,3,4,5] and after-hours surgery carries elevated mortality risk, although the effect size is contested.[7,8,9] At a hospital where 25 rooms drop to 8, then 4, then 1, each case past the shift boundary lands in a setting with fewer staff and more handovers. Room-level monitoring is the necessary first step; Phase 2 of this programme will test whether the overtime patterns we describe are linked to patient outcomes in this cohort.
+The overtime we document exposes both staff and patients to known risks. As reviewed in the Introduction, overtime and long shifts are associated with burnout, reduced care quality, and intent to leave,[2,3,4,5] and after-hours surgery carries elevated mortality risk, although the effect size is contested.[7,8,9] At a hospital where 25 rooms drop to 8, then 4, then 1, each case past the shift boundary lands in a setting with fewer staff and more handovers. Room-level monitoring is the necessary first step; Phase 2 of this programme will test whether the overtime patterns we describe are linked to patient outcomes in this cohort.
 
 ### Limitations
 
