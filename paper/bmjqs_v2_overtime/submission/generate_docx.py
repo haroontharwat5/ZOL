@@ -3,9 +3,12 @@
 
 import re
 from docx import Document
-from docx.shared import Pt, Cm, RGBColor
+from docx.shared import Pt, Cm, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.oxml.ns import qn
+
+FIGURES_DIR = '/home/user/ZOL/paper/bmjqs_v2_overtime/figures'
 
 doc = Document()
 
@@ -86,6 +89,111 @@ def add_heading_caps(text, space_before=12):
     run.font.name = 'Times New Roman'
     run.font.size = Pt(12)
     return p
+
+
+def add_image(filename, width_inches=6.0, caption_text=None, caption_label=None):
+    """Insert a centered image with an optional bold caption."""
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    pf = p.paragraph_format
+    pf.space_before = Pt(12)
+    pf.space_after = Pt(6)
+    pf.line_spacing = Pt(14)
+    run = p.add_run()
+    run.add_picture(f'{FIGURES_DIR}/{filename}', width=Inches(width_inches))
+    if caption_text is not None:
+        cap = doc.add_paragraph()
+        cap.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        cpf = cap.paragraph_format
+        cpf.space_after = Pt(12)
+        cpf.line_spacing = Pt(14)
+        if caption_label:
+            rl = cap.add_run(caption_label)
+            rl.bold = True
+            rl.font.name = 'Times New Roman'
+            rl.font.size = Pt(11)
+        rt = cap.add_run(' ' + caption_text)
+        rt.font.name = 'Times New Roman'
+        rt.font.size = Pt(11)
+
+
+def add_table(headers, rows, header_color='2171b5', bold_last_row=False,
+              col_widths_inches=None, caption_label=None, caption_text=None):
+    """Insert a native Word table with a colored header row and an optional caption.
+
+    headers: list of column header strings
+    rows: list of row lists (strings)
+    """
+    if caption_label:
+        cap = doc.add_paragraph()
+        cap.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        cpf = cap.paragraph_format
+        cpf.space_before = Pt(12)
+        cpf.space_after = Pt(4)
+        cpf.line_spacing = Pt(14)
+        rl = cap.add_run(caption_label)
+        rl.bold = True
+        rl.font.name = 'Times New Roman'
+        rl.font.size = Pt(11)
+        if caption_text:
+            rt = cap.add_run(' ' + caption_text)
+            rt.font.name = 'Times New Roman'
+            rt.font.size = Pt(11)
+
+    table = doc.add_table(rows=len(rows) + 1, cols=len(headers))
+    table.style = 'Light Grid Accent 1'
+
+    # Header row
+    for j, h in enumerate(headers):
+        cell = table.rows[0].cells[j]
+        cell.text = ''
+        para = cell.paragraphs[0]
+        para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = para.add_run(h)
+        run.bold = True
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(10)
+        run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        shading = f'<w:shd {{}} w:fill="{header_color}"/>'.format
+        from docx.oxml import OxmlElement
+        tcPr = cell._tc.get_or_add_tcPr()
+        shd = OxmlElement('w:shd')
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), header_color)
+        tcPr.append(shd)
+
+    # Data rows
+    for i, row in enumerate(rows, start=1):
+        is_bold = bold_last_row and i == len(rows)
+        for j, val in enumerate(row):
+            cell = table.rows[i].cells[j]
+            cell.text = ''
+            para = cell.paragraphs[0]
+            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = para.add_run(str(val))
+            run.bold = is_bold
+            run.font.name = 'Times New Roman'
+            run.font.size = Pt(10)
+            if is_bold:
+                tcPr = cell._tc.get_or_add_tcPr()
+                from docx.oxml import OxmlElement
+                shd = OxmlElement('w:shd')
+                shd.set(qn('w:val'), 'clear')
+                shd.set(qn('w:color'), 'auto')
+                shd.set(qn('w:fill'), 'DEEBF7')
+                tcPr.append(shd)
+
+    # Column widths
+    if col_widths_inches:
+        for j, w in enumerate(col_widths_inches):
+            for row in table.rows:
+                row.cells[j].width = Inches(w)
+
+    # Spacing after table
+    spacer = doc.add_paragraph()
+    spacer.paragraph_format.space_after = Pt(6)
+    spacer.paragraph_format.line_spacing = Pt(14)
 
 
 def add_heading_lower(text, space_before=12):
@@ -177,7 +285,7 @@ for para in intro_paras:
 
 numbered_qs = [
     '1. **How is overtime distributed across rooms and time within one tertiary hospital?** This examines whether overtime is a diffuse hospital-wide problem or concentrates in specific rooms, since the appropriate intervention point depends on that distribution.',
-    '2. **Which operational factors — duration overruns, shift displacement, urgent-elective interaction, and first-case punctuality — are associated with overtime?** This tests which candidate factors identified in the literature are visible in our data, to inform where scheduling interventions should be directed.',
+    '2. **Which operational factors (duration overruns, shift displacement, urgent-elective interaction, and first-case punctuality) are associated with overtime?** This tests which candidate factors identified in the literature are visible in our data, to inform where scheduling interventions should be directed.',
 ]
 for q in numbered_qs:
     add_paragraph(q, space_after=3)
@@ -190,6 +298,9 @@ add_heading_caps('Methods', space_before=18)
 add_heading_lower('Setting and data')
 add_paragraph('The study hospital is a 24/7 tertiary center in Belgium performing more than 22,000 surgical procedures per year. It operates 18 surgical operating rooms and 7 interventional operating rooms. The surgical staff includes 195 surgeons and 207 anesthesiologists (including trainees and fellows), covering all surgery except congenital cardiac and organ transplantation. Nursing staffing runs 2 to 3 per room during the 08:00 to 16:30 day shift; at 16:30 the number of staffed rooms drops to 8, at 17:30 to 4, and overnight a single room remains staffed.', space_after=6)
 add_paragraph('We used administrative OR data from 1 January 2022 to 31 May 2025, covering 79,352 cases in the 18 surgical operating rooms, 60,895 unique patients, and 1,276 distinct procedure types. The admission mix was 42.3% ambulatory and 57.7% inpatient. Room-in and room-out times are the only time markers confirmed as reliable by the hospital\'s clinical team; all timing analyses use these two time points. Following the glossary of Bauer et al.,[18] the extracted variables include planned and observed duration, planning deviation, start-time deviation, overtime flag and overtime minutes, room-swap flag, urgency (elective versus non-elective), and shift label.', space_after=6)
+
+add_heading_lower('Analytic framework')
+add_paragraph('We organized the work along the phases of the CRISP-DM process model.[28] Business and data understanding came from scoping conversations with the hospital\'s clinical team and an exploratory pass over the registration. Data preparation covered consolidation of records across campuses and validity checks against the clinical team\'s disclosure that room-in and room-out are the only reliable time markers in the pipeline. The modeling phase was descriptive rather than predictive: room-level overtime statistics and the figures that follow. Evaluation took the form of structured reviews of intermediate findings with the clinical team. Deployment falls outside the present analysis and is the subject of Phases 2 and 3.', space_after=6)
 
 add_heading_lower('Overtime definition and analyses')
 add_paragraph('Each case was assigned to a shift based on its actual room-in time: day (08:00 to 16:30), evening (16:30 to 22:00), or night (22:00 to 08:00). A case was flagged as overtime if its room-out fell after the end of its assigned shift; overtime minutes equal the positive difference between room-out and shift end. We chose this shift-based definition because the staffing change at each boundary is the operational event that makes overtime consequential at this site, and because it aligns with Bauer et al.[18] Room-level overtime, rather than aggregate utilization, was used as the primary metric, since aggregate measures can mask room-level operational problems.[16,19]', space_after=6)
@@ -209,17 +320,48 @@ add_paragraph('The cohort comprised 79,352 cases across 18 surgical operating ro
 add_heading_lower('Overtime burden and room-level concentration (RQ1)')
 add_paragraph('Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among overtime cases, the mean was 60.3 minutes, the median 39, and the 95th percentile 197 (Table 1). Weekday rates were similar (8.8 to 9.9%) but roughly 1.7 times higher on weekends (Saturday 16.8%, Sunday 15.5%), when volume is almost entirely non-elective. The year-on-year trend showed gradual improvement: 10.0% in 2022, 10.0% in 2023, 9.7% in 2024, and 8.6% in the partial 2025 data.', space_after=6)
 
-add_paragraph('[Table 1. Overtime summary by weekday and year. Cases, overtime count, overtime percentage, and mean overtime minutes by weekday (Monday-Sunday) and year (2022-2025).]', italic=True, space_after=6, space_before=6)
+add_table(
+    headers=['Day', 'n cases', 'n overtime', 'OT rate (%)', 'Mean OT (min)'],
+    rows=[
+        ['Monday',    '14,232', '1,395',  '9.8',  '58.5'],
+        ['Tuesday',   '14,750', '1,416',  '9.6',  '60.1'],
+        ['Wednesday', '15,814', '1,502',  '9.5',  '59.7'],
+        ['Thursday',  '15,844', '1,394',  '8.8',  '60.5'],
+        ['Friday',    '15,615', '1,546',  '9.9',  '62.4'],
+        ['Saturday',   '1,654',   '278', '16.8',  '63.4'],
+        ['Sunday',     '1,443',   '224', '15.5',  '59.1'],
+        ['Total',     '79,352', '7,729',  '9.7',  '60.3'],
+    ],
+    bold_last_row=True,
+    caption_label='Table 1A.',
+    caption_text='Overtime by weekday.',
+)
+add_table(
+    headers=['Year', 'OT rate (%)', 'Mean OT (min)', 'Median OT (min)'],
+    rows=[
+        ['2022',  '10.0', '61.8', '40'],
+        ['2023',  '10.0', '58.8', '38'],
+        ['2024',   '9.7', '61.3', '39'],
+        ['2025*',  '8.6', '58.2', '37'],
+    ],
+    caption_label='Table 1B.',
+    caption_text='Overtime trend by year. * 2025 partial (Jan–May).',
+)
 
-add_paragraph('Room-level overtime rates ranged from 3.5% to 32.9% across the 18 rooms (Figure 1). OR10, which handles complex cardiac surgery (CABG, aortic valve replacement, mitral valve repair), ran overtime on 32.9% of its 1,743 cases, with a mean of 154 minutes and a 95th percentile of 328 minutes. A second tier (OR08 through OR13) clustered at 11 to 16%. At the other end, OR14 ran 3.5% across 6,885 cases and OR01 ran 5.8% across 6,577. The within-hospital spread (nearly ten-fold) exceeded the between-campus spread across the hospital network (0.5 to 9.7%).', space_after=6)
+add_paragraph('Room-level overtime rates ranged from 3.5% to 32.9% across the 18 rooms (Figure 1). OR10, which handles complex cardiac surgery (CABG, aortic valve replacement, mitral valve repair), ran overtime on 32.9% of its 1,743 cases, with a mean of 154 minutes and a 95th percentile of 328 minutes. A second tier (OR08 through OR13) clustered at 11 to 16%. At the other end, OR14 ran 3.5% across 6,885 cases and OR01 ran 5.8% across 6,577. Rates therefore spanned nearly an order of magnitude across rooms in the same hospital.', space_after=6)
 
-add_paragraph('[Insert Figure 1 about here]', italic=True, space_after=6, space_before=6)
+add_image(
+    'fig2_room_overtime.png',
+    width_inches=6.3,
+    caption_label='Figure 1.',
+    caption_text='Room-level overtime concentration. Panel A: percentage of cases with overtime per operating room, ordered ascending. Panel B: mean overtime duration per room (minutes). Overall: 7,729 of 79,352 cases (9.7%), mean 60.3 min, median 39 min, P95 197 min.',
+)
 
-add_paragraph('Most overtime cases ended shortly after the shift boundary. The majority of completions fell in the 16:30 to 17:30 window, when staffing had dropped from 25 to 8 rooms. The distribution decayed through the evening, with a thin tail past 22:00 (Supplementary Figure S1).', space_after=6)
+add_paragraph('Most overtime cases ended shortly after the shift boundary. The majority of completions fell in the 16:30 to 17:30 window, right after the day-shift handover when most of the rooms had already closed. The distribution decayed through the evening, with a thin tail past 22:00 (Supplementary Figure S1).', space_after=6)
 
 add_heading_lower('Contributing factors (RQ2)')
 
-add_paragraph('*Planning accuracy.* Of all cases, 45.7% ran longer than planned and 54.3% ran shorter. The mean overrun was 22.6 minutes (median 14); the mean underrun was 21.2 minutes (median 12). On average, the planning system was roughly unbiased. The problem was dispersion. The coefficient of variation of observed duration was lowest for mid-length cases (0.35 to 0.36 for 61 to 180 minutes), moderate for short cases (0.61 for under 30 minutes), and intermediate for very long cases (0.42 for over 180 minutes). Planning-deviation CV was more extreme: the over-180-minute bucket had a CV of 1.86 (Supplementary Table S1). The procedures with the largest absolute deviations — complex cardiac and oncology cases — were concentrated in the rooms with the highest overtime.', space_after=6)
+add_paragraph('*Planning accuracy.* Of all cases, 45.7% ran longer than planned and 54.3% ran shorter. The mean overrun was 22.6 minutes (median 14); the mean underrun was 21.2 minutes (median 12). On average, the planning system was roughly unbiased. The problem was dispersion. The coefficient of variation of observed duration was lowest for mid-length cases (0.35 to 0.36 for 61 to 180 minutes), moderate for short cases (0.61 for under 30 minutes), and intermediate for very long cases (0.42 for over 180 minutes). Planning-deviation CV was more extreme: the over-180-minute bucket had a CV of 1.86 (Supplementary Table S1). The procedures with the largest absolute deviations (complex cardiac and oncology cases) were concentrated in the rooms with the highest overtime.', space_after=6)
 
 add_paragraph('*Shift displacement.* A total of 4,151 cases (5.2%) were performed in a different shift than originally planned. These cases started on average 398 minutes later than planned (roughly six and a half hours) and ran 22.3 minutes shorter than planned. We report these figures descriptively; the data do not let us determine whether displacement was a cause of, or a response to, delays elsewhere in the day.', space_after=6)
 
@@ -227,7 +369,28 @@ add_paragraph('*Urgent-elective interaction.* Urgent cases constituted 14.6% of 
 
 add_paragraph('To assess whether urgent cases disrupt the elective program, we counted days on which an urgent case ran in a room while an elective case had been planned in the same room over an overlapping time window (urgent case\'s actual room and room-in to room-out interval matched the elective case\'s planned room and planned start-to-end interval). Such overlap occurred on 858 of 1,247 observation days (68.8%). On days with overlap, elective cases started roughly 30 minutes later than on days without, a gap that reached 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases (Supplementary Table S2).', space_after=6)
 
-add_paragraph('[Table 2. Urgent versus elective overtime and overlap. Panel A: volume, after-hours rate, mean overtime, and P95 overtime by urgency. Panel B: overlap frequency (858/1,247 days = 68.8%), mean start-delay effect (+30 min), and OR11 burden.]', italic=True, space_after=6, space_before=6)
+add_table(
+    headers=['Urgency', 'n', 'Share', 'After-hours n', 'After-hours rate', 'Mean OT (min)', 'P95 OT (min)'],
+    rows=[
+        ['Elective',     '67,736', '85.4%', '5,620',  '8.3%',  '5',    '29'],
+        ['Non-elective', '11,616', '14.6%', '2,109', '18.2%', '10.7',  '69'],
+        ['Total',        '79,352', '100%',  '7,729',  '9.7%', '–',    '–'],
+    ],
+    bold_last_row=True,
+    caption_label='Table 2A.',
+    caption_text='Volume and overtime by urgency.',
+)
+add_table(
+    headers=['Metric', 'Value'],
+    rows=[
+        ['Days with at least one urgent–elective overlap', '858 of 1,247 (68.8%)'],
+        ['Highest-burden room (OR11)',                     '475 events; 15.2% of OR11 elective cases'],
+        ['Median start delay at OR11 (no overlap)',        '28 min'],
+        ['Median start delay at OR11 (overlap)',           '60 min'],
+    ],
+    caption_label='Table 2B.',
+    caption_text='Urgent–elective overlap in the same room.',
+)
 
 add_paragraph('*Factors not associated with overtime.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate than non-swapped (14.8% versus 9.7%). Because the data cannot tell us whether the swap caused the overtime or the anticipated overrun prompted the swap, we report the association without interpreting its direction. Inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes, with a 95th percentile of 25 minutes; turnover was not the bottleneck.[22]', space_after=6)
 
@@ -241,14 +404,14 @@ add_heading_caps('Discussion', space_before=18)
 add_paragraph('In this single-center analysis of 79,352 cases, overtime was not a diffuse hospital-wide phenomenon. The aggregate rate (9.7%) hid a near ten-fold spread across rooms (3.5 to 32.9%). The factors most visibly associated with the room-level pattern were case-mix complexity and routine urgent-elective overlap; first-case punctuality and inter-case idle time were not. We discuss each in turn against the existing literature, draw out the implications for quality improvement, and end with the study\'s limitations.', space_after=6)
 
 add_heading_lower('Concentration, not prevalence')
-add_paragraph('A 9.7% hospital-wide overtime rate is unremarkable on its own. The distribution, however, is uneven: OR10 ran overtime in roughly one of every three cases, while OR14 ran 3.5%. The within-hospital spread was wider than the spread across the hospital network as a whole (0.5 to 9.7%). Hospital-wide targets such as "reduce overtime by 10%" will not reach the problem unless decomposed by room. Zhang, Dunstan and Pandit made the same point: aggregate metrics hide room-level operational reality.[16] Valid room-level metrics are a prerequisite for quality improvement.[24]', space_after=6)
+add_paragraph('A 9.7% hospital-wide overtime rate is unremarkable on its own. The distribution, however, is uneven: OR10 ran overtime in roughly one of every three cases, while OR14 ran 3.5%. Hospital-wide targets such as "reduce overtime by 10%" will not reach the problem unless decomposed by room. Zhang, Dunstan and Pandit made the same point: aggregate metrics hide room-level operational reality.[16] Valid room-level metrics are a prerequisite for quality improvement.[24]', space_after=6)
 
 add_heading_lower('Factors associated with overtime')
-add_paragraph('The procedures with the largest planning deviations — complex cardiac and oncology cases — clustered in the rooms with the highest overtime. This concentration suggests that case-mix complexity, rather than scheduling inefficiency alone, accounts for much of the room-level variation. Wachtel and Dexter described, in a large operational dataset, how tardiness grows as duration uncertainty accumulates through the day,[26] and Fugener et al. documented systematic biases in surgeons\' duration estimates that compound across a list.[27] Both observations are consistent with the room-level pattern we describe, although our data cannot test the cumulative-delay account directly.', space_after=6)
+add_paragraph('The procedures with the largest planning deviations (complex cardiac and oncology cases) clustered in the rooms with the highest overtime. This concentration suggests that case-mix complexity, rather than scheduling inefficiency alone, accounts for much of the room-level variation. Wachtel and Dexter described, in a large operational dataset, how tardiness grows as duration uncertainty accumulates through the day,[26] and Fugener et al. documented systematic biases in surgeons\' duration estimates that compound across a list.[27] Both observations are consistent with the room-level pattern we describe, although our data cannot test the cumulative-delay account directly.', space_after=6)
 
-add_paragraph('Urgent-elective overlap occurred on more than two-thirds of observation days and added roughly 30 minutes to elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. Protecting the elective program from this disruption — through dedicated urgent rooms or scheduling buffers — may be more effective than reactive rescheduling.', space_after=6)
+add_paragraph('Urgent-elective overlap occurred on more than two-thirds of observation days and added roughly 30 minutes to elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. Protecting the elective program from this disruption, through dedicated urgent rooms or scheduling buffers, may be more effective than reactive rescheduling.', space_after=6)
 
-add_paragraph('A common assumption is that first-case-on-time-start (FCOTS) drives end-of-day performance, with each minute of tardiness carrying a marginal cost.[25] At the room level, our data do not show that relationship: the room with the lowest late-start rate (OR10, 46.1%) had the highest overtime (32.9%), while a room with one of the highest late-start rates (OR14, 78.7%) had the lowest overtime (3.5%). Pandit et al. reported a similar disconnect across more than 7,000 operating room lists.[23] We do not conclude that FCOTS is unimportant — it remains a reasonable discipline marker — but in this dataset it does not predict where overtime accumulates.', space_after=6)
+add_paragraph('A common assumption is that first-case-on-time-start (FCOTS) drives end-of-day performance, with each minute of tardiness carrying a marginal cost.[25] At the room level, our data do not show that relationship: the room with the lowest late-start rate (OR10, 46.1%) had the highest overtime (32.9%), while a room with one of the highest late-start rates (OR14, 78.7%) had the lowest overtime (3.5%). Pandit et al. reported a similar disconnect across more than 7,000 operating room lists.[23] We do not conclude that FCOTS is unimportant; it remains a reasonable discipline marker. In this dataset, however, it does not predict where overtime accumulates.', space_after=6)
 
 add_heading_lower('Implications')
 add_paragraph('Operational implication. Room-level monitoring should sit ahead of hospital-wide overtime targets, and scheduling should treat urgent-case flow as a routine planning input rather than as an exception.', space_after=6)
@@ -299,7 +462,7 @@ references = [
     'Saager L, Hesler BD, You J, et al. Intraoperative transitions of anesthesia care and postoperative adverse outcomes. Anesthesiology 2014;121(4):695-706.',
     'Health Services Safety Investigations Body (HSSIB). The impact of staff fatigue on patient safety. Investigation report. London: HSSIB, 2025.',
     'Pittman P, Tiunn H-L, et al. Increased utilization of overtime and agency nurses and patient safety. JAMA Netw Open 2025. PMID: 40172888.',
-    'Althoff FC, Wachtendorf LJ, Rostin P, et al. Effects of night surgery on postoperative mortality and morbidity: a multicenter cohort study. BMJ Qual Saf 2021;30(8):678-688.',
+    'Althoff FC, Wachtendorf LJ, Rostin P, et al. Effects of night surgery on postoperative mortality and morbidity: a multicentre cohort study. BMJ Qual Saf 2021;30(8):678-688.',
     'Joseph A, Khoshkenar A, Taaffe KM, et al. Minor flow disruptions, traffic-related factors and their effect on major flow disruptions in the operating room. BMJ Qual Saf 2019;28(4):276-83.',
     'Koch A, Burns J, Catchpole K, Weigl M. Associations of workflow disruptions in the operating room with surgical outcomes: a systematic review and narrative synthesis. BMJ Qual Saf 2020;29(12):1033-1045.',
     'Zhang C, Dunstan C, Pandit JJ. A tutorial on “capped utilisation” as a metric and key performance target in NHS England’s Model Hospital operating theatres database: caution for international healthcare systems. Anesthesiol Perioper Sci 2024. DOI: 10.1007/s44254-024-00073-3.',
@@ -309,11 +472,12 @@ references = [
     'Strum DP, May JH, Vargas LG. Modeling the uncertainty of surgical procedure times: comparison of log-normal and normal models. Anesthesiology 2000;92(4):1160-7.',
     'Eijkemans MJ, van Houdenhoven M, Nguyen T, et al. Predicting the unpredictable: a new prediction model for operating room times using individual surgeon-specific historical data. Anesthesiology 2010;112(1):41-9.',
     'MacMillan L, et al. What affects operating room turnover time? A systematic review and mapping of the evidence. Surgery 2025. PMID: 40054053.',
-    'Pandit JJ, Abbott T, Pandit M, et al. Is “starting on time” useful (or useless) as a surrogate measure for “surgical operating room efficiency”? Anesthesia 2012;67(8):823-32.',
+    'Pandit JJ, Abbott T, Pandit M, et al. Is “starting on time” useful (or useless) as a surrogate measure for “surgical theatre efficiency”? Anaesthesia 2012;67(8):823-32.',
     'Zhang C, Pandit JJ. Getting operating theatre metrics right to underpin quality improvement. Br J Anaesth 2023;131(1):130-4.',
     'Dexter F, Epstein RH. Typical savings from each minute reduction in tardy first case of the day starts. Anesth Analg 2009;108(4):1262-7.',
     'Wachtel RE, Dexter F. Influence of the operating room schedule on tardiness from scheduled start times. Anesth Analg 2009;108(6):1889-1901.',
     'Fugener A, Schiffels S, Kolisch R. Overutilization and underutilization of operating rooms: insights from behavioral health care operations management. Health Care Manag Sci 2017;20(1):115-28.',
+    'Wirth R, Hipp J. CRISP-DM: towards a standard process model for data mining. In: Proceedings of the 4th International Conference on the Practical Applications of Knowledge Discovery and Data Mining (PADD-00). Manchester: Practical Application Company, 2000:29-39.',
 ]
 
 for i, ref in enumerate(references, 1):
