@@ -130,11 +130,15 @@ for i, (p, n) in enumerate(zip(pcts, ncases)):
 ax2.barh(y_pos, mean_ot, color=colors, edgecolor='white', linewidth=0.5, height=0.7)
 ax2.set_xlabel('Mean overtime (min)')
 ax2.set_title('B. Mean overtime duration', loc='left', fontweight='bold')
-ax2.set_xlim(0, 175)
+ax2.set_xlim(0, 220)
 for i, (m, n) in enumerate(zip(mean_ot, ncases)):
-    if m > 5:
+    if m > 130:
+        # Long bars: put value inside the bar (white text) so it does not collide with n=
+        ax2.text(m - 3, i, f'{m:.0f}', ha='right', va='center',
+                 fontsize=7.5, fontweight='bold', color='white')
+    elif m > 5:
         ax2.text(m + 2, i, f'{m:.0f}', ha='left', va='center', fontsize=7.5, color='#333333')
-    ax2.text(170, i, f'n={n:,}', ha='right', va='center', fontsize=7, color='grey')
+    ax2.text(215, i, f'n={n:,}', ha='right', va='center', fontsize=7, color='grey')
 
 ax1.spines['top'].set_visible(False)
 ax1.spines['right'].set_visible(False)
