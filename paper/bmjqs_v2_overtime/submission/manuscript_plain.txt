@@ -55,16 +55,11 @@ The study hospital is a 24/7 tertiary center in Belgium performing more than 22,
 
 We used administrative OR data from 1 January 2022 to 31 May 2025, covering 79,352 cases in the 18 surgical operating rooms, 60,895 unique patients, and 1,276 distinct procedure types. The admission mix was 42.3% ambulatory and 57.7% inpatient. Room-in and room-out times are the only time markers confirmed as reliable by the hospital's clinical team; all timing analyses use these two time points. Following the glossary of Bauer et al.,[18] the extracted variables include planned and observed duration, planning deviation, start-time deviation, overtime flag and overtime minutes, room-swap flag, urgency (elective versus non-elective), and shift label.
 
-Analytic framework
-
-We organized the work along the phases of the CRISP-DM process model.[28] Business and data understanding came from scoping conversations with the hospital's clinical team and an exploratory pass over the registration. Data preparation covered consolidation of records across campuses and validity checks against the clinical team's disclosure that room-in and room-out are the only reliable time markers in the pipeline. The modeling phase was descriptive rather than predictive: room-level overtime statistics and the figures that follow. Evaluation took the form of structured reviews of intermediate findings with the clinical team. Deployment falls outside the present analysis and is the subject of Phases 2 and 3.
-
-
 Overtime definition and analyses
 
 Each case was assigned to a shift based on its actual room-in time: day (08:00 to 16:30), evening (16:30 to 22:00), or night (22:00 to 08:00). A case was flagged as overtime if its room-out fell after the end of its assigned shift; overtime minutes equal the positive difference between room-out and shift end. We chose this shift-based definition because the staffing change at each boundary is the operational event that makes overtime consequential at this site, and because it aligns with Bauer et al.[18] Room-level overtime, rather than aggregate utilization, was used as the primary metric, since aggregate measures can mask room-level operational problems.[16,19]
 
-All analyses are descriptive; we did not fit causal or inferential models. For RQ1, we computed overtime rate, mean, median, and 95th percentile, stratified by room, weekday, year, and shift. For RQ2, we examined duration deviation by planned-duration bucket using coefficients of variation,[20,21] shift displacement (cases performed in a different shift than originally planned), urgency mix and timing, urgent-elective interaction (defined and reported in Results), first-case start-time deviation per room, inter-case idle time, and room swaps. This study is reported following the STROBE guidelines for observational studies.
+All analyses are descriptive; we did not fit causal or inferential models. For RQ1, we computed overtime rate, mean, median, and 95th percentile, stratified by room, weekday, year, and shift. For RQ2, we examined duration deviation by planned-duration bucket using coefficients of variation,[20,21] shift displacement (cases performed in a different shift than originally planned), urgency mix and timing, urgent-elective interaction (defined and reported in Results), first-case start-time deviation per room, inter-case idle time, and room swaps. Intermediate findings were reviewed with the clinical team and used to refine variable definitions and exclusions. The study is reported following the STROBE guidelines for observational studies, with the RECORD extension for studies using routinely-collected health data.[28]
 
 Ethics
 
@@ -188,7 +183,7 @@ REFERENCES
 25. Dexter F, Epstein RH. Typical savings from each minute reduction in tardy first case of the day starts. Anesth Analg 2009;108(4):1262-7.
 26. Wachtel RE, Dexter F. Influence of the operating room schedule on tardiness from scheduled start times. Anesth Analg 2009;108(6):1889-1901.
 27. Fugener A, Schiffels S, Kolisch R. Overutilization and underutilization of operating rooms: insights from behavioral health care operations management. Health Care Manag Sci 2017;20(1):115-28.
-28. Wirth R, Hipp J. CRISP-DM: towards a standard process model for data mining. In: Proceedings of the 4th International Conference on the Practical Applications of Knowledge Discovery and Data Mining (PADD-00). Manchester: Practical Application Company, 2000:29-39.
+28. Benchimol EI, Smeeth L, Guttmann A, et al. The REporting of studies Conducted using Observational Routinely-collected health Data (RECORD) Statement. PLoS Med 2015;12(10):e1001885.
 
 
 FIGURE LEGENDS
