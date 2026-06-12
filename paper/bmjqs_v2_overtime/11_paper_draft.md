@@ -1,12 +1,12 @@
-# Where does operating-room overtime come from? A retrospective analysis of one tertiary hospital
+# Where does operating-room overtime come from? A retrospective single-centre study
 
-Haroon Tharwat, Maxim Riebus, [Ben surname], [Dieter surname], Niels Martin
+Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, Dieter Mesotten
 
 [Affiliations]
 
 **Correspondence:** [corresponding author details]
 
-**Word count:** ~3,500 (body text)
+**Word count:** ~2,800 (body text)
 
 **Keywords:** operating room, overtime, scheduling, patient safety, staff wellbeing, quality improvement
 
@@ -14,19 +14,35 @@ Haroon Tharwat, Maxim Riebus, [Ben surname], [Dieter surname], Niels Martin
 
 ## ABSTRACT
 
+**Background.** Operating-room overtime exposes patients and staff to increased risks, but how overtime distributes within a hospital and which operational factors are associated with it is not well characterised.
+
 **Objective.** To characterise operating-room overtime within a high-volume tertiary hospital: its distribution across rooms and the operational factors associated with it.
 
-**Design.** Retrospective observational study of administrative operating-room data.
-
-**Setting.** A 24/7 tertiary hospital in Belgium running 18 surgical operating rooms.
+**Design and setting.** Retrospective observational study of administrative data from a 24/7 tertiary hospital in Belgium running 18 surgical operating rooms.
 
 **Participants.** 79,352 surgical procedures performed between January 2022 and May 2025.
 
-**Main outcome measures.** Case-level overtime (time past the assigned shift end), by room, weekday, shift, and urgency. Start-time deviation, duration-estimation accuracy, shift displacement, and urgent-elective overlap as candidate contributing factors.
+**Main outcome measures.** Case-level overtime (time past the assigned shift end), by room, weekday, shift, and urgency. Start-time deviation, duration-estimation accuracy, shift displacement, and unplanned urgent-case disruption of the elective programme as candidate contributing factors.
 
-**Results.** 7,729 cases (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Overtime concentrated in a small number of rooms: OR10 ran overtime on 32.9% of its cases (mean 154 minutes), while OR14 ran overtime on 3.5%. Urgent cases ran after-hours at more than twice the elective rate (18.2% versus 8.3%). Urgent-elective overlap in the same room occurred on 68.8% of observation days and added roughly 30 minutes to elective start times. First-case punctuality and inter-case idle time showed no consistent association with room-level overtime.
+**Results.** 7,729 cases (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Overtime concentrated in a small number of rooms: OR10 ran overtime on 32.9% of its cases (mean 154 minutes), while OR14 ran overtime on 3.5%. Urgent cases ran after-hours at more than twice the elective rate (18.2% versus 8.3%). Unplanned urgent-case disruption of the elective programme occurred on 68.8% of observation days and was associated with a median difference of approximately 30 minutes in elective start times. First-case punctuality and inter-case idle time showed no consistent association with room-level overtime.
 
-**Conclusions.** At this tertiary hospital, overtime concentrated in a small number of rooms, with case-mix complexity and urgent-elective overlap as the most visible associated factors. Room-level overtime monitoring and scheduling that accounts for urgent-case flow are more practical targets for quality improvement than first-case punctuality alone.
+**Conclusions.** At this tertiary hospital, overtime concentrated in a small number of rooms, with case-mix complexity and unplanned urgent-case disruption of the elective programme as the most visible associated factors. Room-level overtime monitoring and scheduling that accounts for urgent-case flow are more practical targets for quality improvement than first-case punctuality alone.
+
+---
+
+## KEY MESSAGES
+
+**What is already known on this topic**
+
+- Operating-room overtime increases staffing costs and is associated with poorer patient and staff outcomes.
+- Most hospitals monitor overtime at the aggregate hospital or site level.
+- First-case punctuality is widely promoted as a lever for reducing end-of-day overruns.
+
+**What this study adds**
+
+- Within a single hospital, room-level overtime rates ranged from 3.5% to 32.9%, a ten-fold spread hidden by aggregate metrics.
+- Unplanned urgent-case disruption of the elective programme occurred on more than two-thirds of observation days and was associated with delayed elective start times.
+- First-case punctuality showed no consistent association with room-level overtime, suggesting it may not be an effective intervention target in all settings.
 
 ---
 
@@ -45,7 +61,7 @@ Workflow disruptions in the OR cluster and escalate,[14] and a systematic review
 This study is part of a multi-phase programme at a Belgian tertiary hospital to improve OR performance. Phase 1 characterises scheduled-versus-observed performance from administrative data. Phase 2 will link the operational patterns to patient outcomes. Phase 3 will build predictive scheduling tools. In this Phase 1 analysis, we address two questions:
 
 1. How is overtime distributed across rooms and time within one tertiary hospital?
-2. Which operational factors — including duration overruns, shift displacement, urgent-elective interaction, and first-case punctuality — are associated with overtime?
+2. Which operational factors — including duration overruns, shift displacement, unplanned urgent-case disruption of the elective programme, and first-case punctuality — are associated with overtime?
 
 The first question examines whether overtime is a diffuse hospital-wide problem or whether it concentrates in specific rooms. The second asks which candidate mechanisms identified in the literature are visible in our data, to inform where interventions should be directed.
 
@@ -63,7 +79,7 @@ We used administrative OR data from 1 January 2022 to 31 May 2025, covering 79,3
 
 Each case was assigned to a shift based on its actual room-in time: day (08:00 to 16:30), evening (16:30 to 22:00), or night (22:00 to 08:00). A case was flagged as overtime if its room-out fell after the end of its assigned shift. Overtime minutes equal the positive difference between room-out and shift end. This operationalises the conceptual definition stated in the Introduction and aligns with the framework in Bauer et al.[18]
 
-An urgent case was deemed to overlap with an elective case when the urgent case's actual room matched the elective case's planned room and their time intervals (actual for urgent, planned for elective) overlapped.
+An unplanned urgent case was deemed to disrupt the elective programme when the urgent case's actual room matched the elective case's planned room and their time intervals (actual for urgent, planned for elective) overlapped.
 
 ### Variables
 
@@ -71,7 +87,7 @@ We followed the glossary of Bauer et al.[18] Variable definitions include planne
 
 ### Analyses
 
-All analyses are descriptive; we did not fit causal or inferential models. For RQ1 (distribution), we computed overtime rate, mean, median, and 95th percentile, stratified by room, weekday, year, and shift. For RQ2 (contributing factors), we assessed duration deviation by planned-duration bucket using coefficients of variation,[20,21] shift displacement (cases performed in a different shift than planned), urgency mix and timing, urgent-elective overlap per day and per room, first-case start-time deviation per room, inter-case idle time, and room swaps. This study is reported following the STROBE guidelines for observational studies.
+All analyses are descriptive; we did not fit causal or inferential models. For RQ1 (distribution), we computed overtime rate, mean, median, and 95th percentile, stratified by room, weekday, year, and shift. For RQ2 (contributing factors), we assessed duration deviation by planned-duration bucket using coefficients of variation,[20,21] shift displacement (cases performed in a different shift than planned), urgency mix and timing, unplanned urgent-case disruption per day and per room, first-case start-time deviation per room, inter-case idle time, and room swaps. This study is reported following the STROBE guidelines for observational studies.
 
 ### Ethics
 
@@ -101,11 +117,11 @@ Most overtime cases ended shortly after the shift boundary. The majority of comp
 
 *Shift displacement.* A total of 4,151 cases (5.2%) were performed in a different shift than originally planned. These cases started on average 398 minutes later than planned (roughly six and a half hours) and took 22.3 minutes less than planned. Whether displacement contributed to overtime or resulted from it cannot be determined from these data.
 
-*Urgent-elective interaction.* Urgent cases constituted 14.6% of volume (11,616 of 79,352). Per case, urgent surgery ran after-hours at more than twice the elective rate (18.2% versus 8.3%, Table 2), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of after-hours minutes was still dominated by the elective programme.
+*Unplanned urgent-case disruption.* Urgent cases constituted 14.6% of volume (11,616 of 79,352). Per case, urgent surgery ran after-hours at more than twice the elective rate (18.2% versus 8.3%, Table 2), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of after-hours minutes was still dominated by the elective programme.
 
-Urgent-elective overlap in the same room occurred on 858 of 1,247 observation days (68.8%). On days with overlap, elective cases started roughly 30 minutes later than on days without, a gap that reached 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases (Supplementary Table S2).
+Unplanned urgent-case disruption of the elective programme occurred on 858 of 1,247 observation days (68.8%). On days with disruption, elective cases started approximately 30 minutes later than on days without, a gap that reached 60 minutes in early 2022 before narrowing. OR11 absorbed the highest disruption burden, with 475 events affecting 15.2% of its elective cases (Supplementary Table S2).
 
-**[Table 2. Urgent versus elective overtime and overlap. Panel A: volume, after-hours rate, mean overtime, and P95 overtime by urgency. Panel B: overlap frequency (858/1,247 days = 68.8%), mean start-delay effect (+30 min), and OR11 burden.]**
+**[Table 2. Urgent versus elective overtime and urgent-case disruption. Panel A: volume, after-hours rate, mean overtime, and P95 overtime by urgency. Panel B: disruption frequency (858/1,247 days = 68.8%), mean start-delay effect (+30 min), and OR11 burden.]**
 
 *Factors not associated with overtime.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate (14.8% versus 9.7%), but whether swaps contribute to or result from overtime cannot be determined. Inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes, with a 95th percentile of 25 minutes; turnover was not the bottleneck.[22]
 
@@ -121,9 +137,9 @@ A hospital-wide overtime rate of 9.7% is unremarkable. The distribution, however
 
 The procedures with the largest planning deviations — complex cardiac and oncology cases — clustered in the rooms with the highest overtime. This concentration suggests that case-mix complexity, rather than scheduling inefficiency alone, explains much of the room-level variation. Wachtel and Dexter showed in a large operational dataset that tardiness grows as cumulative duration uncertainty accumulates through the day.[26] Fugener et al. documented systematic biases in surgeons' duration estimates — planning fallacy, anchoring — that compound across a list.[27] Both findings are consistent with the pattern observed here: high-complexity rooms generate more overtime because their cases carry wider duration uncertainty.
 
-Urgent-elective overlap occurred on more than two-thirds of observation days and added roughly 30 minutes to elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. Protecting the elective programme from this disruption through dedicated urgent rooms or scheduling buffers may be more effective than reactive rescheduling.
+Unplanned urgent-case disruption of the elective programme occurred on more than two-thirds of observation days and was associated with a median difference of approximately 30 minutes in elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. Protecting the elective programme from this disruption through dedicated urgent rooms or scheduling buffers may be more effective than reactive rescheduling.
 
-The conventional view holds that first-case punctuality drives end-of-day performance, with each minute of tardiness carrying a marginal cost.[25] Our data provide preliminary indications that this relationship may not hold at the room level. The room with the best start-time punctuality had the worst overtime; a room with among the worst punctuality had the lowest. Pandit et al. reported a similar disconnect.[23] First-case-on-time-start may be a useful discipline marker, but these data suggest it should not be assumed to reduce overtime without supporting evidence from the local context.
+The conventional view holds that first-case punctuality drives end-of-day performance, with each minute of tardiness carrying a marginal cost.[25] In our data, the room with the best start-time punctuality had the worst overtime, while a room with among the worst punctuality had the lowest. Pandit et al. reported a similar disconnect.[23] This descriptive pattern does not prove that first-case punctuality is unrelated to overtime — unmeasured confounders such as case-mix complexity may explain the apparent dissociation — but it does suggest that the relationship, if present, is not straightforward. The association would need to be tested with appropriate statistical adjustment before drawing firm conclusions.
 
 ### Implications
 
@@ -135,7 +151,7 @@ This study has several limitations. It is a single-site retrospective analysis, 
 
 ## CONCLUSION
 
-Operating-room overtime at this tertiary hospital concentrated in a small number of rooms, with case-mix complexity and urgent-elective overlap as the most visible associated factors. First-case punctuality and inter-case idle time were not associated with room-level overtime. The findings support room-level rather than hospital-level overtime monitoring and scheduling interventions that account for urgent-case flow. Phase 2 of this research programme will link the operational patterns to patient outcome data.
+Operating-room overtime at this tertiary hospital concentrated in a small number of rooms, with case-mix complexity and unplanned urgent-case disruption of the elective programme as the most visible associated factors. First-case punctuality and inter-case idle time were not associated with room-level overtime. The findings support room-level rather than hospital-level overtime monitoring and scheduling interventions that account for urgent-case flow. Phase 2 of this research programme will link the operational patterns to patient outcome data.
 
 ---
 
