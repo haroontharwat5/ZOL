@@ -328,63 +328,66 @@ print('  GO14: 78.7% late starts (2nd worst punctuality) — 3.5% overtime (best
 print('  GO11: 82.4% late starts (worst, 319 min mean delay) — 11.7% overtime (mid-pack)')
 
 # =============================================================================
-# RENDERED TABLE 1 — Overtime summary by weekday and year
+# RENDERED TABLE 1 — Overtime summary by weekday and calendar year (MERGED)
+# Single table with two strata (weekday, year) plus an overall total row.
+# Per-year case counts for the surgical cohort: 2022=22,133, 2023=23,575,
+# 2024=23,738, 2025*=9,906 (sum = 79,352); n overtime = round(n x rate).
 # =============================================================================
-fig, axes = plt.subplots(2, 1, figsize=(8.5, 5),
-                          gridspec_kw={'height_ratios': [4, 2.5]})
-
-ax = axes[0]
+fig, ax = plt.subplots(figsize=(8.5, 6))
 ax.axis('off')
-ax.set_title('Table 1A. Overtime by weekday', loc='left',
-             fontweight='bold', fontsize=11, pad=8)
-header1 = ['Day', 'n cases', 'n overtime', 'OT rate (%)', 'Mean OT (min)']
-rows1 = [
-    ['Monday',    '14,232', '1,395',  '9.8', '58.5'],
-    ['Tuesday',   '14,750', '1,416',  '9.6', '60.1'],
-    ['Wednesday', '15,814', '1,502',  '9.5', '59.7'],
-    ['Thursday',  '15,844', '1,394',  '8.8', '60.5'],
-    ['Friday',    '15,615', '1,546',  '9.9', '62.4'],
-    ['Saturday',   '1,654',   '278', '16.8', '63.4'],
-    ['Sunday',     '1,443',   '224', '15.5', '59.1'],
-    ['Total',     '79,352', '7,729',  '9.7', '60.3'],
+ax.set_title('Table 1. Overtime summary by weekday and calendar year',
+             loc='left', fontweight='bold', fontsize=12, pad=10)
+
+header = ['Stratum', 'n cases', 'n overtime', 'OT rate (%)', 'Mean OT (min)']
+rows = [
+    ['By weekday',  '',       '',      '',     ''],
+    ['Monday',      '14,232', '1,395',  '9.8', '58.5'],
+    ['Tuesday',     '14,750', '1,416',  '9.6', '60.1'],
+    ['Wednesday',   '15,814', '1,502',  '9.5', '59.7'],
+    ['Thursday',    '15,844', '1,394',  '8.8', '60.5'],
+    ['Friday',      '15,615', '1,546',  '9.9', '62.4'],
+    ['Saturday',     '1,654',   '278', '16.8', '63.4'],
+    ['Sunday',       '1,443',   '224', '15.5', '59.1'],
+    ['By calendar year', '',   '',      '',     ''],
+    ['2022',        '22,133', '2,213', '10.0', '61.8'],
+    ['2023',        '23,575', '2,358', '10.0', '58.8'],
+    ['2024',        '23,738', '2,303',  '9.7', '61.3'],
+    ['2025*',        '9,906',   '852',  '8.6', '58.2'],
+    ['Total (all cases)', '79,352', '7,729', '9.7', '60.3'],
 ]
-t1 = ax.table(cellText=rows1, colLabels=header1, loc='center', cellLoc='center')
+
+t1 = ax.table(cellText=rows, colLabels=header, loc='center', cellLoc='center')
 t1.auto_set_font_size(False)
 t1.set_fontsize(9)
-t1.scale(1, 1.35)
-for j in range(len(header1)):
+t1.scale(1, 1.3)
+
+# Header styling
+for j in range(len(header)):
     t1[(0, j)].set_facecolor('#2171b5')
     t1[(0, j)].set_text_props(color='white', fontweight='bold')
-for j in range(len(header1)):
-    t1[(8, j)].set_facecolor('#deebf7')
-    t1[(8, j)].set_text_props(fontweight='bold')
 
-ax = axes[1]
-ax.axis('off')
-ax.set_title('Table 1B. Overtime trend by year', loc='left',
-             fontweight='bold', fontsize=11, pad=8)
-header2 = ['Year', 'OT rate (%)', 'Mean OT (min)', 'Median OT (min)']
-rows2 = [
-    ['2022',   '10.0', '61.8', '40'],
-    ['2023',   '10.0', '58.8', '38'],
-    ['2024',    '9.7', '61.3', '39'],
-    ['2025*',   '8.6', '58.2', '37'],
-]
-t2 = ax.table(cellText=rows2, colLabels=header2, loc='center', cellLoc='center')
-t2.auto_set_font_size(False)
-t2.set_fontsize(9)
-t2.scale(1, 1.35)
-for j in range(len(header2)):
-    t2[(0, j)].set_facecolor('#2171b5')
-    t2[(0, j)].set_text_props(color='white', fontweight='bold')
+# Section-header rows (1-indexed including the colLabels row at 0)
+section_rows = [1, 9]   # 'By weekday', 'By calendar year'
+for r in section_rows:
+    for j in range(len(header)):
+        t1[(r, j)].set_facecolor('#c6dbef')
+        t1[(r, j)].set_text_props(fontweight='bold', ha='left' if j == 0 else 'center')
 
-fig.text(0.5, 0.01, '* 2025 partial (Jan–May). Source: In-Depth Analysis Tables 20, 24; Figures 16, 17, 19, 20.',
-         ha='center', fontsize=8, style='italic', color='#666666')
-fig.tight_layout(rect=[0, 0.03, 1, 1])
+# Total row (last data row)
+total_row = len(rows)
+for j in range(len(header)):
+    t1[(total_row, j)].set_facecolor('#deebf7')
+    t1[(total_row, j)].set_text_props(fontweight='bold')
+
+fig.text(0.5, 0.04,
+         '* 2025 partial (Jan–May). Per-year case counts sum to the 79,352-case surgical cohort; '
+         'overtime counts are rounded. Source: In-Depth Analysis Tables 20, 24; Figures 16, 17, 19, 20.',
+         ha='center', fontsize=8, style='italic', color='#666666', wrap=True)
+fig.tight_layout(rect=[0, 0.06, 1, 1])
 fig.savefig(f'{OUTDIR}/table1_overtime_summary.png')
 fig.savefig(f'{OUTDIR}/table1_overtime_summary.pdf')
 plt.close(fig)
-print('Table 1 rendered.')
+print('Table 1 rendered (merged single table).')
 
 # =============================================================================
 # RENDERED TABLE 2 — Urgent vs elective overtime and overlap
