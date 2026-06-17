@@ -131,7 +131,7 @@ add_paragraph('**Keywords:** operating room, overtime, scheduling, patient safet
 add_heading_caps('Abstract', space_before=18)
 
 abstract_parts = [
-    ('Background.', ' Operating-room overtime exposes patients and staff to increased risks, but how overtime distributes within a hospital and which operational factors are associated with it is not well characterised.'),
+    ('Background.', ' Operating-room overtime is associated with elevated patient mortality, staff fatigue, and disproportionate costs. Most studies report overtime as a hospital-wide aggregate, which can obscure where the problem concentrates and misdirect quality improvement efforts.'),
     ('Objective.', ' To characterise operating-room overtime within a high-volume tertiary hospital: its distribution across rooms and the operational factors associated with it.'),
     ('Design and setting.', ' Retrospective observational study of administrative data from a 24/7 tertiary hospital in Belgium running 18 surgical operating rooms.'),
     ('Participants.', ' 79,352 surgical procedures performed between January 2022 and May 2025.'),
@@ -160,9 +160,7 @@ for label, content in abstract_parts:
 add_heading_caps('Key messages', space_before=18)
 
 add_paragraph('**What is already known on this topic**', space_after=3)
-add_paragraph('• Operating-room overtime increases staffing costs and is associated with poorer patient and staff outcomes.', space_after=2)
-add_paragraph('• Most hospitals monitor overtime at the aggregate hospital or site level.', space_after=2)
-add_paragraph('• First-case punctuality is widely promoted as a lever for reducing end-of-day overruns.', space_after=6)
+add_paragraph('• Operating-room overtime is associated with elevated patient mortality, staff fatigue, and burnout, and imposes disproportionate financial costs. Prior work has largely reported overtime as a hospital-wide aggregate, which can obscure where the problem actually resides.', space_after=6)
 
 add_paragraph('**What this study adds**', space_after=3)
 add_paragraph('• Within a single hospital, room-level overtime rates ranged from 3.5% to 32.9%, a ten-fold spread hidden by aggregate metrics.', space_after=2)
@@ -253,9 +251,9 @@ add_paragraph('[Table 2. Urgent versus elective overtime and urgent-case disrupt
 
 add_paragraph('*First-case punctuality.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate (14.8% versus 9.7%), but whether swaps contribute to or result from overtime cannot be determined.', space_after=6)
 
-add_paragraph('First-case punctuality showed no significant correlation with room-level overtime (Spearman rho = −0.29, p = 0.24). OR10 had the best punctuality (46.1% late) yet the worst overtime (32.9%). OR14 had the second-worst punctuality (78.7% late) yet the lowest overtime (3.5%). OR11 had the worst punctuality (82.4% late) yet mid-pack overtime (11.7%). This is consistent with Pandit et al., who reported R-squared values of 0.04 to 0.08 between start and finish times across more than 7,000 theatre lists.[23]', space_after=6)
+add_paragraph('Across all 18 rooms, late-start rate showed no significant correlation with room-level overtime rate (Spearman rho = −0.29, p = 0.24). The direction of the association was negative: rooms with higher late-start rates tended to have lower overtime rates rather than higher ones. OR10 had the lowest late-start rate of all 18 rooms (46.1%) yet the highest overtime rate (32.9%); OR14 had a late-start rate of 78.7% yet the lowest overtime rate (3.5%); OR11 had the highest late-start rate (82.4%) with a mid-range overtime rate (11.7%). This is consistent with Pandit et al., who reported R-squared values of 0.04 to 0.08 between start and finish times across more than 7,000 operating room lists.[23] First-case punctuality was therefore not associated with where overtime accumulates at the room level.', space_after=6)
 
-add_paragraph('*Inter-case idle time.* Mean idle time between consecutive same-room cases had a median of 8 minutes and a mean of 9.9 minutes, with a 95th percentile of 25 minutes; turnover was not a bottleneck.[22] The Spearman correlation between mean inter-case idle time and overtime rate across the 18 rooms was 0.89 (p < 0.001). This association was driven almost entirely by OR10, which combined high idle time with high overtime. After excluding OR10, the pattern did not hold. The high idle time in OR10 most likely reflects complex cardiac cases with long setup and preparation rather than avoidable turnover delay; idle time in this context is a marker of case-mix complexity, not an independent contributor to overtime.', space_after=6)
+add_paragraph('*Inter-case idle time.* Across all 18 rooms, inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes.[22] At the room level, mean idle time was positively correlated with overtime rate (Spearman rho = 0.89, p < 0.001), driven largely by OR10, which had both the highest mean idle time (22.6 minutes) and the highest overtime rate (32.9%). Excluding OR10, the pattern did not hold consistently across the remaining rooms. The elevated idle time in OR10 most plausibly reflects preparation demands between complex cardiac cases rather than inefficient turnover, and is better understood as a marker of case-mix complexity than as a scheduling inefficiency. Inter-case turnover was therefore not identified as an independent contributor to room-level overtime.', space_after=6)
 
 # ============================================================
 # DISCUSSION
