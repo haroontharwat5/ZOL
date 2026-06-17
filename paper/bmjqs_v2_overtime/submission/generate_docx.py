@@ -1,377 +1,191 @@
 #!/usr/bin/env python3
-"""Generate BMJ-formatted Word document from manuscript markdown."""
+"""Generate a BMJ Quality & Safety-formatted Word document from manuscript.md.
+
+This parser reads the markdown manuscript and renders it with BMJ house style
+(Times New Roman 12pt, double spacing, 2.5 cm margins, BOLD CAPS level-1
+headings, bold lower-case level-2 headings). Parsing the markdown directly
+keeps the .docx and the .md in lock-step so they cannot drift apart.
+"""
 
 import re
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml.ns import qn
+
+SRC = '/home/user/ZOL/paper/bmjqs_v2_overtime/submission/manuscript.md'
+OUT = '/home/user/ZOL/paper/bmjqs_v2_overtime/submission/manuscript.docx'
+
+REF_RE = re.compile(r'\[\d+(?:[,–—-]\d+)*\]')
+INLINE_RE = re.compile(r'(\*\*.*?\*\*|\*[^*]+?\*|\[\d+(?:[,–—-]\d+)*\])')
 
 doc = Document()
 
-# --- Page setup: 2.5 cm margins ---
 for section in doc.sections:
     section.top_margin = Cm(2.5)
     section.bottom_margin = Cm(2.5)
     section.left_margin = Cm(2.5)
     section.right_margin = Cm(2.5)
 
-# --- Default font ---
-style = doc.styles['Normal']
-font = style.font
-font.name = 'Times New Roman'
-font.size = Pt(12)
-font.color.rgb = RGBColor(0, 0, 0)
-pf = style.paragraph_format
-pf.space_after = Pt(0)
-pf.space_before = Pt(0)
-pf.line_spacing = Pt(24)  # double spacing
-pf.alignment = WD_ALIGN_PARAGRAPH.LEFT
+normal = doc.styles['Normal']
+normal.font.name = 'Times New Roman'
+normal.font.size = Pt(12)
+normal.font.color.rgb = RGBColor(0, 0, 0)
+normal.paragraph_format.space_after = Pt(0)
+normal.paragraph_format.space_before = Pt(0)
+normal.paragraph_format.line_spacing = Pt(24)
 
 
-def add_paragraph(text, bold=False, italic=False, font_size=12, space_after=0,
-                  space_before=0, alignment=WD_ALIGN_PARAGRAPH.LEFT, style_name='Normal'):
-    p = doc.add_paragraph(style=style_name)
-    p.alignment = alignment
+def add_runs(paragraph, text, size=12, base_bold=False, base_italic=False):
+    """Render inline markdown (**bold**, *italic*, [ref] superscript)."""
+    for part in INLINE_RE.split(text):
+        if not part:
+            continue
+        if part.startswith('**') and part.endswith('**'):
+            run = paragraph.add_run(part[2:-2]); run.bold = True
+        elif part.startswith('*') and part.endswith('*'):
+            run = paragraph.add_run(part[1:-1]); run.italic = True
+        elif REF_RE.fullmatch(part):
+            run = paragraph.add_run(part[1:-1]); run.font.superscript = True
+        else:
+            run = paragraph.add_run(part)
+            run.bold = base_bold
+            run.italic = base_italic
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(size)
+
+
+def para(text, size=12, space_after=6, space_before=0, base_bold=False, base_italic=False):
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     pf = p.paragraph_format
     pf.space_after = Pt(space_after)
     pf.space_before = Pt(space_before)
     pf.line_spacing = Pt(24)
-    add_formatted_runs(p, text, bold=bold, italic=italic, font_size=font_size)
+    add_runs(p, text, size=size, base_bold=base_bold, base_italic=base_italic)
     return p
 
 
-def add_formatted_runs(paragraph, text, bold=False, italic=False, font_size=12):
-    """Parse text for [N] references (make superscript), **bold**, and *italic* markers."""
-    parts = re.split(r'(\*\*.*?\*\*|\*[^*]+?\*|\[\d+(?:[,––-]\d+)*\])', text)
-    for part in parts:
-        if not part:
-            continue
-        if part.startswith('**') and part.endswith('**'):
-            inner = part[2:-2]
-            run = paragraph.add_run(inner)
+def heading(text, caps=False, size=12, space_before=14):
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    pf = p.paragraph_format
+    pf.space_before = Pt(space_before)
+    pf.space_after = Pt(6)
+    pf.line_spacing = Pt(24)
+    run = p.add_run(text.upper() if caps else text)
+    run.bold = True
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(size)
+    return p
+
+
+def is_table_sep(cells):
+    return all(re.fullmatch(r':?-{2,}:?', c.strip()) for c in cells)
+
+
+def split_row(line):
+    return [c.strip() for c in line.strip().strip('|').split('|')]
+
+
+def add_table(rows):
+    header = split_row(rows[0])
+    body = [split_row(r) for r in rows[2:]]  # rows[1] is the separator
+    ncol = len(header)
+    table = doc.add_table(rows=1 + len(body), cols=ncol)
+    table.style = 'Table Grid'
+    for j, cell_text in enumerate(header):
+        cell = table.cell(0, j)
+        cell.paragraphs[0].text = ''
+        add_runs(cell.paragraphs[0], cell_text, size=11, base_bold=True)
+    for i, row in enumerate(body, start=1):
+        for j in range(ncol):
+            cell = table.cell(i, j)
+            cell.paragraphs[0].text = ''
+            add_runs(cell.paragraphs[0], row[j] if j < len(row) else '', size=11)
+    # tighten cell line spacing
+    for r in table.rows:
+        for c in r.cells:
+            for p in c.paragraphs:
+                p.paragraph_format.line_spacing = Pt(13)
+                p.paragraph_format.space_after = Pt(0)
+    doc.add_paragraph().paragraph_format.line_spacing = Pt(6)
+    return table
+
+
+# ---------------------------------------------------------------------------
+# Parse the markdown
+# ---------------------------------------------------------------------------
+with open(SRC, encoding='utf-8') as f:
+    lines = f.readlines()
+
+i = 0
+first_h1_done = False
+while i < len(lines):
+    raw = lines[i].rstrip('\n')
+    line = raw.strip()
+
+    if not line or line == '---':
+        i += 1
+        continue
+
+    # Tables: a block of consecutive lines starting with '|'
+    if line.startswith('|'):
+        block = []
+        while i < len(lines) and lines[i].strip().startswith('|'):
+            block.append(lines[i].strip())
+            i += 1
+        if len(block) >= 2 and is_table_sep(split_row(block[1])):
+            add_table(block)
+        else:
+            for b in block:
+                para(b)
+        continue
+
+    if line.startswith('### '):
+        heading(line[4:].strip(), caps=False, space_before=12)
+        i += 1
+        continue
+    if line.startswith('## '):
+        heading(line[3:].strip(), caps=True, space_before=16)
+        i += 1
+        continue
+    if line.startswith('# '):
+        text = line[2:].strip()
+        if not first_h1_done:
+            p = doc.add_paragraph()
+            pf = p.paragraph_format
+            pf.space_after = Pt(12)
+            pf.line_spacing = Pt(24)
+            run = p.add_run(text)
             run.bold = True
             run.font.name = 'Times New Roman'
-            run.font.size = Pt(font_size)
-        elif part.startswith('*') and part.endswith('*') and not part.startswith('**'):
-            inner = part[1:-1]
-            run = paragraph.add_run(inner)
-            run.italic = True
-            run.font.name = 'Times New Roman'
-            run.font.size = Pt(font_size)
-        elif re.match(r'^\[\d+(?:[,–—–-]\d+)*\]$', part):
-            ref_text = part[1:-1]
-            run = paragraph.add_run(ref_text)
-            run.font.superscript = True
-            run.font.name = 'Times New Roman'
-            run.font.size = Pt(font_size)
+            run.font.size = Pt(14)
+            first_h1_done = True
         else:
-            run = paragraph.add_run(part)
-            run.bold = bold
-            run.italic = italic
-            run.font.name = 'Times New Roman'
-            run.font.size = Pt(font_size)
-
-
-def add_heading_caps(text, space_before=12):
-    """BMJ Level 1: BOLD CAPS"""
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    pf = p.paragraph_format
-    pf.space_before = Pt(space_before)
-    pf.space_after = Pt(6)
-    pf.line_spacing = Pt(24)
-    run = p.add_run(text.upper())
-    run.bold = True
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-    return p
-
-
-def add_heading_lower(text, space_before=12):
-    """BMJ Level 2: bold lower case"""
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    pf = p.paragraph_format
-    pf.space_before = Pt(space_before)
-    pf.space_after = Pt(6)
-    pf.line_spacing = Pt(24)
-    run = p.add_run(text)
-    run.bold = True
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-    return p
-
-
-# ============================================================
-# TITLE PAGE
-# ============================================================
-title_text = 'Where does operating-room overtime come from? A retrospective single-centre study'
-p = doc.add_paragraph()
-p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-pf = p.paragraph_format
-pf.space_after = Pt(12)
-pf.line_spacing = Pt(24)
-run = p.add_run(title_text)
-run.bold = True
-run.font.name = 'Times New Roman'
-run.font.size = Pt(14)
-
-add_paragraph('Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, Dieter Mesotten',
-              space_after=6)
-add_paragraph('[Affiliations]', space_after=6)
-add_paragraph('**Correspondence:** [corresponding author details]', space_after=6)
-add_paragraph('**Word count:** ~2,800 (body text)', space_after=6)
-add_paragraph('**Keywords:** operating room, overtime, scheduling, patient safety, staff wellbeing, quality improvement',
-              space_after=12)
-
-# ============================================================
-# ABSTRACT
-# ============================================================
-add_heading_caps('Abstract', space_before=18)
-
-abstract_parts = [
-    ('Background.', ' Operating-room overtime is associated with elevated patient mortality, staff fatigue, and disproportionate costs. Most studies report overtime as a hospital-wide aggregate, which can obscure where the problem concentrates and misdirect quality improvement efforts.'),
-    ('Objective.', ' To characterise operating-room overtime within a high-volume tertiary hospital: its distribution across rooms and the operational factors associated with it.'),
-    ('Design and setting.', ' Retrospective observational study of administrative operating-room data at a 24/7 tertiary hospital in Belgium operating 18 surgical operating rooms.'),
-    ('Participants.', ' 79,352 surgical procedures performed between January 2022 and May 2025.'),
-    ('Main outcome measures.', ' Case-level overtime (time past the assigned shift end), by room, weekday, shift, and urgency. Start-time deviation, duration-estimation accuracy, shift displacement, and unplanned urgent-case disruption of the elective programme as candidate contributing factors.'),
-    ('Results.', ' 7,729 cases (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Overtime concentrated in a small number of rooms: OR10 ran overtime on 32.9% of its cases (mean 154 minutes), while OR14 ran overtime on 3.5%. Urgent cases ran after-hours at more than twice the elective rate (18.2% versus 8.3%). Unplanned urgent cases disrupted the elective programme on 68.8% of observation days, associated with a median difference of approximately 30 minutes in elective start times. First-case punctuality and inter-case idle time showed no consistent association with room-level overtime.'),
-    ('Conclusions.', ' At this tertiary hospital, overtime concentrated in a small number of rooms, with case-mix complexity and unplanned urgent-case disruption of the elective programme as the most visible associated factors. Room-level overtime monitoring and scheduling that accounts for urgent-case flow are more practical targets for quality improvement than first-case punctuality alone.'),
-]
-
-for label, content in abstract_parts:
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    pf = p.paragraph_format
-    pf.space_after = Pt(3)
-    pf.line_spacing = Pt(24)
-    run = p.add_run(label)
-    run.bold = True
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-    run = p.add_run(content)
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-
-# ============================================================
-# KEY MESSAGES
-# ============================================================
-add_heading_caps('Key messages', space_before=18)
-
-add_paragraph('**What is already known on this topic**', space_after=3)
-add_paragraph('• Operating-room overtime is associated with elevated patient mortality, staff fatigue, and burnout, and imposes disproportionate financial costs. Prior work has largely reported overtime as a hospital-wide aggregate, which can obscure where the problem actually resides.', space_after=6)
-
-add_paragraph('**What this study adds**', space_after=3)
-add_paragraph('• Within a single hospital, room-level overtime rates ranged from 3.5% to 32.9%, a ten-fold spread hidden by aggregate metrics.', space_after=2)
-add_paragraph('• Unplanned urgent-case disruption of the elective programme occurred on more than two-thirds of observation days and was associated with delayed elective start times.', space_after=2)
-add_paragraph('• First-case punctuality showed no consistent association with room-level overtime, suggesting it may not be an effective intervention target in all settings.', space_after=6)
-
-# ============================================================
-# INTRODUCTION
-# ============================================================
-add_heading_caps('Introduction', space_before=18)
-
-intro_paras = [
-    'Operating-room (OR) overtime can refer to several distinct phenomena: a procedure running longer than its estimated duration, a case finishing after its planned end time, or a case extending past a staffing-shift boundary and requiring a personnel handover during or after the procedure. These definitions capture different problems — planning accuracy, schedule adherence, and workforce exposure — and the choice of definition shapes what is measured and what intervention follows. In this study, we define overtime as a case whose room-out time falls after the end of its assigned staffing shift, because the nursing handover at each shift boundary is the operational event that makes overtime consequential. Overutilised time is approximately twice as expensive as underutilised time,[1] but overtime is more than a budget problem.',
-
-    'On the patient side, after-hours surgery carries elevated mortality. A meta-analysis reported an adjusted odds ratio of 1.16 (95% CI 1.06 to 1.28), based on low-certainty evidence.[2] A propensity-matched cohort of 281,717 South Korean patients reported a larger effect (odds ratio 3.58), although that estimate has been challenged on residual-confounding grounds.[3,4] Each intraoperative anaesthesia handover raises the odds of a major composite complication, with incidence rising from 8.8% at zero transitions to 21.2% at four or more.[5] At the study hospital, anaesthesiologists are not subject to shift-based handovers; they remain with the case until it is complete. The nursing team, however, changes at each shift boundary regardless of whether a procedure is in progress. A 2025 UK national patient-safety investigation reported that 22% of surveyed doctors experienced daily sleep deprivation and 35% said tiredness had impaired their ability to treat patients.[6] Overtime above a breakpoint threshold has been associated with a 2.09% increase in hospital-acquired pressure ulcers — skin injuries that develop during prolonged immobility — across 70 US hospitals.[7] In a multicentre cohort of more than 350,000 non-cardiac surgical cases, night surgery was associated with increased morbidity (adjusted odds ratio 1.41), mediated partly by higher blood-transfusion rates and provider handovers during the case.[8]',
-
-    'On the staff side, overtime and long shifts are associated with poorer perceived care quality and higher patient-safety risk in a 12-country European nurse workforce study.[9] The companion study linked 12-hour shifts to burnout and intent to leave.[10] Mandatory overtime was significantly associated with intent to leave in a 2024 cross-sectional study of 264 South Korean nurses.[11] Both long shifts and overtime are associated with worse performance and wellbeing,[12] and high workload combined with low decision latitude is an established burnout predictor.[13]',
-
-    'The severity of these consequences depends on what happens at the shift boundary. On weekdays, 25 rooms (18 surgical, 7 interventional) are staffed during the 08:00 to 16:30 day shift, with 2 to 3 nurses per room. At 16:30, capacity drops to 8 rooms. At 17:30, it drops to 4. Overnight, a single room remains staffed. At weekends the elective programme does not run, and the hospital staffs a reduced roster for urgent and emergency cases only. A case running past the shift boundary competes for a diminishing set of staffed rooms. The nursing team hands over at the boundary regardless of whether a procedure is in progress; surgeons and anaesthesiologists remain with the case until completion.',
-
-    'Workflow disruptions in the OR cluster and escalate,[14] and a systematic review estimated that approximately 20% of operating time involves disruptions, although evidence for direct effects on patient outcomes remains mixed.[15] Prior work on OR overtime has largely treated it as an aggregate site-level number.[16,17] Whether overtime concentrates in specific rooms, and which operational factors are associated with it, has received less attention. Without that granularity, quality improvement efforts risk targeting the wrong intervention point.',
-
-    'This study is part of a broader quality-improvement effort at a Belgian tertiary hospital. The present analysis characterises scheduled-versus-observed performance from administrative data. We address two questions:',
-]
-for para in intro_paras:
-    add_paragraph(para, space_after=6)
-
-numbered_qs = [
-    '1. How is overtime distributed across rooms and time within one tertiary hospital?',
-    '2. Which operational factors — including duration overruns, shift displacement, unplanned urgent-case disruption of the elective programme, and first-case punctuality — are associated with overtime?',
-]
-for q in numbered_qs:
-    add_paragraph(q, space_after=3)
-
-add_paragraph('The first question examines whether overtime is a diffuse hospital-wide problem or whether it concentrates in specific rooms. The second asks which candidate mechanisms identified in the literature are visible in our data, to inform where interventions should be directed.', space_after=6, space_before=3)
-
-# ============================================================
-# METHODS
-# ============================================================
-add_heading_caps('Methods', space_before=18)
-
-add_heading_lower('Setting')
-add_paragraph('The study hospital is a 24/7 tertiary centre in Belgium performing more than 22,000 surgical procedures per year. It operates 18 surgical theatres and 7 interventional theatres. The surgical staff includes 195 surgeons and 207 anaesthesiologists (including trainees and fellows), covering all surgery except congenital cardiac and organ transplantation. During the day shift, 2 to 3 nurses staff each room. At 16:30, the number of staffed rooms drops from 25 to 8; at 17:30, to 4; overnight, a single room remains staffed.', space_after=6)
-
-add_heading_lower('Data and inclusion')
-add_paragraph('We used administrative OR data from 1 January 2022 to 31 May 2025, covering 79,352 cases in the 18 surgical operating rooms, involving 60,895 unique patients and 1,276 distinct procedure types. By admission type, 42.3% of cases were ambulatory and 57.7% inpatient (this classification reflects the admission pathway and does not correspond to the elective/non-elective urgency split reported below). The urgency mix was 85.4% elective and 14.6% non-elective. Annual volume grew from 22,133 cases in 2022 to 23,738 in 2024, with 9,906 recorded through May 2025. Room-in and room-out times are the only time markers confirmed as reliable by the hospital\'s clinical team; all timing analyses use these two time points.', space_after=6)
-
-add_heading_lower('Definitions')
-add_paragraph('Each case was assigned to a shift based on its actual room-in time: day (08:00 to 16:30), evening (16:30 to 22:00), or night (22:00 to 08:00). A case was flagged as overtime if its room-out fell after the end of its assigned shift. Overtime minutes equal the positive difference between room-out and shift end. This operationalises the conceptual definition stated in the Introduction and aligns with the framework in Bauer et al.[18]', space_after=6)
-
-add_heading_lower('Variables')
-add_paragraph('We followed the glossary of Bauer et al.[18] Variable definitions include planned and observed duration, planning deviation, start-time deviation, overtime flag and minutes, room-swap flag, urgency (elective versus non-elective), and shift label. We chose room-level overtime as the primary metric rather than aggregate utilisation, which can mask room-level operational problems.[16,19]', space_after=6)
-
-add_heading_lower('Analyses')
-add_paragraph('All analyses are descriptive; we did not fit causal or inferential models. For RQ1, we computed overtime rate, mean, median, and 95th percentile, stratified by room, weekday, year, and shift. For RQ2, we examined duration deviation by planned-duration bucket using coefficients of variation,[20,21] urgency mix and timing, urgent-elective interaction (defined and reported in Results), first-case start-time deviation per room, inter-case idle time, and room swaps. We also computed Spearman rank correlations across the 18 rooms between room-level overtime rate and two candidate factors: first-case late-start rate and mean inter-case idle time. Intermediate findings were reviewed with the clinical team and used to refine variable definitions and exclusions. The study is reported in accordance with the STROBE guidelines for observational studies.', space_after=6)
-
-add_heading_lower('Ethics')
-add_paragraph('This study used fully anonymised administrative data with institutional approval. No patient interaction occurred.', space_after=6)
-
-# ============================================================
-# RESULTS
-# ============================================================
-add_heading_caps('Results', space_before=18)
-
-add_heading_lower('Overtime burden and room-level concentration (RQ1)')
-add_paragraph('Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among overtime cases, the mean was 60.3 minutes, the median 39, and the 95th percentile 197 (Table 1). Weekday rates were similar (8.8 to 9.9%) but roughly 1.7 times higher on weekends (Saturday 16.8%, Sunday 15.5%), when the elective programme does not run and volume is almost entirely urgent or emergency surgery. The year-on-year trend showed gradual improvement: 10.0% in 2022, 10.0% in 2023, 9.7% in 2024, and 8.6% in the partial 2025 data.', space_after=6)
-
-add_paragraph('[Table 1. Overtime summary by weekday and calendar year. A single table with two strata — weekday (Monday-Sunday) and calendar year (2022-2025) — reporting cases, overtime count, overtime rate, and mean overtime minutes, with an overall total row.]', italic=True, space_after=6, space_before=6)
-
-add_paragraph('Room-level overtime rates ranged from 3.5% to 32.9% across the 18 rooms (Figure 1). OR10, which handles complex cardiac surgery (CABG, aortic valve replacement, mitral valve repair), ran overtime on 32.9% of its 1,743 cases, with a mean of 154 minutes and a 95th percentile of 328 minutes. A second tier (OR08 through OR13) clustered at 11 to 16%. At the other end, OR14 ran 3.5% across 6,885 cases and OR01 ran 5.8% across 6,577. The within-hospital spread (nearly ten-fold) exceeded the between-campus spread across the hospital network (0.5 to 9.7%).', space_after=6)
-
-add_paragraph('[Insert Figure 1 about here]', italic=True, space_after=6, space_before=6)
-
-add_paragraph('Most overtime cases ended shortly after the shift boundary. The majority of completions fell in the 16:30 to 17:30 window, when staffing had dropped from 25 to 8 rooms. The distribution decayed through the evening, with a thin tail past 22:00 (Supplementary Figure S1).', space_after=6)
-
-add_heading_lower('Contributing factors (RQ2)')
-
-add_paragraph('*Planning accuracy.* Across all 79,352 cases (not only those with overtime), 45.7% ran longer than planned and 54.3% ran shorter. The mean overrun was 22.6 minutes (median 14); the mean underrun was 21.2 minutes (median 12). On average, the planning system was roughly unbiased. The problem was dispersion. The coefficient of variation of observed duration was lowest for mid-length cases (0.35 to 0.36 for 61 to 180 minutes), moderate for short cases (0.61 for under 30 minutes), and intermediate for very long cases (0.42 for over 180 minutes). Planning-deviation CV was more extreme: the over-180-minute bucket had a CV of 1.86, meaning the standard deviation of the planning error was nearly twice the mean — an indication that duration estimates for the longest cases are unreliable (Supplementary Table S1). The procedures with the largest absolute deviations — complex cardiac and oncology cases — were concentrated in the rooms with the highest overtime.', space_after=6)
-
-add_paragraph('*Shift displacement.* A total of 4,151 cases (5.2%) were performed in a different shift than originally planned. These cases started on average 398 minutes later than planned (roughly six and a half hours) and took 22.3 minutes less than planned. Whether displacement contributed to overtime or resulted from it cannot be determined from these data.', space_after=6)
-
-add_paragraph('*Urgent-elective interaction.* Urgent cases accounted for 14.6% of the volume (11,616 of 79,352). Per case, urgent surgery ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%, Table 2A), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of overtime minutes was still dominated by the elective programme.', space_after=6)
-
-add_paragraph('To assess whether urgent cases disrupt the elective programme, we counted days on which an urgent case ran in a room while an elective case had been planned in the same room over an overlapping time window (urgent case\'s actual room and room-in to room-out interval matched the elective case\'s planned room and planned start-to-end interval). Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 2B). On days with overlap, elective cases started later than on days without, a median difference of approximately 30 minutes, a gap that reached 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases (Supplementary Table S2).', space_after=6)
-
-add_paragraph('[Table 2. Urgent versus elective overtime and urgent-case disruption. Panel A: volume, after-hours rate, mean overtime, and P95 overtime by urgency. Panel B: disruption frequency (858/1,247 days = 68.8%), mean start-delay effect (+30 min), and OR11 burden.]', italic=True, space_after=6, space_before=6)
-
-add_paragraph('*First-case punctuality.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate (14.8% versus 9.7%), but whether swaps contribute to or result from overtime cannot be determined.', space_after=6)
-
-add_paragraph('Across all 18 rooms, late-start rate showed no significant correlation with room-level overtime rate (Spearman rho = −0.29, p = 0.24). The direction of the association was negative: rooms with higher late-start rates tended to have lower overtime rates rather than higher ones. OR10 had the lowest late-start rate of all 18 rooms (46.1%) yet the highest overtime rate (32.9%); OR14 had a late-start rate of 78.7% yet the lowest overtime rate (3.5%); OR11 had the highest late-start rate (82.4%) with a mid-range overtime rate (11.7%). This is consistent with Pandit et al., who reported R-squared values of 0.04 to 0.08 between start and finish times across more than 7,000 operating room lists.[23] First-case punctuality was therefore not associated with where overtime accumulates at the room level.', space_after=6)
-
-add_paragraph('*Inter-case idle time.* Across all 18 rooms, inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes.[22] At the room level, mean idle time was positively correlated with overtime rate (Spearman rho = 0.89, p < 0.001), driven largely by OR10, which had both the highest mean idle time (22.6 minutes) and the highest overtime rate (32.9%). Excluding OR10, the pattern did not hold consistently across the remaining rooms. The elevated idle time in OR10 most plausibly reflects preparation demands between complex cardiac cases rather than inefficient turnover, and is better understood as a marker of case-mix complexity than as a scheduling inefficiency. Inter-case turnover was therefore not identified as an independent contributor to room-level overtime.', space_after=6)
-
-# ============================================================
-# DISCUSSION
-# ============================================================
-add_heading_caps('Discussion', space_before=18)
-
-add_heading_lower('Concentration, not prevalence')
-add_paragraph('A hospital-wide overtime rate of 9.7% is unremarkable. The distribution, however, is strikingly uneven. OR10 ran overtime in one of every three cases; OR14, in the same hospital, ran 3.5%. The ten-fold within-hospital spread was wider than the between-campus spread across the hospital network (0.5 to 9.7%). Hospital-wide targets such as “reduce overtime by 10%” will not reach the problem unless decomposed by room. Zhang, Dunstan, and Pandit made the same point: aggregate metrics hide room-level operational reality.[16] Valid room-level metrics are a prerequisite for quality improvement.[24]', space_after=6)
-
-add_heading_lower('Factors associated with overtime')
-add_paragraph('The procedures with the largest planning deviations and the highest planned durations — complex cardiac and oncology cases — clustered in the rooms with the highest overtime. This concentration suggests that case-mix complexity, rather than scheduling inefficiency alone, explains much of the room-level variation. Wachtel and Dexter showed in a large operational dataset that delay grows as duration uncertainty accumulates through the day,[26] and Fugener et al. documented systematic biases in surgeons\' duration estimates that compound across a list.[27] Both observations are consistent with the room-level pattern we describe, although our data cannot test the cumulative-delay account directly.', space_after=6)
-
-add_paragraph('Urgent-elective overlap occurred on more than two-thirds of observation days and was associated with a median difference of approximately 30 minutes in elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. The hospital already operates dedicated rooms for urgent cases, yet this overlap still occurs, suggesting that protecting the elective programme may require additional scheduling buffers or capacity reallocation rather than reactive rescheduling alone.', space_after=6)
-
-add_paragraph('A common assumption is that first-case-on-time-start (FCOTS) drives end-of-day performance, with each minute of tardiness carrying a marginal cost.[25] At the room level, our data do not show that relationship: late-start rate and overtime rate were not significantly correlated (Spearman rho = −0.29, p = 0.24), and the room with the lowest late-start rate (OR10, 46.1%) had the highest overtime (32.9%), while a room with one of the highest late-start rates (OR14, 78.7%) had the lowest overtime (3.5%). Pandit et al. reported a similar disconnect across more than 7,000 operating room lists.[23] We do not conclude that FCOTS is unimportant; it remains a reasonable discipline marker. In this dataset, however, it does not predict where overtime accumulates.', space_after=6)
-
-add_heading_lower('Implications')
-add_paragraph('*Operational implication.* Room-level monitoring should take precedence over hospital-wide overtime targets, and scheduling should treat urgent-case flow as a routine planning input rather than an exception. At a hospital where 25 staffed rooms drop to 8, then 4, then 1, each case past the shift boundary lands in a setting with fewer staff and more handovers; decomposing aggregate metrics into per-room overtime rates is a practical first step toward identifying where interventions would have the greatest effect.', space_after=6)
-add_paragraph('*Clinical implication.* The overtime documented here is operationally comparable to the exposure that other studies have linked to staff fatigue, elevated after-hours mortality, and increased complication risk.[2–13] Whether these harms are present in this cohort cannot be determined from administrative data alone; direct measurement of patient and staff outcomes associated with room-level overtime remains an important next step for future research.', space_after=6)
-
-add_heading_lower('Limitations')
-add_paragraph('This study has several limitations. It is a single-site retrospective analysis, so whether the concentration pattern holds in hospitals with different staffing models is unknown. We do not measure patient or staff outcomes directly; the harm argument rests on published literature, not on complications or burnout scores from this cohort. OR10 handles complex cardiac surgery, and its high overtime may partly reflect irreducible procedural duration rather than schedulable inefficiency; we describe this but cannot adjust for it without procedure-level risk scores. The link between after-hours surgery and patient harm rests on observational mortality studies whose effect sizes range widely (adjusted odds ratio 1.16[2] to 3.58[3]) and whose estimates have been questioned on residual-confounding grounds.[4] Readers should weigh the after-hours mortality evidence with this uncertainty in mind.', space_after=6)
-
-# ============================================================
-# CONCLUSION
-# ============================================================
-add_heading_caps('Conclusion', space_before=18)
-add_paragraph('Operating-room overtime at this tertiary hospital concentrated in a small number of rooms, with case-mix complexity and unplanned urgent-case disruption of the elective programme as the most visible associated factors. First-case punctuality showed no significant correlation with room-level overtime (Spearman rho = −0.29, p = 0.24), and the association between inter-case idle time and overtime was driven by a single high-complexity room. The findings support room-level rather than hospital-level overtime monitoring and scheduling interventions that account for urgent-case flow.', space_after=6)
-
-# ============================================================
-# END MATTER
-# ============================================================
-add_heading_caps('Acknowledgements', space_before=18)
-add_paragraph('[To be completed]', space_after=6)
-
-add_heading_caps('Competing interests', space_before=12)
-add_paragraph('None declared.', space_after=6)
-
-add_heading_caps('Funding', space_before=12)
-add_paragraph('[To be completed]', space_after=6)
-
-add_heading_caps('Data availability', space_before=12)
-add_paragraph('The dataset contains anonymised administrative hospital data. Requests for access should be directed to the hospital\'s research office.', space_after=6)
-
-add_heading_caps('Patient and public involvement', space_before=12)
-add_paragraph('Given the retrospective use of fully anonymised administrative data, no patient or public involvement in the design, conduct, or reporting of this study was applicable.', space_after=6)
-
-# ============================================================
-# REFERENCES
-# ============================================================
-add_heading_caps('References', space_before=18)
-
-references = [
-    'Wachtel RE, Dexter F. Review of behavioral operations experimental studies of newsvendor problems for operating room management. Anesth Analg 2010;110(6):1698-1710.',
-    'Cortegiani A, Ippolito M, Misseri G, et al. Association between night/after-hours surgery and mortality: a systematic review and meta-analysis. Br J Anaesth 2020;124(5):623-37.',
-    'Oh T-K, Song I-A. Outcomes of after-hours surgeries performed under general anaesthesia: a South Korean nationwide cohort study. Anaesthesia 2025. DOI: 10.1111/anae.16559.',
-    'Sakurai T. Assessing the influence of after-hours surgery: concerns with the confounders and conclusion. Anaesthesia 2025. DOI: 10.1111/anae.16591.',
-    'Saager L, Hesler BD, You J, et al. Intraoperative transitions of anesthesia care and postoperative adverse outcomes. Anesthesiology 2014;121(4):695-706.',
-    'Health Services Safety Investigations Body (HSSIB). The impact of staff fatigue on patient safety. Investigation report. London: HSSIB, 2025.',
-    'Pittman P, Tiunn H-L, et al. Increased utilization of overtime and agency nurses and patient safety. JAMA Netw Open 2025. PMID: 40172888.',
-    'Althoff FC, Wachtendorf LJ, Rostin P, et al. Effects of night surgery on postoperative mortality and morbidity: a multicentre cohort study. BMJ Qual Saf 2021;30(8):678-688.',
-    'Griffiths P, Dall\'Ora C, Simon M, et al. Nurses\' shift length and overtime working in 12 European countries: the association with perceived quality of care and patient safety. Med Care 2014;52(11):975-81.',
-    'Dall\'Ora C, Griffiths P, Ball J, et al. Association of 12 h shifts and nurses\' job satisfaction, burnout and intention to leave: findings from a cross-sectional study of 12 European countries. BMJ Open 2015;5(9):e008331.',
-    'Bae S-H. Nurse staffing, work hours, mandatory overtime, and turnover in acute care hospitals affect nurse job satisfaction, intent to leave, and burnout: a cross-sectional study. Int J Public Health 2024;69:1607068.',
-    'Dall\'Ora C, Ball J, Recio-Saucedo A, Griffiths P. Characteristics of shift work and their impact on employee performance and wellbeing: a literature review. Int J Nurs Stud 2016;57:12-27.',
-    'Dall\'Ora C, Ball J, Reinius M, Griffiths P. Burnout in nursing: a theoretical review. Hum Resour Health 2020;18:41.',
-    'Joseph A, Khoshkenar A, Taaffe KM, et al. Minor flow disruptions, traffic-related factors and their effect on major flow disruptions in the operating room. BMJ Qual Saf 2019;28(4):276-83.',
-    'Koch A, Burns J, Catchpole K, Weigl M. Associations of workflow disruptions in the operating room with surgical outcomes: a systematic review and narrative synthesis. BMJ Qual Saf 2020;29(12):1033-1045.',
-    'Zhang C, Dunstan C, Pandit JJ. A tutorial on “capped utilisation” as a metric and key performance target in NHS England\'s Model Hospital operating theatres database: caution for international healthcare systems. Anesthesiol Perioper Sci 2024. DOI: 10.1007/s44254-024-00073-3.',
-    'Macario A. Are your hospital operating rooms “efficient”? A scoring system with eight performance indicators. Anesthesiology 2006;105(2):237-40.',
-    'Bauer M, Diemer M, Merkel M, et al. Glossary of perioperative process times and indicators. Anaesthesist 2020;69(Suppl 1):S5-17.',
-    'Schouten AEM, Flipse SM, van Nieuwenhuizen KE, et al. Operating room performance optimization metrics: a systematic review. J Med Syst 2023;47(1):19.',
-    'Strum DP, May JH, Vargas LG. Modeling the uncertainty of surgical procedure times: comparison of log-normal and normal models. Anesthesiology 2000;92(4):1160-7.',
-    'Eijkemans MJ, van Houdenhoven M, Nguyen T, et al. Predicting the unpredictable: a new prediction model for operating room times using individual surgeon-specific historical data. Anesthesiology 2010;112(1):41-9.',
-    'MacMillan L, et al. What affects operating room turnover time? A systematic review and mapping of the evidence. Surgery 2025. PMID: 40054053.',
-    'Pandit JJ, Abbott T, Pandit M, et al. Is “starting on time” useful (or useless) as a surrogate measure for “surgical theatre efficiency”? Anaesthesia 2012;67(8):823-32.',
-    'Zhang C, Pandit JJ. Getting operating theatre metrics right to underpin quality improvement. Br J Anaesth 2023;131(1):130-4.',
-    'Dexter F, Epstein RH. Typical savings from each minute reduction in tardy first case of the day starts. Anesth Analg 2009;108(4):1262-7.',
-    'Wachtel RE, Dexter F. Influence of the operating room schedule on tardiness from scheduled start times. Anesth Analg 2009;108(6):1889-1901.',
-    'Fugener A, Schiffels S, Kolisch R. Overutilization and underutilization of operating rooms: insights from behavioral health care operations management. Health Care Manag Sci 2017;20(1):115-28.',
-]
-
-for i, ref in enumerate(references, 1):
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    pf = p.paragraph_format
-    pf.space_after = Pt(2)
-    pf.line_spacing = Pt(24)
-    run = p.add_run(f'{i}. ')
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-    run = p.add_run(ref)
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-
-# ============================================================
-# FIGURE LEGENDS
-# ============================================================
-add_heading_caps('Figure legends', space_before=18)
-
-fig_legends = [
-    ('Figure 1.', ' Room-level overtime concentration. Horizontal bar chart with one bar per operating room, ordered descending by overtime rate. A secondary panel shows mean overtime minutes per room. OR10 (32.9%) and OR14 (3.5%) anchor the extremes. Overall: 7,729 of 79,352 cases (9.7%), mean 60.3 min, median 39 min, P95 197 min.'),
-]
-
-for label, text in fig_legends:
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    pf = p.paragraph_format
-    pf.space_after = Pt(6)
-    pf.line_spacing = Pt(24)
-    run = p.add_run(label)
-    run.bold = True
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-    run = p.add_run(text)
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(12)
-
-# Save
-output_path = '/home/user/ZOL/paper/bmjqs_v2_overtime/submission/manuscript.docx'
-doc.save(output_path)
-print(f'Saved to {output_path}')
+            heading(text, caps=True)
+        i += 1
+        continue
+
+    # Bullet list item
+    if line.startswith('- '):
+        para('• ' + line[2:].strip(), space_after=3)
+        i += 1
+        continue
+
+    # Numbered list item (RQs, references): keep "N. text"
+    if re.match(r'^\d+\.\s', line):
+        para(line, space_after=3)
+        i += 1
+        continue
+
+    # Bracketed figure/table placeholders -> italic
+    if line.startswith('[') and line.endswith(']'):
+        para(line, base_italic=True, space_after=6, space_before=6)
+        i += 1
+        continue
+
+    para(line)
+    i += 1
+
+doc.save(OUT)
+print(f'Saved to {OUT}')

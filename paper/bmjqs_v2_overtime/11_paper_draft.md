@@ -1,12 +1,12 @@
-# Where does operating-room overtime come from? A retrospective single-centre study
+# Where does operating-room overtime come from? A retrospective single-center study
 
-Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, Dieter Mesotten
+Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, and Dieter Mesotten
 
-[Affiliations]
+[Affiliations to be completed]
 
 **Correspondence:** [corresponding author details]
 
-**Word count:** ~2,800 (body text)
+**Word count:** ~2,900 (body text; target journal allows up to 4,000 for original research)
 
 **Keywords:** operating room, overtime, scheduling, patient safety, staff wellbeing, quality improvement
 
@@ -16,13 +16,13 @@ Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, Dieter Mesotten
 
 **Background.** Operating-room overtime is associated with elevated patient mortality, staff fatigue, and disproportionate costs. Most studies report overtime as a hospital-wide aggregate, which can obscure where the problem concentrates and misdirect quality improvement efforts.
 
-**Objective.** To characterise operating-room overtime within a high-volume tertiary hospital: its distribution across rooms and the operational factors associated with it.
+**Objective.** To characterize operating-room overtime within a high-volume tertiary hospital: its distribution across rooms and the operational factors associated with it.
 
 **Design and setting.** Retrospective observational study of administrative operating-room data at a 24/7 tertiary hospital in Belgium operating 18 surgical operating rooms.
 
 **Participants.** 79,352 surgical procedures performed between January 2022 and May 2025.
 
-**Main outcome measures.** Case-level overtime (time past the assigned shift end), by room, weekday, shift, and urgency. Start-time deviation, duration-estimation accuracy, shift displacement, and unplanned urgent-case disruption of the elective programme as candidate contributing factors.
+**Main outcome measures.** Case-level overtime (time past the assigned shift end), by room, weekday, shift, and urgency. Start-time deviation, duration-estimation accuracy, and unplanned urgent-case disruption of the elective programme as candidate contributing factors.
 
 **Results.** 7,729 cases (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Overtime concentrated in a small number of rooms: OR10 ran overtime on 32.9% of its cases (mean 154 minutes), while OR14 ran overtime on 3.5%. Urgent cases ran after-hours at more than twice the elective rate (18.2% versus 8.3%). Unplanned urgent cases disrupted the elective programme on 68.8% of observation days, associated with a median difference of approximately 30 minutes in elective start times. First-case punctuality and inter-case idle time showed no consistent association with room-level overtime.
 
@@ -38,116 +38,151 @@ Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, Dieter Mesotten
 
 **What this study adds**
 
-- Within a single hospital, room-level overtime rates ranged from 3.5% to 32.9%, a ten-fold spread hidden by aggregate metrics.
-- Unplanned urgent-case disruption of the elective programme occurred on more than two-thirds of observation days and was associated with delayed elective start times.
-- First-case punctuality showed no consistent association with room-level overtime, suggesting it may not be an effective intervention target in all settings.
+- In a single-center retrospective analysis of 79,352 surgical cases, overtime concentrated in a small number of rooms, with a nearly ten-fold spread across the same hospital (3.5% to 32.9%). Case-mix complexity and unplanned urgent cases disrupting the elective programme were the factors most visibly associated with room-level overtime; first-case punctuality and inter-case idle time were not.
+
+**How this study might affect research, practice or policy**
+
+- Hospitals seeking to reduce overtime should monitor and target individual rooms rather than hospital-wide averages, and should treat urgent-case flow as a routine scheduling input rather than an exception. Linking these operational patterns to patient and staff outcomes is a necessary next step.
 
 ---
 
 ## INTRODUCTION
 
-Operating-room (OR) overtime can refer to several distinct phenomena: a procedure running longer than its estimated duration, a case finishing after its planned end time, or a case extending past a staffing-shift boundary and requiring a personnel handover during or after the procedure. These definitions capture different problems — planning accuracy, schedule adherence, and workforce exposure — and the choice of definition shapes what is measured and what intervention follows. In this study, we define overtime as a case whose room-out time falls after the end of its assigned staffing shift, because the nursing handover at each shift boundary is the operational event that makes overtime consequential. Overutilised time is approximately twice as expensive as underutilised time,[1] but overtime is more than a budget problem.
+Operating rooms are among the most resource-intensive units in a hospital, and their schedules rarely align with planned schedules. Overtime in this setting can refer to several distinct phenomena: an individual case running longer than its booked duration, an operating list ending after its scheduled close, or surgery continuing into a period when fewer staff are rostered. These are different operational events with different consequences. The glossary of Bauer et al. defines overtime as time spent operating beyond the end of the assigned shift.[18] We adopt this shift-based definition because the staffing change at each boundary is the operational event that gives overtime its meaning. Overutilized time is approximately twice as expensive as underutilized time,[1] but overtime is more than a budget problem.
 
-On the patient side, after-hours surgery carries elevated mortality. A meta-analysis reported an adjusted odds ratio of 1.16 (95% CI 1.06 to 1.28), based on low-certainty evidence.[2] A propensity-matched cohort of 281,717 South Korean patients reported a larger effect (odds ratio 3.58), although that estimate has been challenged on residual-confounding grounds.[3,4] Each intraoperative anaesthesia handover raises the odds of a major composite complication, with incidence rising from 8.8% at zero transitions to 21.2% at four or more.[5] At the study hospital, anaesthesiologists are not subject to shift-based handovers; they remain with the case until it is complete. The nursing team, however, changes at each shift boundary regardless of whether a procedure is in progress. A 2025 UK national patient-safety investigation reported that 22% of surveyed doctors experienced daily sleep deprivation and 35% said tiredness had impaired their ability to treat patients.[6] Overtime above a breakpoint threshold has been associated with a 2.09% increase in hospital-acquired pressure ulcers — skin injuries that develop during prolonged immobility — across 70 US hospitals.[7] In a multicentre cohort of more than 350,000 non-cardiac surgical cases, night surgery was associated with increased morbidity (adjusted odds ratio 1.41), mediated partly by higher blood-transfusion rates and provider handovers during the case.[8]
+After-hours surgery has been linked to elevated patient mortality. A meta-analysis reported an adjusted odds ratio of 1.16 (95% CI 1.06 to 1.28), based on low-certainty evidence.[7] A propensity-matched cohort of 281,717 South Korean patients reported a larger effect (odds ratio 3.58), although that estimate has been challenged on residual-confounding grounds.[8,9] In a multicenter cohort of more than 350,000 non-cardiac surgical cases, night surgery was associated with increased morbidity (adjusted odds ratio 1.41), mediated partly by higher transfusion rates and provider handovers during the case.[13] Each intraoperative anesthesia handover raises the odds of a major composite complication, with incidence rising from 8.8% at zero transitions to 21.2% at four or more.[10] A 2025 UK national patient-safety investigation reported that 22% of surveyed doctors experienced daily sleep deprivation and 35% said tiredness had impaired their ability to treat patients.[11] Overtime above a breakpoint threshold has been associated with a 2.09% increase in pressure ulcers across 70 US hospitals.[12]
 
-On the staff side, overtime and long shifts are associated with poorer perceived care quality and higher patient-safety risk in a 12-country European nurse workforce study.[9] The companion study linked 12-hour shifts to burnout and intent to leave.[10] Mandatory overtime was significantly associated with intent to leave in a 2024 cross-sectional study of 264 South Korean nurses.[11] Both long shifts and overtime are associated with worse performance and wellbeing,[12] and high workload combined with low decision latitude is an established burnout predictor.[13]
+The same exposure carries documented consequences for staff. A 12-country European nurse workforce study linked overtime and long shifts to poorer perceived quality of care and higher patient safety risk.[2] The companion study tied 12-hour shifts to burnout and intent to leave.[3] Mandatory overtime was associated with intent to leave in a 2024 cross-sectional study of 264 South Korean nurses.[4] Both long shifts and overtime are associated with worse performance and well-being[5] and the combination of high workload and low decision latitude is an established burnout predictor.[6]
 
-The severity of these consequences depends on what happens at the shift boundary. On weekdays, 25 rooms (18 surgical, 7 interventional) are staffed during the 08:00 to 16:30 day shift, with 2 to 3 nurses per room. At 16:30, capacity drops to 8 rooms. At 17:30, it drops to 4. Overnight, a single room remains staffed. At weekends the elective programme does not run, and the hospital staffs a reduced roster for urgent and emergency cases only. A case running past the shift boundary competes for a diminishing set of staffed rooms. The nursing team hands over at the boundary regardless of whether a procedure is in progress; surgeons and anaesthesiologists remain with the case until completion.
+The severity of these consequences depends on what happens at the shift boundary. In hospitals that step staffing down sharply at the end of the day shift, a case running past the boundary competes for a diminishing set of staffed rooms, often staffed by personnel different from those who started the case.
 
-Workflow disruptions in the OR cluster and escalate,[14] and a systematic review estimated that approximately 20% of operating time involves disruptions, although evidence for direct effects on patient outcomes remains mixed.[15] Prior work on OR overtime has largely treated it as an aggregate site-level number.[16,17] Whether overtime concentrates in specific rooms, and which operational factors are associated with it, has received less attention. Without that granularity, quality improvement efforts risk targeting the wrong intervention point.
+Prior work on OR overtime has largely treated it as an aggregate site-level number,[16,17] and OR workflow disruptions are known to cluster and escalate.[14,15] Whether overtime is concentrated in specific rooms within a single hospital, and which operational factors are associated with it, have received less attention. Without that granularity, quality improvement efforts risk targeting the wrong intervention point.
 
-This study is part of a broader quality-improvement effort at a Belgian tertiary hospital. The present analysis characterises scheduled-versus-observed performance from administrative data. We address two questions:
+This study is part of a broader effort at a Belgian tertiary hospital to improve OR performance. We analyze scheduled-versus-observed performance from administrative data and address two questions:
 
-1. How is overtime distributed across rooms and time within one tertiary hospital?
-2. Which operational factors — including duration overruns, shift displacement, unplanned urgent-case disruption of the elective programme, and first-case punctuality — are associated with overtime?
-
-The first question examines whether overtime is a diffuse hospital-wide problem or whether it concentrates in specific rooms. The second asks which candidate mechanisms identified in the literature are visible in our data, to inform where interventions should be directed.
+1. How is overtime distributed across rooms and time within one tertiary hospital? This examines whether overtime is a diffuse, hospital-wide problem or concentrated in specific rooms, since the appropriate intervention point depends on its distribution.
+2. Which operational factors (duration overruns, urgent-elective interaction, and first-case punctuality) are associated with overtime? This tests which candidate factors identified in the literature are visible in our data, to inform where scheduling interventions should be directed.
 
 ## METHODS
 
-### Setting
+### Setting and data
 
-The study hospital is a 24/7 tertiary centre in Belgium performing more than 22,000 surgical procedures per year. It operates 18 surgical theatres and 7 interventional theatres. The surgical staff includes 195 surgeons and 207 anaesthesiologists (including trainees and fellows), covering all surgery except congenital cardiac and organ transplantation. During the day shift, 2 to 3 nurses staff each room. At 16:30, the number of staffed rooms drops from 25 to 8; at 17:30, to 4; overnight, a single room remains staffed.
+The study hospital is a 24/7 tertiary center in Belgium performing more than 22,000 surgical procedures per year. It operates 18 surgical operating rooms and 7 interventional operating rooms. The surgical staff includes 195 surgeons and 207 anesthesiologists (including trainees and fellows), covering all surgical specialties except congenital cardiac surgery and organ transplantation. Nursing staffing runs 2 to 3 per room during the 08:00 to 16:30 day shift; at 16:30 the number of staffed rooms drops to 8, at 17:30 to 4, and overnight a single room remains staffed.
 
-### Data and inclusion
+We used administrative OR data from 1 January 2022 to 31 May 2025, covering 79,352 cases in the 18 surgical operating rooms, 60,895 unique patients, and 1,276 distinct procedure types. The admission mix was 42.3% ambulatory and 57.7% inpatient (this classification reflects the admission pathway and is distinct from the elective versus non-elective urgency split reported below). Room-in and room-out times are the only time markers confirmed as reliable by the hospital's clinical team; all timing analyses use these two time points. Following the glossary of Bauer et al.,[18] the extracted variables include planned and observed duration, planning deviation, start-time deviation, overtime flag and overtime minutes, room-swap flag, urgency (elective versus non-elective), and shift label.
 
-We used administrative OR data from 1 January 2022 to 31 May 2025, covering 79,352 cases in the 18 surgical operating rooms, involving 60,895 unique patients and 1,276 distinct procedure types. By admission type, 42.3% of cases were ambulatory and 57.7% inpatient (this classification reflects the admission pathway and does not correspond to the elective/non-elective urgency split reported below). The urgency mix was 85.4% elective and 14.6% non-elective. Annual volume grew from 22,133 cases in 2022 to 23,738 in 2024, with 9,906 recorded through May 2025. Room-in and room-out times are the only time markers confirmed as reliable by the hospital's clinical team; all timing analyses use these two time points.
+### Overtime definition and analyses
 
-### Definitions
-
-Each case was assigned to a shift based on its actual room-in time: day (08:00 to 16:30), evening (16:30 to 22:00), or night (22:00 to 08:00). A case was flagged as overtime if its room-out fell after the end of its assigned shift. Overtime minutes equal the positive difference between room-out and shift end. This operationalises the conceptual definition stated in the Introduction and aligns with the framework in Bauer et al.[18]
-
-### Variables
-
-We followed the glossary of Bauer et al.[18] Variable definitions include planned and observed duration, planning deviation, start-time deviation, overtime flag and minutes, room-swap flag, urgency (elective versus non-elective), and shift label. We chose room-level overtime as the primary metric rather than aggregate utilisation, which can mask room-level operational problems.[16,19]
-
-### Analyses
+Each case was assigned to a shift based on its actual room-in time: day (08:00 to 16:30), evening (16:30 to 22:00), or night (22:00 to 08:00). A case was flagged as overtime if its room-out fell after the end of its assigned shift; overtime minutes equal the positive difference between room-out and shift end. We chose this shift-based definition because the staffing change at each boundary is the operational event that makes overtime consequential at this site, and because it aligns with Bauer et al.[18] Room-level overtime, rather than aggregate utilization, was used as the primary metric, since aggregate measures can mask room-level operational problems.[16,19]
 
 All analyses are descriptive; we did not fit causal or inferential models. For RQ1, we computed overtime rate, mean, median, and 95th percentile, stratified by room, weekday, year, and shift. For RQ2, we examined duration deviation by planned-duration bucket using coefficients of variation,[20,21] urgency mix and timing, urgent-elective interaction (defined and reported in Results), first-case start-time deviation per room, inter-case idle time, and room swaps. We also computed Spearman rank correlations across the 18 rooms between room-level overtime rate and two candidate factors: first-case late-start rate and mean inter-case idle time. Intermediate findings were reviewed with the clinical team and used to refine variable definitions and exclusions. The study is reported in accordance with the STROBE guidelines for observational studies.
 
 ### Ethics
 
-This study used fully anonymised administrative data with institutional approval. No patient interaction occurred.
+This study used fully de-identified administrative data with institutional approval. No patient interaction occurred.
+
+### Patient and public involvement
+
+Given the retrospective use of fully de-identified administrative data, no patient or public involvement in the design, conduct, or reporting of this study was applicable.
 
 ## RESULTS
 
+### Sample overview
+
+The cohort comprised 79,352 cases across 18 surgical operating rooms, involving 60,895 unique patients, 195 surgeons, and 207 anesthesiologists, and included 1,276 distinct procedure types. Weekday volume was evenly distributed (17.9 to 20.0% Monday through Friday); weekends accounted for 1.8 to 2.1%. Year-on-year volume grew from 22,133 in 2022 to 23,738 in 2024, with 9,906 recorded through May 2025. The urgency mix was 85.4% elective and 14.6% non-elective.
+
 ### Overtime burden and room-level concentration (RQ1)
 
-Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among overtime cases, the mean was 60.3 minutes, the median 39, and the 95th percentile 197 (Table 1). Weekday rates were similar (8.8 to 9.9%) but roughly 1.7 times higher on weekends (Saturday 16.8%, Sunday 15.5%), when the elective programme does not run and volume is almost entirely urgent or emergency surgery. The year-on-year trend showed gradual improvement: 10.0% in 2022, 10.0% in 2023, 9.7% in 2024, and 8.6% in the partial 2025 data.
+Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among overtime cases, the mean was 60.3 minutes, the median was 39 minutes, and the 95th percentile was 197 minutes (Table 1A). Weekday rates were similar (8.8 to 9.9%) but roughly 1.7 times higher on weekends (Saturday 16.8%, Sunday 15.5%), when the elective programme does not run and volume is almost entirely urgent or emergency surgery. The year-on-year trend showed gradual improvement: 10.0% in 2022, 10.0% in 2023, 9.7% in 2024, and 8.6% in the partial 2025 data (Table 1B).
 
-**[Table 1. Overtime summary by weekday and calendar year. A single table with two strata — weekday (Monday-Sunday) and calendar year (2022-2025) — reporting cases, overtime count, overtime rate, and mean overtime minutes, with an overall total row.]**
+**Table 1A. Overtime by weekday.**
 
-Room-level overtime rates ranged from 3.5% to 32.9% across the 18 rooms (Figure 1). OR10, which handles complex cardiac surgery (CABG, aortic valve replacement, mitral valve repair), ran overtime on 32.9% of its 1,743 cases, with a mean of 154 minutes and a 95th percentile of 328 minutes. A second tier (OR08 through OR13) clustered at 11 to 16%. At the other end, OR14 ran 3.5% across 6,885 cases and OR01 ran 5.8% across 6,577. The within-hospital spread (nearly ten-fold) exceeded the between-campus spread across the hospital network (0.5 to 9.7%).
+| Day | n cases | n overtime | OT rate (%) | Mean OT (min) |
+|-----|--------:|-----------:|------------:|--------------:|
+| Monday | 14,232 | 1,395 | 9.8 | 58.5 |
+| Tuesday | 14,750 | 1,416 | 9.6 | 60.1 |
+| Wednesday | 15,814 | 1,502 | 9.5 | 59.7 |
+| Thursday | 15,844 | 1,394 | 8.8 | 60.5 |
+| Friday | 15,615 | 1,546 | 9.9 | 62.4 |
+| Saturday | 1,654 | 278 | 16.8 | 63.4 |
+| Sunday | 1,443 | 224 | 15.5 | 59.1 |
+| **Total** | **79,352** | **7,729** | **9.7** | **60.3** |
+
+**Table 1B. Overtime trend by year.** (*2025 partial, January–May.)
+
+| Year | OT rate (%) | Mean OT (min) | Median OT (min) |
+|------|------------:|--------------:|----------------:|
+| 2022 | 10.0 | 61.8 | 40 |
+| 2023 | 10.0 | 58.8 | 38 |
+| 2024 | 9.7 | 61.3 | 39 |
+| 2025* | 8.6 | 58.2 | 37 |
+
+Room-level overtime rates ranged from 3.5% to 32.9% across the 18 rooms (Figure 1). OR10, which handles complex cardiac surgery (CABG, aortic valve replacement, mitral valve repair), ran overtime on 32.9% of its 1,743 cases, with a mean of 154 minutes and a 95th percentile of 328 minutes. A second tier (OR08 through OR13) clustered at 11–16%. At the other end, OR14 ran 3.5% across 6,885 cases, and OR01 ran 5.8% across 6,577. Rates therefore spanned nearly an order of magnitude across rooms in the same hospital.
 
 [Insert Figure 1 about here]
 
-Most overtime cases ended shortly after the shift boundary. The majority of completions fell in the 16:30 to 17:30 window, when staffing had dropped from 25 to 8 rooms. The distribution decayed through the evening, with a thin tail past 22:00 (Supplementary Figure S1).
+Most overtime cases ended shortly after the shift boundary. The majority of completions fell in the 16:30 to 17:30 window, right after the day-shift handover when most of the rooms had already closed. The distribution decayed through the evening, with a thin tail past 22:00 (Supplementary Figure S1).
 
 ### Contributing factors (RQ2)
 
-*Planning accuracy.* Across all 79,352 cases (not only those with overtime), 45.7% ran longer than planned and 54.3% ran shorter. The mean overrun was 22.6 minutes (median 14); the mean underrun was 21.2 minutes (median 12). On average, the planning system was roughly unbiased. The problem was dispersion. The coefficient of variation of observed duration was lowest for mid-length cases (0.35 to 0.36 for 61 to 180 minutes), moderate for short cases (0.61 for under 30 minutes), and intermediate for very long cases (0.42 for over 180 minutes). Planning-deviation CV was more extreme: the over-180-minute bucket had a CV of 1.86, meaning the standard deviation of the planning error was nearly twice the mean — an indication that duration estimates for the longest cases are unreliable (Supplementary Table S1). The procedures with the largest absolute deviations — complex cardiac and oncology cases — were concentrated in the rooms with the highest overtime.
+*Planning accuracy.* Of all cases (not only those with overtime), 45.7% ran longer than planned and 54.3% ran shorter. The mean overrun was 22.6 minutes (median 14); the mean underrun was 21.2 minutes (median 12). On average, the planning system was roughly unbiased. The problem was dispersion. The coefficient of variation of observed duration was lowest for mid-length cases (0.35 to 0.36 for 61 to 180 minutes), moderate for short cases (0.61 for under 30 minutes), and intermediate for very long cases (0.42 for over 180 minutes). Planning-deviation CV was more extreme: the over-180-minute bucket had a CV of 1.86, meaning the standard deviation of the planning error was nearly twice the mean. The procedures with the largest absolute deviations (complex cardiac and oncology cases) were concentrated in the rooms with the highest overtime.
 
-*Shift displacement.* A total of 4,151 cases (5.2%) were performed in a different shift than originally planned. These cases started on average 398 minutes later than planned (roughly six and a half hours) and took 22.3 minutes less than planned. Whether displacement contributed to overtime or resulted from it cannot be determined from these data.
+*Urgent-elective interaction.* Urgent cases accounted for 14.6% of the volume (11,616 of 79,352). Per case, urgent surgery ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%, Table 2A), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of overtime minutes was still dominated by the elective program.
 
-*Urgent-elective interaction.* Urgent cases accounted for 14.6% of the volume (11,616 of 79,352). Per case, urgent surgery ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%, Table 2A), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of overtime minutes was still dominated by the elective programme.
+To assess whether urgent cases disrupt the elective program, we counted days on which an urgent case ran in a room while an elective case had been planned in the same room over an overlapping time window (urgent case's actual room and room-in to room-out interval matched the elective case's planned room and planned start-to-end interval). Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 2B). On days with overlap, elective cases started later than on days without, a median difference of approximately 30 minutes, a gap that reached 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases.
 
-To assess whether urgent cases disrupt the elective programme, we counted days on which an urgent case ran in a room while an elective case had been planned in the same room over an overlapping time window (urgent case's actual room and room-in to room-out interval matched the elective case's planned room and planned start-to-end interval). Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 2B). On days with overlap, elective cases started later than on days without, a median difference of approximately 30 minutes, a gap that reached 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases (Supplementary Table S2).
+**Table 2A. Volume and overtime by urgency.**
 
-**[Table 2. Urgent versus elective overtime and urgent-case disruption. Panel A: volume, after-hours rate, mean overtime, and P95 overtime by urgency. Panel B: disruption frequency (858/1,247 days = 68.8%), mean start-delay effect (+30 min), and OR11 burden.]**
+| Urgency | n | Share | After-hours n | After-hours rate | Mean OT (min) | P95 OT (min) |
+|---------|------:|------:|--------------:|-----------------:|--------------:|-------------:|
+| Elective | 67,736 | 85.4% | 5,620 | 8.3% | 5 | 29 |
+| Non-elective | 11,616 | 14.6% | 2,109 | 18.2% | 10.7 | 69 |
+| **Total** | **79,352** | **100%** | **7,729** | **9.7%** | – | – |
 
-*First-case punctuality.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate (14.8% versus 9.7%), but whether swaps contribute to or result from overtime cannot be determined.
+**Table 2B. Urgent–elective overlap in the same room.**
 
-Across all 18 rooms, late-start rate showed no significant correlation with room-level overtime rate (Spearman rho = −0.29, p = 0.24). The direction of the association was negative: rooms with higher late-start rates tended to have lower overtime rates rather than higher ones. OR10 had the lowest late-start rate of all 18 rooms (46.1%) yet the highest overtime rate (32.9%); OR14 had a late-start rate of 78.7% yet the lowest overtime rate (3.5%); OR11 had the highest late-start rate (82.4%) with a mid-range overtime rate (11.7%). This is consistent with Pandit et al., who reported R-squared values of 0.04 to 0.08 between start and finish times across more than 7,000 operating room lists.[23] First-case punctuality was therefore not associated with where overtime accumulates at the room level.
+| Metric | Value |
+|--------|-------|
+| Days with at least one urgent–elective overlap | 858 of 1,247 (68.8%) |
+| Highest-burden room (OR11) | 475 events; 15.2% of OR11 elective cases |
+| Median start delay at OR11 (no overlap) | 28 min |
+| Median start delay at OR11 (overlap) | 60 min |
+
+*First-case punctuality.* Across all 18 rooms, late-start rate showed no significant correlation with room-level overtime rate (Spearman rho = −0.29, p = 0.24). The direction of the association was negative: rooms with higher late-start rates tended to have lower overtime rates rather than higher ones. OR10 had the lowest late-start rate of all 18 rooms (46.1%) yet the highest overtime rate (32.9%); OR14 had a late-start rate of 78.7% yet the lowest overtime rate (3.5%); OR11 had the highest late-start rate (82.4%) with a mid-range overtime rate (11.7%). This is consistent with Pandit et al., who reported R-squared values of 0.04 to 0.08 between start and finish times across more than 7,000 operating room lists.[23] First-case punctuality was therefore not associated with where overtime accumulates at the room level.
 
 *Inter-case idle time.* Across all 18 rooms, inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes.[22] At the room level, mean idle time was positively correlated with overtime rate (Spearman rho = 0.89, p < 0.001), driven largely by OR10, which had both the highest mean idle time (22.6 minutes) and the highest overtime rate (32.9%). Excluding OR10, the pattern did not hold consistently across the remaining rooms. The elevated idle time in OR10 most plausibly reflects preparation demands between complex cardiac cases rather than inefficient turnover, and is better understood as a marker of case-mix complexity than as a scheduling inefficiency. Inter-case turnover was therefore not identified as an independent contributor to room-level overtime.
 
+*Room swaps.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate (14.8% versus 9.7%), but whether swaps contribute to or result from overtime cannot be determined.
+
 ## DISCUSSION
+
+In this single-center analysis of 79,352 cases, overtime was not a diffuse hospital-wide phenomenon. The aggregate rate (9.7%) hid a near ten-fold spread across rooms (3.5 to 32.9%). The factors most visibly associated with the room-level pattern were case-mix complexity and routine urgent-elective overlap; first-case punctuality and inter-case idle time were not.
 
 ### Concentration, not prevalence
 
-A hospital-wide overtime rate of 9.7% is unremarkable. The distribution, however, is strikingly uneven. OR10 ran overtime in one of every three cases; OR14, in the same hospital, ran 3.5%. The ten-fold within-hospital spread was wider than the between-campus spread across the hospital network (0.5 to 9.7%). Hospital-wide targets such as "reduce overtime by 10%" will not reach the problem unless decomposed by room. Zhang, Dunstan, and Pandit made the same point: aggregate metrics hide room-level operational reality.[16] Valid room-level metrics are a prerequisite for quality improvement.[24]
+A 9.7% hospital-wide overtime rate is unremarkable on its own. The distribution, however, is uneven: OR10 ran overtime in roughly one of every three cases, while OR14 ran 3.5%. Hospital-wide targets such as "reduce overtime by 10%" will not reach the problem unless decomposed by room. Zhang, Dunstan and Pandit made the same point: aggregate metrics hide room-level operational reality.[16] Valid room-level metrics are a prerequisite for quality improvement.[24]
 
 ### Factors associated with overtime
 
-The procedures with the largest planning deviations and the highest planned durations — complex cardiac and oncology cases — clustered in the rooms with the highest overtime. This concentration suggests that case-mix complexity, rather than scheduling inefficiency alone, explains much of the room-level variation. Wachtel and Dexter showed in a large operational dataset that delay grows as duration uncertainty accumulates through the day,[26] and Fugener et al. documented systematic biases in surgeons' duration estimates that compound across a list.[27] Both observations are consistent with the room-level pattern we describe, although our data cannot test the cumulative-delay account directly.
+The procedures with the largest planning deviations and the highest planned durations (complex cardiac and oncology cases) clustered in the rooms with the highest overtime. This concentration suggests that case-mix complexity, rather than scheduling inefficiency alone, accounts for much of the room-level variation. Wachtel and Dexter described, in a large operational dataset, how tardiness grows as duration uncertainty accumulates through the day,[26] and Fugener et al. documented systematic biases in surgeons' duration estimates that compound across a list.[27] Both observations are consistent with the room-level pattern we describe, although our data cannot test the cumulative-delay account directly.
 
-Urgent-elective overlap occurred on more than two-thirds of observation days and was associated with a median difference of approximately 30 minutes in elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. The hospital already operates dedicated rooms for urgent cases, yet this overlap still occurs, suggesting that protecting the elective programme may require additional scheduling buffers or capacity reallocation rather than reactive rescheduling alone.
+Urgent-elective overlap occurred on more than two-thirds of observation days and was associated with a median difference of approximately 30 minutes in elective start times. This makes urgent arrivals a routine scheduling factor rather than an exception. The hospital already operates dedicated rooms for urgent cases, yet this overlap still occurs, so protecting the elective program may require additional scheduling buffers or capacity reallocation rather than reactive rescheduling alone.
 
 A common assumption is that first-case-on-time-start (FCOTS) drives end-of-day performance, with each minute of tardiness carrying a marginal cost.[25] At the room level, our data do not show that relationship: late-start rate and overtime rate were not significantly correlated (Spearman rho = −0.29, p = 0.24), and the room with the lowest late-start rate (OR10, 46.1%) had the highest overtime (32.9%), while a room with one of the highest late-start rates (OR14, 78.7%) had the lowest overtime (3.5%). Pandit et al. reported a similar disconnect across more than 7,000 operating room lists.[23] We do not conclude that FCOTS is unimportant; it remains a reasonable discipline marker. In this dataset, however, it does not predict where overtime accumulates.
 
 ### Implications
 
-*Operational implication.* Room-level monitoring should take precedence over hospital-wide overtime targets, and scheduling should treat urgent-case flow as a routine planning input rather than an exception. At a hospital where 25 staffed rooms drop to 8, then 4, then 1, each case past the shift boundary lands in a setting with fewer staff and more handovers; decomposing aggregate metrics into per-room overtime rates is a practical first step toward identifying where interventions would have the greatest effect.
+*Operational implication.* Room-level monitoring should take precedence over hospital-wide overtime targets, and scheduling should treat urgent-case flow as a routine planning input rather than an exception.
 
-*Clinical implication.* The overtime documented here is operationally comparable to the exposure that other studies have linked to staff fatigue, elevated after-hours mortality, and increased complication risk.[2–13] Whether these harms are present in this cohort cannot be determined from administrative data alone; direct measurement of patient and staff outcomes associated with room-level overtime remains an important next step for future research.
+*Clinical implication.* The overtime documented here is operationally comparable to the exposure that other studies have linked to staff fatigue, elevated after-hours mortality, and increased complication risk (references 2–13). Whether these harms are present in this cohort cannot be determined from administrative data alone; direct measurement of patient and staff outcomes associated with room-level overtime remains an important next step for future research.
 
 ### Limitations
 
-This study has several limitations. It is a single-site retrospective analysis, so whether the concentration pattern holds in hospitals with different staffing models is unknown. We do not measure patient or staff outcomes directly; the harm argument rests on published literature, not on complications or burnout scores from this cohort. OR10 handles complex cardiac surgery, and its high overtime may partly reflect irreducible procedural duration rather than schedulable inefficiency; we describe this but cannot adjust for it without procedure-level risk scores. The link between after-hours surgery and patient harm rests on observational mortality studies whose effect sizes range widely (adjusted odds ratio 1.16[2] to 3.58[3]) and whose estimates have been questioned on residual-confounding grounds.[4] Readers should weigh the after-hours mortality evidence with this uncertainty in mind.
+This study has several limitations. It is a single-site retrospective analysis, so it is unknown whether the concentration pattern holds across hospitals with different staffing models. The administrative data provide only room-in and room-out times, so we cannot infer what happens inside the case. We do not measure patient or staff outcomes directly; the harm argument rests on published literature, not on complications or burnout scores from this cohort. OR10 handles complex cardiac surgery, and its high overtime may partly reflect irreducible procedural duration rather than schedulable inefficiency; we describe this but cannot adjust for it without procedure-level risk scores. The link between after-hours surgery and patient harm rests on observational mortality studies whose effect sizes vary widely (adjusted odds ratios of 1.16[7] to 3.58[8]) and whose estimates have been questioned on residual-confounding grounds.[9] Readers should weigh the after-hours mortality evidence with this uncertainty in mind.
 
 ## CONCLUSION
 
-Operating-room overtime at this tertiary hospital concentrated in a small number of rooms, with case-mix complexity and unplanned urgent-case disruption of the elective programme as the most visible associated factors. First-case punctuality showed no significant correlation with room-level overtime (Spearman rho = −0.29, p = 0.24), and the association between inter-case idle time and overtime was driven by a single high-complexity room. The findings support room-level rather than hospital-level overtime monitoring and scheduling interventions that account for urgent-case flow.
+Operating-room overtime at this tertiary hospital concentrated in a small number of rooms, with case-mix complexity and unplanned urgent-case disruption of the elective programme as the most strongly associated factors. First-case punctuality and inter-case idle time were not associated with room-level overtime. The findings support room-level rather than hospital-level overtime monitoring and scheduling interventions that account for urgent-case flow.
 
 ---
 
@@ -165,29 +200,25 @@ None declared.
 
 ## DATA AVAILABILITY
 
-The dataset contains anonymised administrative hospital data. Requests for access should be directed to the hospital's research office.
-
-## PATIENT AND PUBLIC INVOLVEMENT
-
-Given the retrospective use of fully anonymised administrative data, no patient or public involvement in the design, conduct, or reporting of this study was applicable.
+The dataset contains de-identified administrative hospital data. Requests for access should be directed to the hospital's research office.
 
 ---
 
 ## REFERENCES
 
 1. Wachtel RE, Dexter F. Review of behavioral operations experimental studies of newsvendor problems for operating room management. *Anesth Analg* 2010;110(6):1698-1710.
-2. Cortegiani A, Ippolito M, Misseri G, et al. Association between night/after-hours surgery and mortality: a systematic review and meta-analysis. *Br J Anaesth* 2020;124(5):623-37.
-3. Oh T-K, Song I-A. Outcomes of after-hours surgeries performed under general anaesthesia: a South Korean nationwide cohort study. *Anaesthesia* 2025. DOI: 10.1111/anae.16559.
-4. Sakurai T. Assessing the influence of after-hours surgery: concerns with the confounders and conclusion. *Anaesthesia* 2025. DOI: 10.1111/anae.16591.
-5. Saager L, Hesler BD, You J, et al. Intraoperative transitions of anesthesia care and postoperative adverse outcomes. *Anesthesiology* 2014;121(4):695-706.
-6. Health Services Safety Investigations Body (HSSIB). The impact of staff fatigue on patient safety. Investigation report. London: HSSIB, 2025.
-7. Pittman P, Tiunn H-L, et al. Increased utilization of overtime and agency nurses and patient safety. *JAMA Netw Open* 2025. PMID: 40172888.
-8. Althoff FC, Wachtendorf LJ, Rostin P, et al. Effects of night surgery on postoperative mortality and morbidity: a multicentre cohort study. *BMJ Qual Saf* 2021;30(8):678-688.
-9. Griffiths P, Dall'Ora C, Simon M, et al. Nurses' shift length and overtime working in 12 European countries: the association with perceived quality of care and patient safety. *Med Care* 2014;52(11):975-81.
-10. Dall'Ora C, Griffiths P, Ball J, et al. Association of 12 h shifts and nurses' job satisfaction, burnout and intention to leave: findings from a cross-sectional study of 12 European countries. *BMJ Open* 2015;5(9):e008331.
-11. Bae S-H. Nurse staffing, work hours, mandatory overtime, and turnover in acute care hospitals affect nurse job satisfaction, intent to leave, and burnout: a cross-sectional study. *Int J Public Health* 2024;69:1607068.
-12. Dall'Ora C, Ball J, Recio-Saucedo A, Griffiths P. Characteristics of shift work and their impact on employee performance and wellbeing: a literature review. *Int J Nurs Stud* 2016;57:12-27.
-13. Dall'Ora C, Ball J, Reinius M, Griffiths P. Burnout in nursing: a theoretical review. *Hum Resour Health* 2020;18:41.
+2. Griffiths P, Dall'Ora C, Simon M, et al. Nurses' shift length and overtime working in 12 European countries: the association with perceived quality of care and patient safety. *Med Care* 2014;52(11):975-81.
+3. Dall'Ora C, Griffiths P, Ball J, et al. Association of 12 h shifts and nurses' job satisfaction, burnout and intention to leave: findings from a cross-sectional study of 12 European countries. *BMJ Open* 2015;5(9):e008331.
+4. Bae S-H. Nurse staffing, work hours, mandatory overtime, and turnover in acute care hospitals affect nurse job satisfaction, intent to leave, and burnout: a cross-sectional study. *Int J Public Health* 2024;69:1607068.
+5. Dall'Ora C, Ball J, Recio-Saucedo A, Griffiths P. Characteristics of shift work and their impact on employee performance and wellbeing: a literature review. *Int J Nurs Stud* 2016;57:12-27.
+6. Dall'Ora C, Ball J, Reinius M, Griffiths P. Burnout in nursing: a theoretical review. *Hum Resour Health* 2020;18:41.
+7. Cortegiani A, Ippolito M, Misseri G, et al. Association between night/after-hours surgery and mortality: a systematic review and meta-analysis. *Br J Anaesth* 2020;124(5):623-37.
+8. Oh T-K, Song I-A. Outcomes of after-hours surgeries performed under general anaesthesia: a South Korean nationwide cohort study. *Anaesthesia* 2025. DOI: 10.1111/anae.16559.
+9. Sakurai T. Assessing the influence of after-hours surgery: concerns with the confounders and conclusion. *Anaesthesia* 2025. DOI: 10.1111/anae.16591.
+10. Saager L, Hesler BD, You J, et al. Intraoperative transitions of anesthesia care and postoperative adverse outcomes. *Anesthesiology* 2014;121(4):695-706.
+11. Health Services Safety Investigations Body (HSSIB). The impact of staff fatigue on patient safety. Investigation report. London: HSSIB, 2025.
+12. Pittman P, Tiunn H-L, et al. Increased utilization of overtime and agency nurses and patient safety. *JAMA Netw Open* 2025. PMID: 40172888.
+13. Althoff FC, Wachtendorf LJ, Rostin P, et al. Effects of night surgery on postoperative mortality and morbidity: a multicentre cohort study. *BMJ Qual Saf* 2021;30(8):678-688.
 14. Joseph A, Khoshkenar A, Taaffe KM, et al. Minor flow disruptions, traffic-related factors and their effect on major flow disruptions in the operating room. *BMJ Qual Saf* 2019;28(4):276-83.
 15. Koch A, Burns J, Catchpole K, Weigl M. Associations of workflow disruptions in the operating room with surgical outcomes: a systematic review and narrative synthesis. *BMJ Qual Saf* 2020;29(12):1033-1045.
 16. Zhang C, Dunstan C, Pandit JJ. A tutorial on "capped utilisation" as a metric and key performance target in NHS England's Model Hospital operating theatres database: caution for international healthcare systems. *Anesthesiol Perioper Sci* 2024. DOI: 10.1007/s44254-024-00073-3.
@@ -207,4 +238,4 @@ Given the retrospective use of fully anonymised administrative data, no patient 
 
 ## FIGURE LEGENDS
 
-**Figure 1.** Room-level overtime concentration. Horizontal bar chart with one bar per operating room, ordered descending by overtime rate. A secondary panel shows mean overtime minutes per room. OR10 (32.9%) and OR14 (3.5%) anchor the extremes. Overall: 7,729 of 79,352 cases (9.7%), mean 60.3 min, median 39 min, P95 197 min.
+**Figure 1.** Room-level overtime concentration. Panel A: percentage of cases with overtime per operating room, ordered ascending. Panel B: mean overtime duration per room (minutes), with the hospital-wide average marked for reference. Overall: 7,729 of 79,352 cases (9.7%), mean 60.3 min, median 39 min, P95 197 min.
