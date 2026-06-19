@@ -1,10 +1,8 @@
 # Where does operating-room overtime come from? A retrospective single-center study
 
-Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, and Dieter Mesotten
+[Authors and affiliations removed for blinded review]
 
-[Affiliations to be completed]
-
-**Correspondence:** [corresponding author details]
+**Correspondence:** [removed for blinded review]
 
 **Word count:** ~2,900 (body text; target journal allows up to 4,000 for original research)
 
@@ -18,7 +16,7 @@ Maxim Riebus, Haroon Tharwat, Niels Martin, Ben Van Bylen, and Dieter Mesotten
 
 **Objective.** To characterize operating-room overtime within a high-volume tertiary hospital: its distribution across rooms and the operational factors associated with it.
 
-**Design and setting.** Retrospective observational study of administrative operating-room data at a 24/7 tertiary hospital in Belgium operating 18 surgical operating rooms.
+**Design and setting.** Retrospective observational study of administrative operating-room data at a 24/7 tertiary hospital in [country] operating 18 surgical operating rooms.
 
 **Participants.** 79,352 surgical procedures performed between January 2022 and May 2025.
 
@@ -58,7 +56,7 @@ The severity of these consequences depends on what happens at the shift boundary
 
 Prior work on OR overtime has largely treated it as an aggregate site-level number,[16,17] and OR workflow disruptions are known to cluster and escalate.[14,15] Whether overtime is concentrated in specific rooms within a single hospital, and which operational factors are associated with it, have received less attention. Without that granularity, quality improvement efforts risk targeting the wrong intervention point.
 
-This study is part of a broader effort at a Belgian tertiary hospital to improve OR performance. We analyze scheduled-versus-observed performance from administrative data and address two questions:
+This study is part of a broader effort at a tertiary hospital to improve OR performance. We analyze scheduled-versus-observed performance from administrative data and address two questions:
 
 1. How is overtime distributed across rooms and time within one tertiary hospital? This examines whether overtime is a diffuse, hospital-wide problem or concentrated in specific rooms, since the appropriate intervention point depends on its distribution.
 2. Which operational factors (duration overruns, urgent-elective interaction, and start-time punctuality) are associated with overtime? This tests which candidate factors identified in the literature are visible in our data, to inform where scheduling interventions should be directed.
@@ -67,9 +65,9 @@ This study is part of a broader effort at a Belgian tertiary hospital to improve
 
 ### Setting and data
 
-The study hospital is a 24/7 tertiary center in Belgium performing more than 22,000 surgical procedures per year. It operates 18 surgical operating rooms and 7 interventional operating rooms. The surgical staff includes 195 surgeons and 207 anesthesiologists (including trainees and fellows), covering all surgical specialties except congenital cardiac surgery and organ transplantation. During the 08:00 to 16:30 day shift, each room is staffed with 2 to 3 nurses; at 16:30 the hospital reduces to 8 staffed rooms, at 17:30 to 4, and overnight to a single room.
+The study hospital is a 24/7 tertiary center in [country] performing more than 22,000 surgical procedures per year. It operates 18 surgical operating rooms and 7 interventional operating rooms. The surgical staff includes 195 surgeons and 207 anesthesiologists (including trainees and fellows), covering all surgical specialties except congenital cardiac surgery and organ transplantation. During the 08:00 to 16:30 day shift, each room is staffed with 2 to 3 nurses; at 16:30 the hospital reduces to 8 staffed rooms, at 17:30 to 4, and overnight to a single room.
 
-We used administrative OR data from 1 January 2022 to 31 May 2025 from the 18 surgical operating rooms. Endoscopy suites and catheterization laboratory cases without an anesthesiologist present were excluded. Cases with implausible timestamps (zero observed duration, planned duration exceeding 24 hours, or extreme deviations from the planned schedule) were also removed. The final cohort comprised 79,352 cases involving 60,895 unique patients and 1,276 distinct procedure types. The admission mix was 42.3% ambulatory and 57.7% inpatient (ambulatory patients are discharged on the day of surgery; inpatient patients are admitted overnight). Room-in and room-out times are the only procedural time markers confirmed as reliable by the hospital's clinical team; all timing analyses use these two time points. The administrative system also records planned duration, urgency (non-elective cases were those scheduled or performed within 24 hours of booking; all others were classified as elective), and room assignment. From these inputs, and following the glossary of Bauer et al.,[18] we derived observed duration, planning deviation, start-time deviation, overtime flag and overtime minutes, room-swap flag, and shift label.
+We used administrative OR data from 1 January 2022 to 31 May 2025 from the 18 surgical operating rooms. Endoscopy suites and catheterization laboratory cases without an anesthesiologist present were excluded. Cases with implausible timestamps (zero observed duration, planned duration exceeding 24 hours, or extreme deviations from the planned schedule) were also removed. The final cohort comprised 79,352 cases involving 60,895 unique patients and 1,276 distinct procedure types. The admission mix was 42.3% ambulatory and 57.7% inpatient (ambulatory patients are discharged on the day of surgery; inpatient patients are admitted overnight). Room-in and room-out times are the only procedural time markers confirmed as reliable by the hospital's clinical team; all timing analyses use these two time points. The administrative system also records planned duration, urgency (cases scheduled or performed within 24 hours of booking were classified as non-elective, hereafter referred to as urgent; all others were classified as elective), and room assignment. From these inputs, and following the glossary of Bauer et al.,[18] we derived observed duration, planning deviation, start-time deviation, overtime flag and overtime minutes, room-swap flag, and shift label.
 
 ### Overtime definition and analyses
 
@@ -89,7 +87,7 @@ Given the retrospective use of fully de-identified administrative data, no patie
 
 ### Sample overview
 
-The cohort comprised 79,352 cases across 18 surgical operating rooms, involving 60,895 unique patients, 195 surgeons, and 207 anesthesiologists, and included 1,276 distinct procedure types. Weekday volume was evenly distributed (17.9 to 20.0% Monday through Friday); weekends accounted for 1.8 to 2.1%. Year-on-year volume grew from 22,133 in 2022 to 23,738 in 2024, with 9,906 recorded through May 2025. The urgency mix was 85.4% elective and 14.6% non-elective.
+The cohort comprised 79,352 cases across 18 surgical operating rooms, involving 60,895 unique patients, 195 surgeons, and 207 anesthesiologists, and included 1,276 distinct procedure types. Weekday volume was evenly distributed (17.9 to 20.0% Monday through Friday); weekends accounted for 1.8 to 2.1%. Year-on-year volume grew from 22,133 in 2022 to 23,738 in 2024, with 9,906 recorded through May 2025. The urgency mix was 85.4% elective and 14.6% urgent (non-elective).
 
 ### Overtime burden and room-level concentration (RQ1)
 
@@ -138,7 +136,7 @@ To assess whether urgent cases disrupt the elective program, we counted days on 
 | Urgency | n | Share | After-hours n | After-hours rate | Mean OT (min) | P95 OT (min) |
 |---------|------:|------:|--------------:|-----------------:|--------------:|-------------:|
 | Elective | 67,736 | 85.4% | 5,620 | 8.3% | 5 | 29 |
-| Non-elective | 11,616 | 14.6% | 2,109 | 18.2% | 10.7 | 69 |
+| Non-elective (urgent) | 11,616 | 14.6% | 2,109 | 18.2% | 10.7 | 69 |
 | **Total** | **79,352** | **100%** | **7,729** | **9.7%** | – | – |
 
 **Table 2B. Urgent–elective overlap in the same room.**
