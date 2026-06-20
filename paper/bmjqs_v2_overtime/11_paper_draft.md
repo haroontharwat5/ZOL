@@ -4,7 +4,7 @@
 
 **Correspondence:** [removed for blinded review]
 
-**Word count:** ~2,900 (body text; target journal allows up to 4,000 for original research)
+**Word count:** 3,044 (body text; target journal allows up to 4,000 for original research)
 
 **Keywords:** operating room, overtime, scheduling, patient safety, staff wellbeing, quality improvement
 
@@ -150,7 +150,7 @@ To assess whether urgent cases disrupt the elective programme, we counted days o
 
 *Start-time punctuality.* Across all cases and rooms, 67.4% started later than their planned time, with a mean delay of 74.6 minutes and a median of 28 minutes among late cases. At the room level, late-start rate showed no significant correlation with overtime rate (Spearman rho = −0.29, p = 0.24). The direction of the association was negative: rooms with higher late-start rates tended to have lower overtime rates rather than higher ones. OR10 had the lowest late-start rate of all 18 rooms (46.1%) yet the highest overtime rate (32.9%); OR14 had a late-start rate of 78.7% yet the lowest overtime rate (3.5%); OR11 had the highest late-start rate (82.4%) with a mid-range overtime rate (11.7%). This is consistent with Pandit et al., who reported R-squared values of 0.04 to 0.08 between start and finish times across more than 7,000 operating room lists.[23] Start-time punctuality was therefore not associated with where overtime accumulates at the room level.
 
-*Inter-case idle time.* Across all 18 rooms, inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes.[22] At the room level, mean idle time was positively correlated with overtime rate (Spearman rho = 0.89, p < 0.001), driven largely by OR10, which had both the highest mean idle time (22.6 minutes) and the highest overtime rate (32.9%). Excluding OR10, the pattern did not hold consistently across the remaining rooms. The elevated idle time in OR10 most plausibly reflects preparation demands between complex cardiac cases rather than inefficient turnover, and is better understood as a marker of case-mix complexity than as a scheduling inefficiency. Inter-case turnover was therefore not identified as an independent contributor to room-level overtime.
+*Inter-case idle time.* Across all 18 rooms, inter-case idle time had a median of 8 minutes and a mean of 9.9 minutes.[22] At the room level, mean idle time was positively correlated with overtime rate (Spearman rho = 0.89, p < 0.001), driven largely by OR10, which had both the highest mean idle time (22.6 minutes) and the highest overtime rate (32.9%). Excluding OR10, the pattern did not hold consistently across the remaining rooms. The higher idle time in OR10 most plausibly reflects preparation demands between complex cardiac cases rather than inefficient turnover, and is better understood as a marker of case-mix complexity than as a scheduling inefficiency. Inter-case turnover was therefore not identified as an independent contributor to room-level overtime.
 
 *Room swaps.* Room swaps affected 0.7% of cases (519 of 79,352). Swapped cases had a higher overtime rate (14.8% versus 9.7%), but whether swaps contribute to or result from overtime cannot be determined.
 
