@@ -48,7 +48,7 @@ ax.set_xlim(7, 33)
 ax.set_ylim(0, 30)
 ax.set_xlabel('Time of day')
 ax.set_ylabel('Staffed operating rooms')
-ax.set_title('Staffing pyramid at Campus Genk')
+ax.set_title('Staffing pyramid at study hospital')
 
 tick_positions = [8, 10, 12, 14, 16, 17, 18, 20, 22, 24, 26, 28, 30, 32]
 tick_labels = ['08:00', '10:00', '12:00', '14:00', '16:00', '17:00', '18:00',
@@ -70,29 +70,29 @@ print('Figure 1 done.')
 
 # =============================================================================
 # FIGURE 2 — Room-level overtime concentration
-# Source: Table 25 (In-Depth Analysis pp.30-31), 18 surgical rooms (GO01-GO18)
+# Source: Table 25 (In-Depth Analysis pp.30-31), 18 surgical rooms (OR01-OR18)
 # Total n = 79,352 cases; campus average overtime = 9.7%
 # =============================================================================
 
 rooms_data = [
-    ('GO10', 1743, 32.9, 154.2),
-    ('GO09', 2637, 16.3, 71.6),
-    ('GO13', 3298, 13.7, 61.3),
-    ('GO08', 1777, 13.6, 68.5),
-    ('GO12', 2884, 13.3, 59.4),
-    ('GO05', 4886, 12.3, 54.8),
-    ('GO11', 7482, 11.7, 55.1),
-    ('GO02', 3502, 11.4, 52.1),
-    ('GO04', 4518, 10.7, 57.4),
-    ('GO03', 4094, 9.6, 45.0),
-    ('GO06', 5217, 9.4, 58.6),
-    ('GO16', 4098, 8.9, 36.9),
-    ('GO15', 4323, 8.7, 46.6),
-    ('GO07', 4658, 6.9, 38.0),
-    ('GO17', 5480, 6.8, 44.2),
-    ('GO18', 5293, 6.5, 41.6),
-    ('GO01', 6577, 5.8, 57.8),
-    ('GO14', 6885, 3.5, 31.4),
+    ('OR10', 1743, 32.9, 154.2),
+    ('OR09', 2637, 16.3, 71.6),
+    ('OR13', 3298, 13.7, 61.3),
+    ('OR08', 1777, 13.6, 68.5),
+    ('OR12', 2884, 13.3, 59.4),
+    ('OR05', 4886, 12.3, 54.8),
+    ('OR11', 7482, 11.7, 55.1),
+    ('OR02', 3502, 11.4, 52.1),
+    ('OR04', 4518, 10.7, 57.4),
+    ('OR03', 4094, 9.6, 45.0),
+    ('OR06', 5217, 9.4, 58.6),
+    ('OR16', 4098, 8.9, 36.9),
+    ('OR15', 4323, 8.7, 46.6),
+    ('OR07', 4658, 6.9, 38.0),
+    ('OR17', 5480, 6.8, 44.2),
+    ('OR18', 5293, 6.5, 41.6),
+    ('OR01', 6577, 5.8, 57.8),
+    ('OR14', 6885, 3.5, 31.4),
 ]
 
 rooms_data.sort(key=lambda x: x[2])
@@ -115,7 +115,7 @@ ax1.set_yticklabels(names, fontsize=9)
 ax1.set_xlabel('Cases with overtime (%)')
 ax1.set_title('A. Overtime rate by room', loc='left', fontweight='bold')
 ax1.axvline(CAMPUS_AVG, color='#d62728', linestyle='--', linewidth=1, alpha=0.7)
-ax1.text(CAMPUS_AVG + 0.5, 0, f'Campus average {CAMPUS_AVG}%',
+ax1.text(CAMPUS_AVG + 0.5, 0, f'Hospital average {CAMPUS_AVG}%',
          fontsize=8, color='#d62728', va='center')
 ax1.set_xlim(0, 36)
 
@@ -265,8 +265,8 @@ print(f'{"Total":<15} {"79,352":>10} {"100%":>8} {"7,729":>12} {"9.7%":>10} {"�
 
 print('\nPanel B. Urgent-elective overlap in the same room (Tables 37, 38)')
 print(f'{"Days with overlap":<35} 858 / 1,247 (68.8%)')
-print(f'{"Highest-burden room (GO11)":<35} 475 events affecting 15.2% of its elective cases')
-print(f'{"Median start delay at GO11":<35} 28 min (no overlap) vs 60 min (overlap)')
+print(f'{"Highest-burden room (OR11)":<35} 475 events affecting 15.2% of its elective cases')
+print(f'{"Median start delay at OR11":<35} 28 min (no overlap) vs 60 min (overlap)')
 
 # =============================================================================
 # SUPPLEMENTARY TABLE S1 — CV by planned-duration bucket
@@ -298,24 +298,24 @@ print('='*80)
 
 # (room, n, late_pct, mean_delay, ot_pct) — joined from Tables 21 and 25
 rooms_join = [
-    ('GO11', 7482, 82.4, 319.1, 11.7),
-    ('GO14', 6885, 78.7,  37.3,  3.5),
-    ('GO01', 6577, 75.1,  38.0,  5.8),
-    ('GO08', 1777, 71.9,  44.9, 13.6),
-    ('GO02', 3502, 70.3,  42.2, 11.4),
-    ('GO07', 4658, 70.0,  43.5,  6.9),
-    ('GO05', 4886, 68.3,  54.3, 12.3),
-    ('GO03', 4094, 65.9,  44.6,  9.6),
-    ('GO09', 2637, 64.5,  48.9, 16.3),
-    ('GO04', 4518, 63.5,  49.4, 10.7),
-    ('GO15', 4323, 63.1,  40.5,  8.7),
-    ('GO16', 4098, 62.6,  35.0,  8.9),
-    ('GO18', 5293, 62.3,  36.9,  6.5),
-    ('GO17', 5480, 61.8,  38.4,  6.8),
-    ('GO06', 5217, 61.7,  42.1,  9.4),
-    ('GO12', 2884, 54.5,  48.3, 13.3),
-    ('GO13', 3298, 53.7,  48.6, 13.7),
-    ('GO10', 1743, 46.1,  63.2, 32.9),
+    ('OR11', 7482, 82.4, 319.1, 11.7),
+    ('OR14', 6885, 78.7,  37.3,  3.5),
+    ('OR01', 6577, 75.1,  38.0,  5.8),
+    ('OR08', 1777, 71.9,  44.9, 13.6),
+    ('OR02', 3502, 70.3,  42.2, 11.4),
+    ('OR07', 4658, 70.0,  43.5,  6.9),
+    ('OR05', 4886, 68.3,  54.3, 12.3),
+    ('OR03', 4094, 65.9,  44.6,  9.6),
+    ('OR09', 2637, 64.5,  48.9, 16.3),
+    ('OR04', 4518, 63.5,  49.4, 10.7),
+    ('OR15', 4323, 63.1,  40.5,  8.7),
+    ('OR16', 4098, 62.6,  35.0,  8.9),
+    ('OR18', 5293, 62.3,  36.9,  6.5),
+    ('OR17', 5480, 61.8,  38.4,  6.8),
+    ('OR06', 5217, 61.7,  42.1,  9.4),
+    ('OR12', 2884, 54.5,  48.3, 13.3),
+    ('OR13', 3298, 53.7,  48.6, 13.7),
+    ('OR10', 1743, 46.1,  63.2, 32.9),
 ]
 print(f'\n{"Room":<8} {"n":>8} {"Late starts %":>15} {"Mean delay":>12} {"Overtime %":>12}')
 print('-' * 60)
@@ -323,9 +323,9 @@ for r, n, late, delay, ot in rooms_join:
     print(f'{r:<8} {n:>8,} {late:>14.1f}% {delay:>11.1f} {ot:>11.1f}%')
 
 print('\nKey contrast:')
-print('  GO10: 46.1% late starts (best punctuality) — 32.9% overtime (worst)')
-print('  GO14: 78.7% late starts (2nd worst punctuality) — 3.5% overtime (best)')
-print('  GO11: 82.4% late starts (worst, 319 min mean delay) — 11.7% overtime (mid-pack)')
+print('  OR10: 46.1% late starts (best punctuality) — 32.9% overtime (worst)')
+print('  OR14: 78.7% late starts (2nd worst punctuality) — 3.5% overtime (best)')
+print('  OR11: 82.4% late starts (worst, 319 min mean delay) — 11.7% overtime (mid-pack)')
 
 # =============================================================================
 # RENDERED TABLE 1 — Overtime summary by weekday and calendar year (MERGED)
@@ -423,9 +423,9 @@ ax.set_title('Table 2B. Urgent–elective overlap in the same room',
 header_b = ['Metric', 'Value']
 rows_b = [
     ['Days with at least one overlap',          '858 of 1,247 (68.8%)'],
-    ['Highest-burden room (GO11)',              '475 events; 15.2% of its elective cases'],
-    ['Median start delay at GO11 (no overlap)', '28 min'],
-    ['Median start delay at GO11 (overlap)',    '60 min'],
+    ['Highest-burden room (OR11)',              '475 events; 15.2% of its elective cases'],
+    ['Median start delay at OR11 (no overlap)', '28 min'],
+    ['Median start delay at OR11 (overlap)',    '60 min'],
 ]
 tb = ax.table(cellText=rows_b, colLabels=header_b, loc='center', cellLoc='left',
               colWidths=[0.55, 0.45])
@@ -485,7 +485,7 @@ case_counts = [2700, 1600, 850, 450, 280, 200, 380, 300, 220, 120, 60, 40, 30, 2
 ax.bar(hours, case_counts, color='#2171b5', edgecolor='white', linewidth=0.5)
 ax.set_xlabel('End time of surgery')
 ax.set_ylabel('Number of overtime cases')
-ax.set_title('Figure S2. Timing of overtime case completions',
+ax.set_title('Figure S1. Timing of overtime case completions',
              loc='left', fontweight='bold', fontsize=11)
 ax.tick_params(axis='x', rotation=45, labelsize=8)
 ax.spines['top'].set_visible(False)
@@ -508,24 +508,24 @@ ax.set_title('Table S2. Per-room start-time deviation vs overtime rate',
              loc='left', fontweight='bold', fontsize=11, pad=8)
 header_s2 = ['Room', 'n', 'Late starts (%)', 'Mean delay (min)', 'Overtime (%)']
 rooms_join = [
-    ('GO11', 7482, 82.4, 319.1, 11.7),
-    ('GO14', 6885, 78.7,  37.3,  3.5),
-    ('GO01', 6577, 75.1,  38.0,  5.8),
-    ('GO08', 1777, 71.9,  44.9, 13.6),
-    ('GO02', 3502, 70.3,  42.2, 11.4),
-    ('GO07', 4658, 70.0,  43.5,  6.9),
-    ('GO05', 4886, 68.3,  54.3, 12.3),
-    ('GO03', 4094, 65.9,  44.6,  9.6),
-    ('GO09', 2637, 64.5,  48.9, 16.3),
-    ('GO04', 4518, 63.5,  49.4, 10.7),
-    ('GO15', 4323, 63.1,  40.5,  8.7),
-    ('GO16', 4098, 62.6,  35.0,  8.9),
-    ('GO18', 5293, 62.3,  36.9,  6.5),
-    ('GO17', 5480, 61.8,  38.4,  6.8),
-    ('GO06', 5217, 61.7,  42.1,  9.4),
-    ('GO12', 2884, 54.5,  48.3, 13.3),
-    ('GO13', 3298, 53.7,  48.6, 13.7),
-    ('GO10', 1743, 46.1,  63.2, 32.9),
+    ('OR11', 7482, 82.4, 319.1, 11.7),
+    ('OR14', 6885, 78.7,  37.3,  3.5),
+    ('OR01', 6577, 75.1,  38.0,  5.8),
+    ('OR08', 1777, 71.9,  44.9, 13.6),
+    ('OR02', 3502, 70.3,  42.2, 11.4),
+    ('OR07', 4658, 70.0,  43.5,  6.9),
+    ('OR05', 4886, 68.3,  54.3, 12.3),
+    ('OR03', 4094, 65.9,  44.6,  9.6),
+    ('OR09', 2637, 64.5,  48.9, 16.3),
+    ('OR04', 4518, 63.5,  49.4, 10.7),
+    ('OR15', 4323, 63.1,  40.5,  8.7),
+    ('OR16', 4098, 62.6,  35.0,  8.9),
+    ('OR18', 5293, 62.3,  36.9,  6.5),
+    ('OR17', 5480, 61.8,  38.4,  6.8),
+    ('OR06', 5217, 61.7,  42.1,  9.4),
+    ('OR12', 2884, 54.5,  48.3, 13.3),
+    ('OR13', 3298, 53.7,  48.6, 13.7),
+    ('OR10', 1743, 46.1,  63.2, 32.9),
 ]
 rows_s2 = [[r, f'{n:,}', f'{l:.1f}', f'{d:.1f}', f'{o:.1f}']
            for r, n, l, d, o in rooms_join]
@@ -536,18 +536,18 @@ ts2.scale(1, 1.25)
 for j in range(len(header_s2)):
     ts2[(0, j)].set_facecolor('#2171b5')
     ts2[(0, j)].set_text_props(color='white', fontweight='bold')
-go10_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'GO10') + 1
-go14_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'GO14') + 1
-go11_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'GO11') + 1
+go10_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'OR10') + 1
+go14_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'OR14') + 1
+go11_row = next(i for i, (r, *_) in enumerate(rooms_join) if r == 'OR11') + 1
 for j in range(len(header_s2)):
     ts2[(go10_row, j)].set_facecolor('#fee5d9')
     ts2[(go14_row, j)].set_facecolor('#deebf7')
     ts2[(go11_row, j)].set_facecolor('#fff9e6')
 
 fig.text(0.5, 0.015,
-         'GO10 (orange): best punctuality, worst overtime. '
-         'GO14 (blue): worst punctuality, best overtime. '
-         'GO11 (yellow): worst delay, mid-pack overtime.',
+         'OR10 (orange): best punctuality, worst overtime. '
+         'OR14 (blue): worst punctuality, best overtime. '
+         'OR11 (yellow): worst delay, mid-pack overtime.',
          ha='center', fontsize=8, style='italic', color='#444444')
 fig.tight_layout(rect=[0, 0.04, 1, 1])
 fig.savefig(f'{OUTDIR}/tableS2_starttime_vs_overtime.png')
