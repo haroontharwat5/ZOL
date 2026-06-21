@@ -245,6 +245,14 @@ The dataset contains de-identified administrative hospital data. Requests for ac
 
 ---
 
+## SUPPLEMENTARY FIGURES
+
+**Supplementary Figure S1.** Timing of overtime case completions. Distribution of room-out times for the 7,729 overtime cases. More than half of completions fall in the 16:30 to 17:30 window immediately after the day-shift handover, with a long tail decaying through the evening and overnight.
+
+[Insert Supplementary Figure S1 about here]
+
+---
+
 ## SUPPLEMENTARY TABLES
 
 **Supplementary Table S1. Summary of cited literature.**

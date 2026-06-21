@@ -130,11 +130,14 @@ for i, (p, n) in enumerate(zip(pcts, ncases)):
 ax2.barh(y_pos, mean_ot, color=colors, edgecolor='white', linewidth=0.5, height=0.7)
 ax2.set_xlabel('Mean overtime (min)')
 ax2.set_title('B. Mean overtime duration', loc='left', fontweight='bold')
-ax2.set_xlim(0, 175)
+ax2.set_xlim(0, 200)
 for i, (m, n) in enumerate(zip(mean_ot, ncases)):
-    if m > 5:
+    if m > 120:  # long bars: label inside so it clears the n= count
+        ax2.text(m - 3, i, f'{m:.0f}', ha='right', va='center',
+                 fontsize=7.5, fontweight='bold', color='white')
+    elif m > 5:
         ax2.text(m + 2, i, f'{m:.0f}', ha='left', va='center', fontsize=7.5, color='#333333')
-    ax2.text(170, i, f'n={n:,}', ha='right', va='center', fontsize=7, color='grey')
+    ax2.text(197, i, f'n={n:,}', ha='right', va='center', fontsize=7, color='grey')
 
 ax1.spines['top'].set_visible(False)
 ax1.spines['right'].set_visible(False)
@@ -483,16 +486,19 @@ hours = ['16:30', '17:30', '18:30', '19:30', '20:30', '21:30',
          '04:30', '05:30', '06:30', '07:30']
 case_counts = [2700, 1600, 850, 450, 280, 200, 380, 300, 220, 120, 60, 40, 30, 20, 30, 60]
 ax.bar(hours, case_counts, color='#2171b5', edgecolor='white', linewidth=0.5)
+ax.set_ylim(0, 3200)
 ax.set_xlabel('End time of surgery')
 ax.set_ylabel('Number of overtime cases')
 ax.set_title('Figure S1. Timing of overtime case completions',
-             loc='left', fontweight='bold', fontsize=11)
+             loc='left', fontweight='bold', fontsize=11, pad=12)
 ax.tick_params(axis='x', rotation=45, labelsize=8)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.axvspan(-0.5, 0.5, alpha=0.15, color='#d62728')
-ax.text(0, 2900, 'Day-shift\nspillover', ha='center', fontsize=8,
-        color='#d62728', fontweight='bold')
+# annotate from the right so the label clears the top-left title
+ax.annotate('Day-shift spillover', xy=(0.45, 2700), xytext=(3.0, 2950),
+            ha='left', va='center', fontsize=8, color='#d62728', fontweight='bold',
+            arrowprops=dict(arrowstyle='->', color='#d62728', lw=1.2))
 fig.tight_layout()
 fig.savefig(f'{OUTDIR}/figS2_end_time_distribution.png')
 fig.savefig(f'{OUTDIR}/figS2_end_time_distribution.pdf')

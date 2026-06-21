@@ -7,13 +7,23 @@ headings, bold lower-case level-2 headings). Parsing the markdown directly
 keeps the .docx and the .md in lock-step so they cannot drift apart.
 """
 
+import os
 import re
 from docx import Document
-from docx.shared import Pt, Cm, RGBColor
+from docx.shared import Pt, Cm, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 SRC = '/home/user/ZOL/paper/bmjqs_v2_overtime/submission/manuscript.md'
 OUT = '/home/user/ZOL/paper/bmjqs_v2_overtime/submission/manuscript.docx'
+FIGDIR = '/home/user/ZOL/paper/bmjqs_v2_overtime/submission'
+
+# Maps "[Insert <X> about here]" placeholders to image files so the review
+# copy shows the figures inline. Keys are lower-case.
+FIGURE_MAP = {
+    'figure 1': f'{FIGDIR}/Figure1.png',
+    'supplementary figure s1': f'{FIGDIR}/FigureS1.png',
+    'figure s1': f'{FIGDIR}/FigureS1.png',
+}
 
 REF_RE = re.compile(r'\[\d+(?:[,–—-]\d+)*\]')
 INLINE_RE = re.compile(r'(\*\*.*?\*\*|\*[^*]+?\*|\[\d+(?:[,–—-]\d+)*\])')
@@ -178,9 +188,19 @@ while i < len(lines):
         i += 1
         continue
 
-    # Bracketed figure/table placeholders -> italic
+    # Bracketed figure/table placeholders. "[Insert <X> about here]" embeds
+    # the matching image; anything else is rendered as italic placeholder text.
     if line.startswith('[') and line.endswith(']'):
-        para(line, base_italic=True, space_after=6, space_before=6)
+        m = re.match(r'insert (.+?) about here', line[1:-1].strip(), re.IGNORECASE)
+        img = FIGURE_MAP.get(m.group(1).strip().lower()) if m else None
+        if img and os.path.exists(img):
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_before = Pt(6)
+            p.paragraph_format.space_after = Pt(6)
+            p.add_run().add_picture(img, width=Inches(6.0))
+        else:
+            para(line, base_italic=True, space_after=6, space_before=6)
         i += 1
         continue
 
