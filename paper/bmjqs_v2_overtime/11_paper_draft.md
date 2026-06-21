@@ -172,7 +172,7 @@ A common assumption is that first-case-on-time-start (FCOTS) drives end-of-day p
 
 ### Implications
 
-*Operational implication.* Room-level monitoring should take precedence over hospital-wide overtime targets, and scheduling should treat urgent-case flow as a routine planning input rather than an exception.
+*Operational implication.* Room-level monitoring should take precedence over hospital-wide overtime targets. A 9.7% hospital-wide rate hides a near ten-fold spread, and an intervention aimed at the average will miss the rooms that generate most of the overtime. For the highest-overtime rooms, where long complex cases dominate, scheduling systems could assign wider duration margins to procedures with high expected variability rather than applying a uniform padding factor. Urgent-case flow should be treated as a routine scheduling input: overlap occurred on more than two-thirds of observation days, so dedicating additional capacity or buffering the elective programme against predictable disruption is more realistic than treating each urgent arrival as an exception. Start-time compliance, while reasonable to pursue on other grounds, should not be expected to reduce overtime: in this dataset it was unrelated to where overtime accumulated.
 
 *Clinical implication.* The overtime documented here produces the same exposure that other studies have linked to staff fatigue, higher after-hours mortality, and increased complication risk.[2–13] Whether those harms are present at this hospital cannot be determined from administrative data alone. Linking room-level overtime to patient and staff outcomes is a necessary next step.
 
