@@ -87,13 +87,39 @@ Given the retrospective use of fully anonymised administrative data, no patient 
 
 ### Sample overview
 
-The cohort comprised 79,352 cases across 18 surgical operating rooms, involving 60,895 unique patients, 195 surgeons, 207 anaesthesiologists, and 1,276 distinct procedure types. Weekday volume was evenly distributed (17.9 to 20.0% Monday through Friday); weekends accounted for 1.8 to 2.1%. Year-on-year volume grew from 22,133 in 2022 to 23,738 in 2024, with 9,906 recorded through May 2025. The urgency mix was 85.4% elective and 14.6% urgent (non-elective).
+The cohort comprised 79,352 surgical cases performed on 60,895 unique patients across 18 operating rooms between January 2022 and May 2025 (Table 1). Cases covered 1,276 distinct procedure types performed by 195 surgeons and 207 anaesthesiologists. The urgency mix was 85.4% elective and 14.6% urgent (non-elective), 42.3% of cases were ambulatory, and almost all activity (96.1%) fell on weekdays. Annual volume grew from 22,133 in 2022 to 23,738 in 2024, with 9,906 cases recorded through May 2025.
+
+**Table 1. Study cohort characteristics.** (*2025 partial, January–May.)
+
+| Characteristic | Value |
+|----------------|-------|
+| Surgical cases | 79,352 |
+| Unique patients | 60,895 |
+| Surgical operating rooms | 18 |
+| Distinct procedure types | 1,276 |
+| Surgeons | 195 |
+| Anaesthesiologists | 207 |
+| Study period | January 2022 – May 2025 |
+| **Admission type**, n (%) | |
+| Ambulatory (day surgery) | 33,566 (42.3) |
+| Inpatient | 45,786 (57.7) |
+| **Urgency**, n (%) | |
+| Elective | 67,736 (85.4) |
+| Urgent (non-elective) | 11,616 (14.6) |
+| **Timing**, n (%) | |
+| Weekday | 76,255 (96.1) |
+| Weekend | 3,097 (3.9) |
+| **Cases by year**, n | |
+| 2022 | 22,133 |
+| 2023 | 23,575 |
+| 2024 | 23,738 |
+| 2025* | 9,906 |
 
 ### Overtime burden and room-level concentration (RQ1)
 
-Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among overtime cases, the mean was 60.3 minutes, the median was 39 minutes, and the 95th percentile was 197 minutes (Table 1A). Weekday rates were similar (8.8 to 9.9%) but roughly 1.7 times higher on weekends (Saturday 16.8%, Sunday 15.5%), when the elective programme does not run and volume is almost entirely urgent surgery. The overtime rate declined gradually over the study period: 10.0% in 2022, 10.0% in 2023, 9.7% in 2024, and 8.6% in the first five months of 2025 (Table 1B).
+Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among overtime cases, the mean was 60.3 minutes, the median was 39 minutes, and the 95th percentile was 197 minutes (Table 2A). Weekday rates were similar (8.8 to 9.9%) but roughly 1.7 times higher on weekends (Saturday 16.8%, Sunday 15.5%), when the elective programme does not run and volume is almost entirely urgent surgery. The overtime rate declined gradually over the study period: 10.0% in 2022, 10.0% in 2023, 9.7% in 2024, and 8.6% in the first five months of 2025 (Table 2B).
 
-**Table 1A. Overtime by weekday.**
+**Table 2A. Overtime by weekday.**
 
 | Day | n cases | n overtime | OT rate (%) | Mean OT (min) |
 |-----|--------:|-----------:|------------:|--------------:|
@@ -106,7 +132,7 @@ Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift. Among ov
 | Sunday | 1,443 | 224 | 15.5 | 59.1 |
 | **Total** | **79,352** | **7,729** | **9.7** | **60.3** |
 
-**Table 1B. Overtime trend by year.** (*2025 partial, January–May.)
+**Table 2B. Overtime trend by year.** (*2025 partial, January–May.)
 
 | Year | OT rate (%) | Mean OT (min) | Median OT (min) |
 |------|------------:|--------------:|----------------:|
@@ -127,11 +153,11 @@ Most overtime cases ended shortly after the shift boundary. More than half of ov
 
 We measured this spread with the coefficient of variation (CV), the standard deviation of duration divided by its mean, which places cases of different lengths on a comparable scale. Observed-duration CV was highest for short cases (0.54 for procedures under 30 minutes), lowest for mid-length cases (about 0.35 for 61 to 180 minutes), and intermediate for the longest cases (0.42 for over 180 minutes); short cases are proportionally the most variable because a few extra minutes is a large fraction of a brief booking. The CV of the planning error itself was higher still, reaching 1.84 in the over-180-minute bucket, where the spread of the booking error was nearly twice its own average. The schedule was therefore least able to predict the finishing time of the longest cases. These procedures, mainly complex cardiac and oncology cases, clustered in the rooms with the highest overtime, so the rooms that were hardest to plan were also the ones that most often ran late.
 
-*Urgent-elective interaction.* Urgent cases accounted for 14.6% of the volume (11,616 of 79,352) and ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%, Table 2A), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of overtime minutes was still dominated by the elective programme.
+*Urgent-elective interaction.* Urgent cases accounted for 14.6% of the volume (11,616 of 79,352) and ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%, Table 3A), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of overtime minutes was still dominated by the elective programme.
 
-To assess whether urgent cases disrupt the elective programme, we counted days on which an urgent case occupied a room during a time window when an elective case had been planned in the same room. Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 2B). On days with overlap, elective cases started later than on days without, by a median of approximately 30 minutes, reaching 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases.
+To assess whether urgent cases disrupt the elective programme, we counted days on which an urgent case occupied a room during a time window when an elective case had been planned in the same room. Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 3B). On days with overlap, elective cases started later than on days without, by a median of approximately 30 minutes, reaching 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases.
 
-**Table 2A. Volume and overtime by urgency.**
+**Table 3A. Volume and overtime by urgency.**
 
 | Urgency | n | Share | After-hours n | After-hours rate | Mean OT (min) | P95 OT (min) |
 |---------|------:|------:|--------------:|-----------------:|--------------:|-------------:|
@@ -139,7 +165,7 @@ To assess whether urgent cases disrupt the elective programme, we counted days o
 | Non-elective (urgent) | 11,616 | 14.6% | 2,109 | 18.2% | 10.7 | 69 |
 | **Total** | **79,352** | **100%** | **7,729** | **9.7%** | – | – |
 
-**Table 2B. Urgent–elective overlap in the same room.**
+**Table 3B. Urgent–elective overlap in the same room.**
 
 | Metric | Value |
 |--------|-------|
