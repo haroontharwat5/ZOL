@@ -129,7 +129,7 @@ We measured this spread with the coefficient of variation (CV), the standard dev
 
 *Urgent-elective interaction.* Urgent cases accounted for 14.6% of the volume (11,616 of 79,352) and ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%, Table 2A), with heavier tails (P95 69 versus 29 minutes). Because elective cases outnumbered urgent cases nearly six to one, the absolute volume of overtime minutes was still dominated by the elective programme.
 
-To assess whether urgent cases disrupt the elective programme, we counted days on which an urgent case occupied a room during a time window when an elective case had been planned in the same room. Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 2B). On days with overlap, elective cases started later than on days without, by a median of of approximately 30 minutes, reaching 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases.
+To assess whether urgent cases disrupt the elective programme, we counted days on which an urgent case occupied a room during a time window when an elective case had been planned in the same room. Such overlap occurred on 858 of 1,247 observation days (68.8%, Table 2B). On days with overlap, elective cases started later than on days without, by a median of approximately 30 minutes, reaching 60 minutes in early 2022 before narrowing. OR11 absorbed the highest overlap burden, with 475 events affecting 15.2% of its elective cases.
 
 **Table 2A. Volume and overtime by urgency.**
 
