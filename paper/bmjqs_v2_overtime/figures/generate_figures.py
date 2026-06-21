@@ -127,10 +127,14 @@ for i, (p, n) in enumerate(zip(pcts, ncases)):
         ax1.text(p + 0.3, i, f'{p:.1f}%', ha='left', va='center',
                  fontsize=7.5, color='#555555')
 
+CAMPUS_MEAN_OT = 60.3
 ax2.barh(y_pos, mean_ot, color=colors, edgecolor='white', linewidth=0.5, height=0.7)
 ax2.set_xlabel('Mean overtime (min)')
 ax2.set_title('B. Mean overtime duration', loc='left', fontweight='bold')
 ax2.set_xlim(0, 200)
+ax2.axvline(CAMPUS_MEAN_OT, color='#d62728', linestyle='--', linewidth=1, alpha=0.7)
+ax2.text(CAMPUS_MEAN_OT + 1.5, 0, f'Hospital average {CAMPUS_MEAN_OT} min',
+         fontsize=8, color='#d62728', va='center')
 for i, (m, n) in enumerate(zip(mean_ot, ncases)):
     if m > 120:  # long bars: label inside so it clears the n= count
         ax2.text(m - 3, i, f'{m:.0f}', ha='right', va='center',
