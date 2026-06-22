@@ -226,7 +226,7 @@ None declared.
 
 ## DATA AVAILABILITY
 
-The dataset contains de-identified administrative hospital data. Requests for access should be directed to the hospital's research office.
+The dataset contains anonymised administrative hospital data. Requests for access should be directed to the hospital's research office.
 
 ---
 
