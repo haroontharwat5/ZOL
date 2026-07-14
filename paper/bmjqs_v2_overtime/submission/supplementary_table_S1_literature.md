@@ -3,15 +3,15 @@
 | Ref | First author (year) | Design | Sample / scope | Key finding | Role in this paper |
 |-----|---------------------|--------|----------------|-------------|-------------------|
 | 1 | Wachtel (2010) | Literature review | Newsvendor experiments for OR management | Overutilized time costs approximately twice as much as underutilized time | Establishes cost asymmetry of overtime |
-| 2 | Griffiths (2014) | Cross-sectional survey | 33,659 nurses, 12 European countries | Overtime and long shifts associated with poorer perceived quality of care and higher patient safety risk | Staff-harm evidence |
-| 3 | Dall'Ora (2015) | Cross-sectional survey | Same RN4CAST dataset as ref 2 | 12-hour shifts associated with burnout (OR 1.26) and intent to leave (OR 1.13) | Staff-harm evidence |
+| 2 | Griffiths (2014) | Cross-sectional survey | 31,627 nurses, 488 hospitals, 12 European countries | Overtime and long shifts associated with poorer perceived quality of care and higher patient safety risk | Staff-harm evidence |
+| 3 | Dall'Ora (2015) | Cross-sectional survey | Same RN4CAST dataset as ref 2 | 12-hour shifts associated with emotional exhaustion (OR 1.26) and intention to leave (OR 1.29) | Staff-harm evidence |
 | 4 | Bae (2024) | Cross-sectional survey | 264 nurses, South Korean acute care hospitals | Mandatory overtime associated with intent to leave | Staff-harm evidence |
-| 5 | Dall'Ora (2016) | Literature review | 13 studies on shift characteristics | Both long shifts and overtime associated with worse performance and well-being | Staff-harm evidence |
+| 5 | Dall'Ora (2016) | Literature review | 35 studies on shift characteristics (25 in healthcare) | Long shifts associated with jeopardised outcomes; overtime associated with decreased job performance | Staff-harm evidence |
 | 6 | Dall'Ora (2020) | Theoretical review | Burnout models in nursing | High workload combined with low decision latitude is an established burnout predictor | Burnout mechanism |
 | 7 | Cortegiani (2020) | Systematic review and meta-analysis | 40 studies overall; adjusted mortality estimate pooled 18 studies | After-hours surgery associated with higher mortality (adjusted OR 1.16, 95% CI 1.06–1.28); low-certainty evidence | Patient-harm evidence, primary mortality estimate |
 | 8 | Oh (2025) | Retrospective cohort | 281,717 propensity-matched patients, South Korea | After-hours surgery associated with mortality (OR 3.58) | Patient-harm evidence, upper-bound estimate |
 | 9 | Sakurai (2025) | Correspondence / commentary | Response to ref 8 | Challenges ref 8 on residual confounding grounds | Qualifies the mortality evidence |
-| 10 | Saager (2014) | Retrospective cohort | 927,307 cases, Cleveland Clinic | Each intraoperative anesthesia handover raises complication risk; incidence 8.8% at zero transitions to 21.2% at four or more | Handover-harm mechanism |
+| 10 | Saager (2014) | Retrospective cohort | 138,932 cases, Cleveland Clinic | Each intraoperative anesthesia handover raises complication risk; incidence 8.8% at zero transitions to 21.2% at four or more | Handover-harm mechanism |
 | 11 | HSSIB (2025) | National investigation report | UK healthcare staff survey | 22% of doctors reported daily sleep deprivation; 35% said tiredness impaired their ability to treat patients | Fatigue-harm evidence |
 | 12 | Pittman (2025) | Retrospective panel analysis | 70 US hospitals | Overtime above a breakpoint threshold associated with 2.09% increase in pressure ulcers | Patient-harm evidence (nursing-specific) |
 | 13 | Althoff (2021) | Retrospective multicenter cohort | 350,000+ non-cardiac surgical cases | Night surgery associated with increased morbidity (adjusted OR 1.41), mediated by transfusion rates and handovers | Patient-harm evidence, morbidity |
@@ -23,8 +23,8 @@
 | 19 | Schouten (2023) | Systematic review | 52 studies on OR performance metrics | Catalogues OR performance metrics; notes lack of standardisation across studies | Supports the need for valid room-level metrics |
 | 20 | Strum (2000) | Methodological study | 7,846 cases, surgical duration distributions | Surgical duration follows a log-normal distribution; CV varies by procedure type | Supports the CV-based analysis of planning accuracy |
 | 21 | Eijkemans (2010) | Prediction model development | 2,709 cases, Erasmus MC | Surgeon-specific historical data improve duration prediction; residual variability remains substantial | Supports the CV-based analysis of planning accuracy |
-| 22 | MacMillan (2025) | Systematic review | 37 studies on OR turnover time | Maps factors affecting turnover time; median turnover across studies was 25–45 minutes | Contextualises our inter-case idle time findings |
-| 23 | Pandit (2012) | Retrospective observational | 7,096 operating lists, UK | First-case start time explains only 4–8% of variance in list finish time (R-squared 0.04–0.08) | Supports the FCOTS finding |
+| 22 | MacMillan (2025) | Systematic review | 105 studies on OR turnover time (136 analyses) | Maps mutable factors associated with turnover time across anaesthetic, staffing, IT, and process domains | Contextualises our inter-case idle time findings |
+| 23 | Pandit (2012) | Retrospective observational | More than 7,000 operating lists, two UK hospitals | List start time explains only 4–8% of variance in list finish time (r² 0.043 and 0.077) | Supports the FCOTS finding |
 | 24 | Zhang (2023) | Editorial / methodological commentary | OR metrics in the UK | Valid room-level metrics are a prerequisite for quality improvement | Supports room-level monitoring recommendation |
 | 25 | Dexter (2009) | Decision-analytic model | Marginal cost of tardiness | Each minute of first-case tardiness carries a marginal cost, but the effect is small relative to case-mix variation | Contextualises FCOTS discussion |
 | 26 | Wachtel (2009) | Retrospective observational | Large US OR dataset | Tardiness accumulates through the day as duration uncertainty compounds across sequential cases | Supports planning-accuracy discussion |
