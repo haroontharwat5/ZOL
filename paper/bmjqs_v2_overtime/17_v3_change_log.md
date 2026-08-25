@@ -27,3 +27,17 @@ Note: "monitoring" is supported by the planned dashboard mock-up figure; revisit
 - Macario 2006 has no published abstract; the "suite-level scoring" characterisation is verified via citing sources only. Verify the exact indicator wording against the full PDF before quoting it directly.
 - "The schedule is built such that no overtime occurs if all cases run as planned" (Niels wants this in Methods): NOT yet confirmed — requires Ben/Dieter confirmation before it enters the text.
 - Pandit 2012 "7,096 lists": abstract says "more than 7000"; exact figure needs full-text check or use "more than 7,000".
+
+## 5. Code and data audit (25 Aug, data + Rmds shared by Haroon)
+
+Independent Python verification against genk_cleaned.xlsx (79,352 rows), cross-checked against Maxim's R console output in the previous-version Google Doc. Verification script: `verification/verify_results_numbers.py` (code in repo; data not in repo).
+
+**Confirmed exactly:** all headline overtime stats; full 18-room table; start-delay stats; punctuality Spearman (rho −0.2920537, p 0.2388 — matches Maxim's R to 7 decimals); idle summary; swaps; urgency table incl. the Table 3A all-cases means (5.0/10.7); overlap 858/1,247 = 68.8%; OR11 475 events/15.2%. Stored overtime flag is 100% internally consistent, and an independent reconstruction matches it on 100.0000% of cases.
+
+**Corrections applied to the manuscript:**
+1. **Shift boundary:** day-shift assignment starts at room-in 07:30, not 08:00 (6,163 cases enter 07:30–07:59 and carry the day label). Methods now state room-in windows and shift ends explicitly. Rationale for 07:30 NOT yet confirmed clinically — ask Ben/Dieter (or check data_cleaning.R) before adding a "why".
+2. **Idle-time correlation:** rho corrected to 0.91 (overtime rate over all cases per room, consistent with room rates reported elsewhere; Maxim's 0.89 used the gap-defined subset — both reproduced). The claim "Excluding OR10, the pattern did not hold" was never computed in any shared code and is false (excl GO10: rho 0.90/0.87, p < 10⁻⁵ in all variants); it originated as prose in an earlier draft ("idle time is not the bottleneck" notes tab). Replaced with the computed result: the association persists without OR10; idle time is now reported as a positive room-level association, interpreted as a plausible case-mix marker, causality untested. Abstract, Key Messages, Discussion opening, and Conclusion updated accordingly. **Confirm with Maxim which rate denominator to keep (0.91 recommended; his 0.89 equally defensible if the subset is described).**
+3. **Overlap wording:** comparison is case-level (overlapped vs non-overlapped elective cases), not day-level; "median ≈30 minutes" was OR11's median gap (60 vs 28); "reaching 60 minutes in early 2022" was the monthly means trend (~70 vs ~30). Results now report each correctly; OR11 identified as the emergency-designated room (per In-Depth Rmd).
+4. **Methods additions:** idle-time measurement rules (day shift; includes shift-start-to-first-case gap; excludes gaps > 60 min); overlap flag definition.
+
+**v3 locked-section updates:** abstract Results sentence now "Start-time punctuality showed no association with room-level overtime, whereas rooms with longer gaps between cases also had higher overtime rates."; Key Messages adjusted to match.
