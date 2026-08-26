@@ -41,3 +41,11 @@ Independent Python verification against genk_cleaned.xlsx (79,352 rows), cross-c
 4. **Methods additions:** idle-time measurement rules (day shift; includes shift-start-to-first-case gap; excludes gaps > 60 min); overlap flag definition.
 
 **v3 locked-section updates:** abstract Results sentence now "Start-time punctuality showed no association with room-level overtime, whereas rooms with longer gaps between cases also had higher overtime rates."; Key Messages adjusted to match.
+
+## 6. data_cleaning.R audit (25 Aug, shared by Haroon)
+
+Resolves ask-list Q2. The base shift boundaries ARE hospital policy at 08:00/16:30/22:00 (code comment: "op basis van beleid"). The 07:30 pattern is a deliberate reclassification ("Herclassificeer vroege starters"): cases entering 07:30-08:00 whose room-out falls after 08:00 are assigned to the day shift (6,153 cases; the 10 early entrants ending before 08:00 stay night). Methods rewritten accordingly; the earlier "07:30 assignment boundary" description was an approximation.
+
+Second code-vs-prose fix: gap_time excludes the first case of each shift window (lag = NA), contradicting the Rmd prose "delay between shift start and the first case"; and it is computed within all three shift windows, not day-only. Methods corrected (code is ground truth). gap_time cutoff 60 min confirmed in data_cleaning.R (the quality-check variant uses 120 min and is not the shipped dataset).
+
+Remaining Ben/Dieter questions: (1) zero-overtime-by-design schedule claim; (3) does anaesthesia also change at shift boundaries; (4) weekend staffing boundaries.
