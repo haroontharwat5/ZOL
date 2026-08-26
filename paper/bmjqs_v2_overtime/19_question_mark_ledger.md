@@ -49,3 +49,12 @@ Status: FIXED = already resolved by a locked v3 change. PENDING = proposal below
 ## Method for Google Doc replies (when porting v3)
 
 For every item above, reply in its thread with one line: what changed and where (e.g., "Rewritten; CV definition moved to Methods; Results sentence now states the conclusion for overtime explicitly"). Do not resolve threads yourself; let Niels resolve on re-read.
+
+## Corrections after Haroon's in-doc reading (ground truth, 26 Aug)
+
+Haroon read the anchors directly in the Google Doc. Three corrections to the reconstruction above:
+1. "So what is the conclusion on overtime based on this?" anchors the URGENT-ELECTIVE OVERLAP paragraph, not the idle paragraph. Fix: explicit closing sentence stating the measured link (urgent cases' own 2x boundary-crossing) and that elective-delay-to-overtime was not measured.
+2. The punctuality correlation sentence ("We tested a broad version of this hypothesis...") carries a "?" that was missing from this ledger. Fix: name the test plainly, define late-start rate inline, drop "broad version of this hypothesis".
+3. The "?" marks on the Table 2A caption note and Table 3A footnote sit on the CURRENT (already-revised) wording - the revised notes are still too cryptic. New plain-sentence versions proposed. Note: the Doc's text was replaced after Niels's July pass, so some anchors may have drifted; treat Haroon's readings as operative and confirm on Niels's re-read.
+
+Additional confirmed pairings: "protect the end of the list" carries BOTH the "timely end of the list?" question and the zero-overtime-by-design reply; "cannot be determined." carries "because ..." (wants the reason: no swap-cause field in the administrative record).
