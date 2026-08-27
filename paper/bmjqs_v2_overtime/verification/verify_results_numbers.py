@@ -83,3 +83,32 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def decomposition() -> None:
+    """Scheduled-crossing vs unplanned overtime decomposition (26 Aug).
+
+    New analysis completed from variables data_cleaning.R already builds
+    (PlannedEndDT vs planned_shift_end). Awaiting team sign-off before the
+    numbers enter the manuscript.
+    """
+    df = pd.read_excel(DATA_PATH)
+    d = df.dropna(subset=["PlannedEndDT", "planned_shift_end"]).copy()
+    d["PlannedEndDT"] = pd.to_datetime(d["PlannedEndDT"])
+    d["planned_shift_end"] = pd.to_datetime(d["planned_shift_end"])
+    d["planned_over"] = d["PlannedEndDT"] > d["planned_shift_end"]
+    po = d["planned_over"]
+    print(f"planned to cross: {po.sum()} of {len(d)} ({100*po.mean():.1f}%)")       # 5812, 7.3%
+    ot = d[d["afterhours_flag"] == 1]
+    print(f"overtime cases planned to cross: {ot['planned_over'].sum()} of {len(ot)}"
+          f" ({100*ot['planned_over'].mean():.1f}%)")                                # 3532, 45.7%
+    for name, g in [("scheduled", ot[ot.planned_over]), ("unplanned", ot[~ot.planned_over])]:
+        m = g["overtime_minutes"]
+        print(f"  {name}: n={len(g)} mean={m.mean():.1f} median={m.median():.0f} "
+              f"minutes={m.sum():.0f} ({100*m.sum()/ot['overtime_minutes'].sum():.1f}%)")
+    # conversion: planned-to-fit 5.7% -> planned-to-cross 60.8%
+    fit = d[~po]
+    print(f"overtime risk: planned-to-fit {100*fit['afterhours_flag'].mean():.1f}% vs "
+          f"planned-to-cross {100*d.loc[po,'afterhours_flag'].mean():.1f}%")
+    go10 = ot[ot["ActualOR"] == "GO10"]
+    print(f"GO10 overtime cases scheduled share: {100*go10['planned_over'].mean():.1f}%")  # 81.5%
