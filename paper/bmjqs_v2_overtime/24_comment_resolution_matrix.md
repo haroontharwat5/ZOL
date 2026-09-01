@@ -26,14 +26,14 @@ HOW: It is the OR department (confirmed against the cited prior work); phrasing 
 **C4. Abstract — "Case-level"**
 NIELS: "Make sure it is clear to the reader what a case in this paper will refer to"
 OLD: Participants. 79,352 surgical procedures performed between January 2022 and May 2025.
-NEW: Participants. 79,352 surgical cases (one case is one patient occupying one operating room from entry to exit) between January 2022 and May 2025. [Full definition in Methods: one uninterrupted occupancy of one OR by one patient, room-in to room-out, one procedure code; distinct from admission and from patient.]
-HOW: Case defined at first use in plain words; Methods carries the precise version.
+NEW: Participants. 79,352 surgical cases performed between January 2022 and May 2025; a case is one patient's uninterrupted stay in one operating room, from entry to exit.
+HOW: Case defined at first use in one plain clause; Methods carries the precise version (one uninterrupted occupancy, room-in to room-out, one procedure code; distinct from admission and from patient).
 
 **C5. Abstract — "time past the assigned shift end"**
 NIELS: "I would keep it general here. Keep details on how things are operationalized for a later part in the paper."
 OLD: Main outcome measures. Case-level overtime (time past the assigned shift end), by room, weekday, shift, and urgency...
-NEW: Main outcome measures. Overtime, defined as a case still in the operating room after the end of its assigned staff shift, analysed per case by room, weekday, shift, and urgency...
-HOW: One plain definitional clause (readers must know what overtime means in the abstract); the operational detail (boundaries, reclassification, minutes) lives only in Methods.
+NEW: Main outcome measures. Overtime per case, analysed by room, weekday, shift, and urgency; start-time deviation, duration-estimation accuracy, inter-case gaps, and urgent-case disruption of the elective programme were examined as candidate contributing factors. [The overtime description moved to the abstract Background: "Operating-room (OR) overtime, in which surgery continues beyond the end of the staffed shift, ..."]
+HOW: Per Niels's placement comment, the description sits at the concept's first use (the Background subsection); the outcome-measures field stays general, with operational detail only in Methods.
 
 **C6. Abstract Results — "while OR14 ran 3.5%"**
 NIELS: "Why mention this as a room in which overtime 'is concentrated' as it deviates so strongly from the number for OR10?"
@@ -49,8 +49,8 @@ HOW: Only overtime-linked findings remain in the abstract; the disruption result
 
 **C8. Abstract Conclusions sentence — "?"**
 OLD: Room-level monitoring and scheduling that accounts for urgent-case flow are more actionable targets than start-time punctuality.
-NEW: Routinely collected OR data located overtime precisely enough to direct management attention: it was concentrated in a small number of rooms, it divided into scheduled boundary-crossings and unplanned overruns with different management levers, and longer between-case gaps travelled with overtime, while start-time punctuality predicted little. Room-level monitoring built from these data is a more actionable instrument than department-wide averages.
-HOW: The vague claim became the paper's main conclusion, each clause a measured result.
+NEW: Routinely collected OR data located overtime precisely enough to direct management attention: it was concentrated in a small number of rooms, it divided into scheduled boundary-crossings and unplanned overruns with different management levers, and longer between-case gaps travelled with overtime, while start-time punctuality predicted little. Room-level monitoring built from these data may offer a more actionable basis for overtime management than department-wide averages.
+HOW: The vague claim became the paper's main conclusion; each descriptive clause is a measured result, and the comparative claim is hedged because it was not tested.
 
 ## BATCH 2 — Key Messages
 
