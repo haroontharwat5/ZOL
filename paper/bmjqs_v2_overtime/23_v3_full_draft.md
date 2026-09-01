@@ -10,19 +10,19 @@ Citations as [Author] pending final Vancouver renumbering. [TO CONFIRM] marks it
 
 ## ABSTRACT
 
-**Background.** Operating-room (OR) overtime is associated with higher patient mortality and staff burnout, and it costs roughly twice as much per minute as underutilised time. Overtime is usually reported as one number for the whole OR department, which hides where it occurs and cannot direct improvement.
+**Background.** Operating-room (OR) overtime, in which surgery continues beyond the end of the staffed shift, is associated with higher patient mortality and staff burnout, and it costs roughly twice as much per minute as underutilised time. Overtime is usually reported as a single figure for the whole OR department, which conceals where it arises and cannot direct improvement.
 
 **Objective.** To show what analysis of routinely collected administrative data can contribute to overtime monitoring and management, by characterising overtime in one high-volume tertiary hospital: its distribution across rooms and time, and the operational factors associated with it.
 
 **Design and setting.** Retrospective observational study using administrative OR data from a 24/7 tertiary hospital in Belgium with 18 surgical operating rooms.
 
-**Participants.** 79,352 surgical cases (one case is one patient occupying one operating room from entry to exit) between January 2022 and May 2025.
+**Participants.** 79,352 surgical cases performed between January 2022 and May 2025; a case is one patient's uninterrupted stay in one operating room, from entry to exit.
 
-**Main outcome measures.** Overtime, defined as a case still in the operating room after the end of its assigned staff shift, analysed per case by room, weekday, shift, and urgency; start-time deviation, duration-estimation accuracy, inter-case gaps, and urgent-case disruption of the elective programme as candidate contributing factors.
+**Main outcome measures.** Overtime per case, analysed by room, weekday, shift, and urgency; start-time deviation, duration-estimation accuracy, inter-case gaps, and urgent-case disruption of the elective programme were examined as candidate contributing factors.
 
 **Results.** Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Room-level overtime rates ranged from 3.5% to 32.9%; the highest-overtime room ran overtime on a third of its cases (mean 154 minutes). Urgent cases ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%). Nearly half of the overtime cases (45.7%) were already planned to end past the shift boundary, and these scheduled crossings carried 62.1% of all overtime minutes. Rooms with longer gaps between cases had higher overtime rates (Spearman rho = 0.89, p < 0.001), whereas start-time punctuality showed no association with room-level overtime (rho = −0.29, p = 0.24).
 
-**Conclusions.** Routinely collected OR data located overtime precisely enough to direct management attention: it was concentrated in a small number of rooms, it divided into scheduled boundary-crossings and unplanned overruns with different management levers, and longer between-case gaps travelled with overtime, while start-time punctuality predicted little. Room-level monitoring built from these data is a more actionable instrument than department-wide averages.
+**Conclusions.** Routinely collected OR data located overtime precisely enough to direct management attention: it was concentrated in a small number of rooms, it divided into scheduled boundary-crossings and unplanned overruns with different management levers, and longer between-case gaps travelled with overtime, while start-time punctuality predicted little. Room-level monitoring built from these data may offer a more actionable basis for overtime management than department-wide averages.
 
 ## KEY MESSAGES
 

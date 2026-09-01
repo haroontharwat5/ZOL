@@ -273,3 +273,12 @@ HOW: His wording, adopted.
 
 **C60. (Haroon's thread) "this needs to be verified" — Maxim: "We will ask this when we send a solid version to Ben/Dieter."**
 NEW: On the compiled Ben/Dieter list; thread reply notes it is tracked there.
+
+---
+
+## Corrections after Haroon's Batch 1 review (28 Aug)
+
+- C4 Participants rewritten to submission register: "79,352 surgical cases performed between January 2022 and May 2025; a case is one patient's uninterrupted stay in one operating room, from entry to exit."
+- C5/C14 corrected reading of Niels's placement comment: "the background part" is the abstract's Background subsection. The overtime description now sits there ("Operating-room (OR) overtime, in which surgery continues beyond the end of the staffed shift, ...") and Main outcome measures returns to a general formulation. Satisfies both the define-at-first-use and keep-operationalisation-for-later comments.
+- C8 final sentence hedged: "Room-level monitoring built from these data may offer a more actionable basis for overtime management than department-wide averages." Untested comparative claims are not asserted as fact.
+- Standing standard reaffirmed: all NEW text is final submission prose; no em dashes; no annotations inside quoted manuscript text; claims scaled to evidence.
