@@ -1,0 +1,278 @@
+---
+title: "Planned versus Unplanned Overtime - Genk"
+subtitle: Leveraging Data Analytics for Efficient OR Planning at ZOL
+date: "August 2026"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: false
+    keep_tex: true
+  html_document:
+    toc: false
+    df_print: paged
+geometry: margin=1in
+header-includes:
+  - |
+    \usepackage{graphicx}
+    \usepackage{booktabs}
+    \usepackage{float}
+    \usepackage{titling}
+
+    % Logo's bovenaan
+    \pretitle{%
+      \begin{center}
+      \includegraphics[width=4cm]{figures/BINF.png}\hfill
+      \includegraphics[width=6cm]{figures/PAIH.png}\\[2cm]
+      \huge
+    }
+    \posttitle{\end{center}}
+---
+
+\begin{center}
+\vspace{2cm}
+
+Niels MARTIN\\
+niels.martin@uhasselt.be\\[0.5em]
+Maxim RIEBUS\\
+maxim.riebus@uhasselt.be\\[0.5em]
+Haroon THARWAT\\
+haroon.tharwat@uhasselt.be\\
+
+\vspace{6cm}
+
+\textbf{Hasselt University} \\
+Faculty of Business Economics \\
+Research Group Business Informatics \\
+Process Analytics in Healthcare
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+knitr::opts_chunk$set(out.width = "70%")
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.asp = 0.618)
+
+kable <- function(x, ...) {
+  knitr::kable(x, booktabs = T, format = "latex",  position = "H", ...)
+}
+
+knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+# All libraries loaded explicitly (no dependency on packages.R)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(pander)
+library(scales)
+```
+
+```{r data import, include=FALSE}
+# ---- DATA PATH ----
+# Option A (recommended): put this Rmd in the same folder as genk_cleaned.xlsx
+genk <- read_excel("genk_cleaned.xlsx")
+
+# Option B: keep the original project structure
+# genk <- read_excel("modified data/genk_cleaned.xlsx")
+
+# Option C: full Windows path (find yours by running file.choose() in the console)
+# genk <- read_excel("C:/Users/<you>/.../Updated_Analysis/genk_cleaned.xlsx")
+
+# If only the all-campus file is available, filter Genk first:
+# genk <- read_excel("data_cleaned.xlsx") %>%
+#   filter(grepl("^GO[0-9]+$", PlannedOR), grepl("^GO[0-9]+$", ActualOR))
+```
+
+```{r derive, include=FALSE}
+genk <- genk %>%
+  mutate(
+    planned_over = PlannedEndDT > planned_shift_end,
+    pov_min      = as.numeric(difftime(PlannedEndDT, planned_shift_end, units = "mins")),
+    urgency_lbl  = ifelse(grepl("niet|non", tolower(UrgencyType)), "Urgent", "Elective")
+  )
+ot <- genk %>% filter(afterhours_flag == 1)
+```
+
+# Introduction
+
+This document extends the in-depth analysis for campus Genk with one question raised during the internal review of the manuscript: does the surgical schedule itself already plan cases beyond the end of their staffed shift? The cleaning pipeline anticipated this question (data_cleaning.R constructs planned shift boundaries and planned after-hours minutes), but the variables had not yet been analysed in any report. All figures below derive from genk_cleaned.xlsx with no additional data collection. Overtime keeps its established definition: a case whose room-out time falls after the end of its assigned shift.
+
+# Consistency check against the established results
+
+Before introducing the new variable, the headline overtime figures are recomputed to confirm that this document works from the same basis as the in-depth analysis (expected: 7,729 cases, 9.7 percent, mean 60.3, median 39, P95 197).
+
+```{r baseline, table.pos='H'}
+ot %>%
+  summarise(
+    `Surgeries with overtime` = n(),
+    `Percentage` = round(100 * n() / nrow(genk), 1),
+    `Mean Overtime` = round(mean(overtime_minutes), 1),
+    `Median Overtime` = round(median(overtime_minutes), 1),
+    `P95 Overtime` = round(quantile(overtime_minutes, .95), 1)
+  ) %>%
+  pander(split.table = 120,
+         caption = "Overall share and duration of overtime surgeries (Genk). \\label{tab:baseline}")
+```
+
+# How often does the schedule plan beyond the shift boundary?
+
+A case is classified as a planned crossing when its planned end time falls after the end of its planned shift. Table \ref{tab:pov} shows the overall frequency and the split by urgency type (expected: 5,812 cases, 7.3 percent overall; 6.4 percent of elective and 12.8 percent of urgent cases).
+
+```{r pov, table.pos='H'}
+bind_rows(
+  genk %>% summarise(Group = "All cases",
+                     Count = sum(planned_over, na.rm = TRUE),
+                     Percentage = round(100 * mean(planned_over, na.rm = TRUE), 1)),
+  genk %>% group_by(Group = urgency_lbl) %>%
+    summarise(Count = sum(planned_over, na.rm = TRUE),
+              Percentage = round(100 * mean(planned_over, na.rm = TRUE), 1))
+) %>%
+  pander(split.table = 120,
+         caption = "Cases planned to end past the shift boundary. \\label{tab:pov}")
+```
+
+# How far past the boundary are these cases planned?
+
+The planned excess is not marginal. Table \ref{tab:bins} groups planned crossings by the number of minutes their planned end falls after the boundary (expected bin totals: 1,299 / 1,162 / 1,362 / 1,113 / 876; median 40 minutes; P95 246). Figure \ref{fig:povhist} shows the distribution.
+
+```{r bins, table.pos='H'}
+genk %>% filter(planned_over) %>%
+  mutate(Bin = cut(pov_min, c(0, 15, 30, 60, 120, Inf),
+                   labels = c("1-15 min", "16-30 min", "31-60 min", "61-120 min", ">120 min"))) %>%
+  count(Bin, urgency_lbl) %>%
+  pivot_wider(names_from = urgency_lbl, values_from = n, values_fill = 0) %>%
+  mutate(Total = Elective + Urgent,
+         Percentage = round(100 * Total / sum(Total), 1)) %>%
+  pander(split.table = 120,
+         caption = "Planned minutes past the shift boundary among planned crossings. \\label{tab:bins}")
+```
+
+```{r povhist, fig.cap="Planned minutes past the shift boundary (planned crossings, trimmed at P99) \\label{fig:povhist}", fig.pos='H'}
+upper <- genk %>% filter(planned_over) %>% pull(pov_min) %>% quantile(.99, na.rm = TRUE)
+genk %>% filter(planned_over, pov_min <= upper) %>%
+  ggplot(aes(x = pov_min)) +
+  geom_histogram(binwidth = 15, fill = "steelblue", color = "white") +
+  labs(title = "Planned minutes past the shift boundary",
+       x = "Planned minutes past boundary", y = "Number of surgeries") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+# Do planned crossings become actual overtime?
+
+Table \ref{tab:funnel} traces planned crossings into observed overtime (expected: 60.8 percent of planned crossings actually crossed; overtime risk 5.7 percent among cases planned to fit versus 60.8 percent among cases planned to cross).
+
+```{r funnel, table.pos='H'}
+bind_rows(
+  genk %>% filter(planned_over) %>%
+    summarise(Group = "Planned to cross", Cases = n(),
+              `Ran overtime` = sum(afterhours_flag == 1, na.rm = TRUE),
+              `Overtime rate (%)` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1)),
+  genk %>% filter(!planned_over) %>%
+    summarise(Group = "Planned to fit", Cases = n(),
+              `Ran overtime` = sum(afterhours_flag == 1, na.rm = TRUE),
+              `Overtime rate (%)` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1))
+) %>%
+  pander(split.table = 120,
+         caption = "Conversion of planned crossings into observed overtime. \\label{tab:funnel}")
+```
+
+# Decomposing observed overtime
+
+The 7,729 overtime cases divide into scheduled crossings (planned past the boundary) and unplanned overruns (planned to fit, but overran). Table \ref{tab:decomp} reports the split (expected: 3,532 scheduled, 45.7 percent of cases, mean 82 minutes, 62.1 percent of all overtime minutes; 4,197 unplanned, 54.3 percent, mean 42 minutes).
+
+```{r decomp, table.pos='H'}
+ot %>%
+  mutate(Kind = ifelse(planned_over, "Scheduled crossing", "Unplanned overrun")) %>%
+  group_by(Kind) %>%
+  summarise(Cases = n(),
+            `Share of overtime cases (%)` = round(100 * n() / nrow(ot), 1),
+            `Mean OT (min)` = round(mean(overtime_minutes), 1),
+            `Median OT (min)` = round(median(overtime_minutes), 1),
+            `Total OT minutes` = round(sum(overtime_minutes))) %>%
+  mutate(`Share of OT minutes (%)` = round(100 * `Total OT minutes` / sum(`Total OT minutes`), 1)) %>%
+  pander(split.table = 140,
+         caption = "Scheduled versus unplanned overtime. \\label{tab:decomp}")
+```
+
+# Which kind of overtime does each room produce?
+
+Table \ref{tab:rooms} decomposes each room's overtime rate into its scheduled and unplanned components; Figure \ref{fig:stacked} shows the same as a stacked chart (expected: GO10 with 81.5 percent of its overtime cases scheduled).
+
+```{r rooms, table.pos='H'}
+room_tbl <- genk %>% group_by(ActualOR) %>%
+  summarise(Cases = n(),
+            `OT rate (%)` = round(100 * mean(afterhours_flag == 1, na.rm = TRUE), 1),
+            `Scheduled (%)` = round(100 * mean(planned_over & afterhours_flag == 1, na.rm = TRUE), 1),
+            `Unplanned (%)` = round(100 * mean(!planned_over & afterhours_flag == 1, na.rm = TRUE), 1)) %>%
+  arrange(desc(`OT rate (%)`))
+room_tbl %>%
+  pander(split.table = 120,
+         caption = "Room-level overtime decomposed into scheduled and unplanned components. \\label{tab:rooms}")
+```
+
+```{r stacked, fig.cap="Room-level overtime rate split into scheduled and unplanned components \\label{fig:stacked}", fig.pos='H'}
+room_tbl %>%
+  select(ActualOR, Scheduled = `Scheduled (%)`, Unplanned = `Unplanned (%)`) %>%
+  pivot_longer(-ActualOR, names_to = "Component", values_to = "Rate") %>%
+  ggplot(aes(x = reorder(ActualOR, Rate, sum), y = Rate, fill = Component)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c(Scheduled = "steelblue", Unplanned = "grey70")) +
+  labs(title = "Overtime rate per room, by component",
+       x = "Operating room", y = "Overtime rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+# Concentration of overtime minutes
+
+```{r concentration, table.pos='H'}
+tot_min <- sum(ot$overtime_minutes)
+ot %>% group_by(ActualOR) %>%
+  summarise(`OT minutes` = round(sum(overtime_minutes))) %>%
+  mutate(`Share of all OT minutes (%)` = round(100 * `OT minutes` / tot_min, 1)) %>%
+  arrange(desc(`OT minutes`)) %>%
+  slice_head(n = 5) %>%
+  pander(split.table = 120,
+         caption = "Rooms contributing the most overtime minutes (expected: GO10 19.0 percent; top three 36.4 percent). \\label{tab:conc}")
+```
+
+# Correlations revisited
+
+For completeness, the two room-level rank correlations from the manuscript are recomputed, in both denominators discussed (expected: punctuality rho -0.29, p 0.24; idle time rho 0.91 on all-case rates or 0.89 on the gap-defined subset; excluding GO10 the idle association persists at rho about 0.90).
+
+```{r correlations, table.pos='H'}
+room <- genk %>% group_by(ActualOR) %>%
+  summarise(late = mean(start_diff > 0, na.rm = TRUE),
+            otr  = mean(afterhours_flag == 1, na.rm = TRUE),
+            gap  = mean(gap_time, na.rm = TRUE))
+sub <- genk %>% filter(!is.na(gap_time)) %>% group_by(ActualOR) %>%
+  summarise(gap = mean(gap_time), otr = mean(afterhours_flag == 1))
+no10 <- room %>% filter(ActualOR != "GO10")
+
+ct <- function(x, y) cor.test(x, y, method = "spearman")
+res <- list(
+  `Late-start rate vs OT rate`            = ct(room$late, room$otr),
+  `Mean idle vs OT rate (all cases)`      = ct(room$gap,  room$otr),
+  `Mean idle vs OT rate (gap subset)`     = ct(sub$gap,   sub$otr),
+  `Mean idle vs OT rate (excl. GO10)`     = ct(no10$gap,  no10$otr)
+)
+tibble(Analysis = names(res),
+       rho = round(sapply(res, function(z) unname(z$estimate)), 3),
+       `p value` = signif(sapply(res, function(z) z$p.value), 3)) %>%
+  pander(split.table = 120,
+         caption = "Spearman rank correlations across the 18 rooms. \\label{tab:corr}")
+```
+
+# Conclusion
+
+The schedule itself already crosses the shift boundary for 7.3 percent of cases, and these scheduled crossings account for nearly half of all overtime cases and about two thirds of all overtime minutes. Overtime at Genk therefore has two components with different management levers: scheduled crossings, which reflect planning and capacity decisions and dominate in the highest-overtime room, and unplanned overruns, which reflect duration variability. Overtime risk is largely visible at planning time: cases planned to cross the boundary ran overtime more than ten times as often as cases planned to fit. Whether planning past the boundary is deliberate use of the evening staffing tier is a question for the clinical team.
