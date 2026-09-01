@@ -19,9 +19,9 @@ Data-driven monitoring of operating-room overtime: a single-centre retrospective
 
 **Main outcome measures.** Overtime per case, analysed by room, weekday, shift, and urgency; start-time deviation, duration-estimation accuracy, inter-case gaps, and urgent-case disruption of the elective programme as candidate contributing factors.
 
-**Results.** Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Room-level overtime rates ranged from 3.5% to 32.9%; the highest-overtime room ran overtime on a third of its cases (mean 154 minutes). Urgent cases ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%). Rooms with longer gaps between cases had higher overtime rates (Spearman rho = 0.91, p < 0.001), whereas start-time punctuality showed no association with room-level overtime (rho = −0.29, p = 0.24).
+**Results.** Of 79,352 cases, 7,729 (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes and a 95th percentile of 197 minutes. Room-level overtime rates ranged from 3.5% to 32.9%; the highest-overtime room ran overtime on a third of its cases (mean 154 minutes). Urgent cases ran past the shift boundary at more than twice the elective rate (18.2% versus 8.3%). Nearly half of the overtime cases (45.7%) were already planned to end past the shift boundary, and these scheduled crossings carried 62.1% of all overtime minutes. Rooms with longer gaps between cases had higher overtime rates (Spearman rho = 0.89, p < 0.001), whereas start-time punctuality showed no association with room-level overtime (rho = −0.29, p = 0.24).
 
-**Conclusions.** Routinely collected OR data located overtime precisely enough to direct management attention: it was concentrated in a small number of rooms, urgent cases crossed the shift boundary at twice the elective rate, and longer between-case gaps travelled with overtime, while start-time punctuality predicted little. Room-level monitoring built from these data is a more actionable instrument than department-wide averages.
+**Conclusions.** Routinely collected OR data located overtime precisely enough to direct management attention: it was concentrated in a small number of rooms, it divided into scheduled boundary-crossings and unplanned overruns with different management levers, and longer between-case gaps travelled with overtime, while start-time punctuality predicted little. Room-level monitoring built from these data is a more actionable instrument than department-wide averages.
 
 ## Key messages [LOCKED]
 
@@ -39,7 +39,7 @@ For staff, the evidence concerns overtime itself rather than its after-hours con
 
 An OR department that wants to reduce overtime first has to know where it occurs, and the numbers usually available to management do not say. Established efficiency scoring operates at the level of the whole OR suite [Macario], published performance metrics lack standardised definitions [Schouten], and aggregation can actively mislead: NHS England's capped-utilisation metric ignores operating time in late finishes, which is precisely the time overtime consists of [Zhang, Dunstan and Pandit]. Prior analyses of overtime itself treat it as a department-level number or as a cost parameter in staffing models [Wachtel and Dexter]. Where overtime sits within a department, room by room, and which operational factors are associated with it, the literature does not answer. The records needed to answer it already exist in routine registration: OR information systems log room entry and exit times, planned durations, and urgency classifications in the course of daily operations [Bauer].
 
-This paper uses those records to study overtime at a Belgian tertiary centre with 18 surgical ORs and a steep staffing step-down at each shift end. Using only routinely recorded administrative data covering three and a half years and 79,352 cases, we address two research questions. First, how is overtime distributed across rooms and time (RQ1)? Second, which of four operational factors are associated with it: duration overruns, urgent-elective interaction, start-time punctuality, and inter-case gaps (RQ2)? The aim is to show what data-driven analysis of routine OR records can contribute to overtime management, and where its limits lie.
+This paper uses those records to study overtime at a Belgian tertiary centre with 18 surgical ORs and a steep staffing step-down at each shift end. Using only routinely recorded administrative data covering three and a half years and 79,352 cases, we address two research questions. First, how is overtime distributed across rooms and time, and to what extent is it scheduled rather than unplanned (RQ1)? Second, which of four operational factors are associated with it: duration overruns, urgent-elective interaction, start-time punctuality, and inter-case gaps (RQ2)? The aim is to show what data-driven analysis of routine OR records can contribute to overtime management, and where its limits lie.
 
 ## Methods [PENDING — full chunk awaiting verdict]
 
@@ -51,11 +51,23 @@ Terminology passage ("reference point" version, quotes around each term; Dexter 
 
 ### Ethics / PPI [LOCKED as in v2]
 
-## Results [TODO — chunks 7a/7b in progress]
-Structure agreed in principle: opens with general overtime statistics (no sample-overview section); every subsection ends with its explicit conclusion for overtime; Table 3B deleted (values in prose).
+## Results [BASELINE APPROVED + decomposition APPROVED by Maxim meeting 27 Aug]
 
-## Discussion [TODO]
-Reframe per narrative: what the case study showed; implications for data-driven overtime management; what monitoring cannot do; dashboard implication [Ivers, Anhøj pending verification]; limitations rewritten.
+Structure: opens with general overtime statistics (no sample-overview section); every subsection ends with its explicit conclusion for overtime; Table 3B deleted (values in prose); room swaps section removed.
+
+### New RQ1 block: Scheduled and unplanned overtime [APPROVED]
+
+> Not all overtime was unplanned. For 5,812 cases (7.3%), the schedule itself placed the planned end past the shift boundary (6.4% of elective and 12.8% of urgent cases; median 40 planned minutes past it). Of these planned crossings, 60.8% did run past the boundary, against 5.7% of cases planned to fit. The 7,729 overtime cases therefore divide into 3,532 scheduled crossings (45.7%) and 4,197 unplanned overruns (54.3%). Scheduled crossings ran longer (mean 82 versus 42 overtime minutes) and carried 62.1% of all overtime minutes. The balance differed by room: in OR10, 81.5% of overtime cases were scheduled crossings. For monitoring, overtime risk is therefore largely visible at planning time.
+
+Planning-accuracy subsection now opens: "For the unplanned component of overtime, lists planned to finish inside the shift that did not, the first candidate explanation is systematic underbooking: if cases routinely needed more time than the schedule gave them, the shortfall would accumulate over the list and push its end past the boundary. The data show no such pattern." Idle correlation reported as rho = 0.89 (gap-subset denominator, Maxim's computation), robust excluding OR10 (rho = 0.90).
+
+## Discussion [TODO - one block APPROVED]
+
+### Approved passage: the scheduled component as a capacity decision
+
+> The scheduled component reframes part of the overtime problem as a capacity decision rather than an execution failure. Booking a long case across the boundary uses staffed evening capacity that would otherwise sit idle, and idle staffed time is itself costly: overutilised time costs roughly twice as much as underutilised time, which is the trade-off OR managers weigh when staffing cannot match uncertain demand [Wachtel and Dexter]. Whether the observed volume of scheduled crossings reflects deliberate use of the evening tier could not be determined from administrative data and is a question for the clinical team. The two components call for different responses: scheduled crossings are a planning and capacity question, while unplanned overruns, concentrated where duration variability is highest, are a duration-risk question. Room-level monitoring can report both from routine data alone.
+
+Remaining TODO: what-the-case-study-showed opening (9.7% re-explained); FCOTS paragraph fixes; dashboard paragraph [Ivers, Anhøj pending verification]; limitations rewrite.
 
 ## Conclusion [TODO]
 
