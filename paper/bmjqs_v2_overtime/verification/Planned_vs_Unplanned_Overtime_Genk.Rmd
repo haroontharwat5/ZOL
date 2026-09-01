@@ -65,7 +65,6 @@ kable <- function(x, ...) {
 
 knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
 
-# All libraries loaded explicitly (no dependency on packages.R)
 library(readxl)
 library(dplyr)
 library(tidyr)
@@ -76,19 +75,7 @@ library(scales)
 ```
 
 ```{r data import, include=FALSE}
-# ---- DATA PATH ----
-# Option A (recommended): put this Rmd in the same folder as genk_cleaned.xlsx
 genk <- read_excel("genk_cleaned.xlsx")
-
-# Option B: keep the original project structure
-# genk <- read_excel("modified data/genk_cleaned.xlsx")
-
-# Option C: full Windows path (find yours by running file.choose() in the console)
-# genk <- read_excel("C:/Users/<you>/.../Updated_Analysis/genk_cleaned.xlsx")
-
-# If only the all-campus file is available, filter Genk first:
-# genk <- read_excel("data_cleaned.xlsx") %>%
-#   filter(grepl("^GO[0-9]+$", PlannedOR), grepl("^GO[0-9]+$", ActualOR))
 ```
 
 ```{r derive, include=FALSE}
@@ -103,11 +90,11 @@ ot <- genk %>% filter(afterhours_flag == 1)
 
 # Introduction
 
-This document extends the in-depth analysis for campus Genk with one question raised during the internal review of the manuscript: does the surgical schedule itself already plan cases beyond the end of their staffed shift? The cleaning pipeline anticipated this question (data_cleaning.R constructs planned shift boundaries and planned after-hours minutes), but the variables had not yet been analysed in any report. All figures below derive from genk_cleaned.xlsx with no additional data collection. Overtime keeps its established definition: a case whose room-out time falls after the end of its assigned shift.
+This document extends the in-depth analysis for campus Genk with one further question: to what extent does the surgical schedule itself already plan cases beyond the end of their staffed shift, and how does this planned component relate to the overtime we observe? The analysis uses the same cleaned dataset as the previous reports, and overtime keeps its established definition: a case whose room-out time falls after the end of its assigned shift. Distinguishing overtime that was written into the schedule from overtime that arose during execution matters operationally, because the two call for different responses.
 
-# Consistency check against the established results
+# Starting point
 
-Before introducing the new variable, the headline overtime figures are recomputed to confirm that this document works from the same basis as the in-depth analysis (expected: 7,729 cases, 9.7 percent, mean 60.3, median 39, P95 197).
+As a starting point, Table \ref{tab:baseline} reproduces the headline overtime figures. They are identical to those reported in the in-depth analysis: 7,729 of 79,352 cases (9.7%) ran past the end of their assigned shift, with a mean overtime of 60.3 minutes, a median of 39 minutes, and a 95th percentile of 197 minutes.
 
 ```{r baseline, table.pos='H'}
 ot %>%
@@ -124,7 +111,7 @@ ot %>%
 
 # How often does the schedule plan beyond the shift boundary?
 
-A case is classified as a planned crossing when its planned end time falls after the end of its planned shift. Table \ref{tab:pov} shows the overall frequency and the split by urgency type (expected: 5,812 cases, 7.3 percent overall; 6.4 percent of elective and 12.8 percent of urgent cases).
+A case is classified as a planned crossing when its planned end time falls after the end of its planned shift. This applies to 5,812 cases, or 7.3% of all surgeries: 6.4% of elective cases and 12.8% of urgent cases. Planning beyond the boundary is therefore not an occasional exception but a structural feature of the schedule, and it is roughly twice as common for urgent as for elective work. Table \ref{tab:pov} summarises the frequencies.
 
 ```{r pov, table.pos='H'}
 bind_rows(
@@ -141,7 +128,7 @@ bind_rows(
 
 # How far past the boundary are these cases planned?
 
-The planned excess is not marginal. Table \ref{tab:bins} groups planned crossings by the number of minutes their planned end falls after the boundary (expected bin totals: 1,299 / 1,162 / 1,362 / 1,113 / 876; median 40 minutes; P95 246). Figure \ref{fig:povhist} shows the distribution.
+The planned excess is substantial rather than marginal. Among planned crossings, the median planned end lies 40 minutes past the boundary and the 95th percentile 246 minutes past it. The distribution spreads across all severities: roughly a fifth of planned crossings are planned 15 minutes or less past the boundary, while about a third are planned more than an hour past it. Table \ref{tab:bins} groups the cases by planned excess and Figure \ref{fig:povhist} shows the distribution.
 
 ```{r bins, table.pos='H'}
 genk %>% filter(planned_over) %>%
@@ -168,7 +155,7 @@ genk %>% filter(planned_over, pov_min <= upper) %>%
 
 # Do planned crossings become actual overtime?
 
-Table \ref{tab:funnel} traces planned crossings into observed overtime (expected: 60.8 percent of planned crossings actually crossed; overtime risk 5.7 percent among cases planned to fit versus 60.8 percent among cases planned to cross).
+They largely do. Of the 5,812 planned crossings, 60.8% actually ran past the boundary, against 5.7% of the cases that were planned to fit within their shift. Overtime risk is therefore visible at planning time: a case planned to cross the boundary is more than ten times as likely to end in overtime as a case planned to fit. Table \ref{tab:funnel} summarises the conversion.
 
 ```{r funnel, table.pos='H'}
 bind_rows(
@@ -187,7 +174,7 @@ bind_rows(
 
 # Decomposing observed overtime
 
-The 7,729 overtime cases divide into scheduled crossings (planned past the boundary) and unplanned overruns (planned to fit, but overran). Table \ref{tab:decomp} reports the split (expected: 3,532 scheduled, 45.7 percent of cases, mean 82 minutes, 62.1 percent of all overtime minutes; 4,197 unplanned, 54.3 percent, mean 42 minutes).
+The 7,729 overtime cases divide into two components. Scheduled crossings, planned past the boundary from the start, account for 3,532 cases (45.7%). Unplanned overruns, planned to fit but running long, account for 4,197 cases (54.3%). The scheduled component runs considerably heavier: a mean of 82 overtime minutes against 42 for unplanned overruns, so scheduled crossings carry 62.1% of all overtime minutes despite being the smaller group of cases. Table \ref{tab:decomp} reports the split.
 
 ```{r decomp, table.pos='H'}
 ot %>%
@@ -205,7 +192,7 @@ ot %>%
 
 # Which kind of overtime does each room produce?
 
-Table \ref{tab:rooms} decomposes each room's overtime rate into its scheduled and unplanned components; Figure \ref{fig:stacked} shows the same as a stacked chart (expected: GO10 with 81.5 percent of its overtime cases scheduled).
+The balance between the two components differs strongly between rooms. In GO10, the room with the highest overtime rate, 81.5% of overtime cases were scheduled crossings: its overtime is predominantly written into the schedule, consistent with long cardiac procedures that cannot fit inside the day shift. In most other rooms the two components are closer to balanced. Table \ref{tab:rooms} decomposes each room's overtime rate and Figure \ref{fig:stacked} shows the same split graphically.
 
 ```{r rooms, table.pos='H'}
 room_tbl <- genk %>% group_by(ActualOR) %>%
@@ -235,6 +222,8 @@ room_tbl %>%
 
 # Concentration of overtime minutes
 
+Overtime minutes are strongly concentrated. GO10 alone, with 2.2% of the caseload, generates 19.0% of all overtime minutes; together with GO11 and GO05 the three largest contributors account for 36.4%. Table \ref{tab:conc} lists the five rooms with the largest contributions.
+
 ```{r concentration, table.pos='H'}
 tot_min <- sum(ot$overtime_minutes)
 ot %>% group_by(ActualOR) %>%
@@ -243,12 +232,12 @@ ot %>% group_by(ActualOR) %>%
   arrange(desc(`OT minutes`)) %>%
   slice_head(n = 5) %>%
   pander(split.table = 120,
-         caption = "Rooms contributing the most overtime minutes (expected: GO10 19.0 percent; top three 36.4 percent). \\label{tab:conc}")
+         caption = "Rooms contributing the most overtime minutes. \\label{tab:conc}")
 ```
 
-# Correlations revisited
+# Room-level correlations
 
-For completeness, the two room-level rank correlations from the manuscript are recomputed, in both denominators discussed (expected: punctuality rho -0.29, p 0.24; idle time rho 0.91 on all-case rates or 0.89 on the gap-defined subset; excluding GO10 the idle association persists at rho about 0.90).
+For completeness, the two room-level rank correlations are recomputed across the 18 rooms. Late-start rate shows no association with overtime rate (rho = -0.29, p = 0.24). Mean idle time between cases correlates strongly with overtime rate, whether the room rate is computed over all cases (rho = 0.91) or restricted to cases with a defined gap (rho = 0.89), and the association persists when GO10 is excluded (rho = 0.90). Table \ref{tab:corr} summarises the four analyses.
 
 ```{r correlations, table.pos='H'}
 room <- genk %>% group_by(ActualOR) %>%
@@ -261,10 +250,10 @@ no10 <- room %>% filter(ActualOR != "GO10")
 
 ct <- function(x, y) cor.test(x, y, method = "spearman")
 res <- list(
-  `Late-start rate vs OT rate`            = ct(room$late, room$otr),
-  `Mean idle vs OT rate (all cases)`      = ct(room$gap,  room$otr),
-  `Mean idle vs OT rate (gap subset)`     = ct(sub$gap,   sub$otr),
-  `Mean idle vs OT rate (excl. GO10)`     = ct(no10$gap,  no10$otr)
+  `Late-start rate vs OT rate`        = ct(room$late, room$otr),
+  `Mean idle vs OT rate (all cases)`  = ct(room$gap,  room$otr),
+  `Mean idle vs OT rate (gap subset)` = ct(sub$gap,   sub$otr),
+  `Mean idle vs OT rate (excl. GO10)` = ct(no10$gap,  no10$otr)
 )
 tibble(Analysis = names(res),
        rho = round(sapply(res, function(z) unname(z$estimate)), 3),
@@ -275,4 +264,4 @@ tibble(Analysis = names(res),
 
 # Conclusion
 
-The schedule itself already crosses the shift boundary for 7.3 percent of cases, and these scheduled crossings account for nearly half of all overtime cases and about two thirds of all overtime minutes. Overtime at Genk therefore has two components with different management levers: scheduled crossings, which reflect planning and capacity decisions and dominate in the highest-overtime room, and unplanned overruns, which reflect duration variability. Overtime risk is largely visible at planning time: cases planned to cross the boundary ran overtime more than ten times as often as cases planned to fit. Whether planning past the boundary is deliberate use of the evening staffing tier is a question for the clinical team.
+The schedule itself already crosses the shift boundary for 7.3% of cases, and these scheduled crossings account for nearly half of all overtime cases and about two thirds of all overtime minutes. Overtime at Genk therefore has two components with different management levers: scheduled crossings, which reflect planning and capacity decisions and dominate in the highest-overtime room, and unplanned overruns, which reflect duration variability. Overtime risk is largely visible at planning time, since cases planned to cross the boundary ran overtime more than ten times as often as cases planned to fit. Whether planning past the boundary reflects deliberate use of the evening staffing capacity is a question to take to the clinical team.
