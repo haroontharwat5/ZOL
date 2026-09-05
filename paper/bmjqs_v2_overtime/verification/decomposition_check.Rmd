@@ -1,0 +1,161 @@
+---
+title: "Genk overtime: verification + scheduled-vs-unplanned decomposition"
+author: "Haroon Tharwat"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(tidyr)
+
+# >>> SET THIS PATH to where genk_cleaned.xlsx lives on your PC <<<
+genk <- read_excel("genk_cleaned.xlsx")
+```
+
+## 1. Baseline sanity check (must match the paper exactly)
+
+```{r baseline}
+nrow(genk)                                   # expect 79352
+
+genk %>% filter(afterhours_flag == 1) %>%
+  summarise(n = n(),
+            rate_pct = 100 * n() / nrow(genk),
+            mean_ot  = mean(overtime_minutes),
+            median_ot = median(overtime_minutes),
+            p95_ot   = quantile(overtime_minutes, .95))
+# expect: n 7729 | 9.7% | 60.3 | 39 | 197
+```
+
+## 2. The new variable: was the case PLANNED to end past its shift boundary?
+
+Same construction data_cleaning.R anticipated (PlannedEndDT vs planned_shift_end).
+
+```{r planned-over}
+genk <- genk %>%
+  mutate(planned_over = PlannedEndDT > planned_shift_end,
+         pov_min = as.numeric(difftime(PlannedEndDT, planned_shift_end, units = "mins")),
+         urgent  = grepl("niet|non", tolower(UrgencyType)))
+
+genk %>% summarise(n = sum(planned_over, na.rm = TRUE),
+                   pct = 100 * mean(planned_over, na.rm = TRUE))
+# expect: 5812 | 7.3%
+
+genk %>% group_by(urgent) %>%
+  summarise(pct_planned_over = 100 * mean(planned_over, na.rm = TRUE))
+# expect: elective (FALSE) 6.4% | urgent (TRUE) 12.8%
+```
+
+## 3. Severity: how far past the boundary were they planned?
+
+```{r bins}
+genk %>% filter(planned_over) %>%
+  mutate(bin = cut(pov_min, c(0, 15, 30, 60, 120, Inf),
+                   labels = c("1-15", "16-30", "31-60", "61-120", ">120"))) %>%
+  count(bin, urgent) %>%
+  pivot_wider(names_from = urgent, values_from = n,
+              names_glue = "{ifelse(urgent,'urgent','elective')}")
+# expect totals per bin: 1299 / 1162 / 1362 / 1113 / 876
+
+genk %>% filter(planned_over) %>%
+  summarise(median_min_over = median(pov_min), p95 = quantile(pov_min, .95))
+# expect: 40 | 246
+```
+
+## 4. The funnel: planned crossings convert to real overtime
+
+```{r funnel}
+genk %>% filter(planned_over) %>%
+  summarise(crossed = sum(afterhours_flag == 1, na.rm = TRUE),
+            pct = 100 * mean(afterhours_flag == 1, na.rm = TRUE))
+# expect: 3532 | 60.8%
+
+genk %>% filter(!planned_over) %>%
+  summarise(pct_overtime = 100 * mean(afterhours_flag == 1, na.rm = TRUE))
+# expect: 5.7%  -> overtime risk is ~10x higher when the plan already crosses
+```
+
+## 5. Decomposition of the 7,729 overtime cases
+
+```{r decomposition}
+ot <- genk %>% filter(afterhours_flag == 1)
+
+ot %>% group_by(planned_over) %>%
+  summarise(n = n(),
+            case_share = 100 * n() / nrow(ot),
+            mean_ot = mean(overtime_minutes),
+            median_ot = median(overtime_minutes),
+            total_min = sum(overtime_minutes)) %>%
+  mutate(minutes_share = 100 * total_min / sum(total_min))
+# expect: planned TRUE  3532 | 45.7% | 82 | 58 | 62.1% of minutes
+#         planned FALSE 4197 | 54.3% | 42 | 28 | 37.9% of minutes
+```
+
+## 6. Per room: which kind of overtime does each room produce?
+
+```{r per-room}
+genk %>% group_by(ActualOR) %>%
+  summarise(n = n(),
+            ot_rate = 100 * mean(afterhours_flag == 1, na.rm = TRUE),
+            scheduled_rate = 100 * mean(planned_over & afterhours_flag == 1, na.rm = TRUE),
+            unplanned_rate = 100 * mean(!planned_over & afterhours_flag == 1, na.rm = TRUE)) %>%
+  arrange(desc(ot_rate)) %>% print(n = 18)
+
+ot %>% filter(ActualOR == "GO10") %>%
+  summarise(scheduled_share = 100 * mean(planned_over))
+# expect: 81.5%  -> GO10's overtime is mostly written into the schedule
+```
+
+## 7. Concentration of overtime minutes (candidate addition)
+
+```{r concentration}
+tot_min <- sum(ot$overtime_minutes)
+ot %>% group_by(ActualOR) %>%
+  summarise(minutes = sum(overtime_minutes)) %>%
+  mutate(share_pct = 100 * minutes / tot_min) %>%
+  arrange(desc(share_pct)) %>% head(5)
+# expect: GO10 19.0% (with 2.2% of caseload); GO10+GO11+GO05 together 36.4%
+```
+
+## 8. The two correlations (decision: which idle denominator to report)
+
+```{r correlations}
+room <- genk %>% group_by(ActualOR) %>%
+  summarise(late = mean(start_diff > 0, na.rm = TRUE),
+            otr  = mean(afterhours_flag == 1, na.rm = TRUE),
+            gap  = mean(gap_time, na.rm = TRUE))
+
+cor.test(room$late, room$otr, method = "spearman")   # expect rho -0.292, p 0.239 (unchanged)
+
+cor.test(room$gap, room$otr, method = "spearman")    # expect rho 0.913  (all-cases OT rate)
+
+sub <- genk %>% filter(!is.na(gap_time)) %>% group_by(ActualOR) %>%
+  summarise(gap = mean(gap_time), otr = mean(afterhours_flag == 1))
+cor.test(sub$gap, sub$otr, method = "spearman")      # expect rho 0.8906 (your original run)
+
+no10 <- room %>% filter(ActualOR != "GO10")
+cor.test(no10$gap, no10$otr, method = "spearman")    # expect rho ~0.90
+# -> the draft's "excluding OR10, the pattern did not hold" is refuted either way
+```
+
+## 9. OPTIONAL - only if we decide to run it (Niels's overlap question)
+
+```{r overlap-optional, eval=FALSE}
+is_overlap <- function(s1, e1, s2, e2) (s1 < e2) & (e1 > s2)
+
+ne <- genk %>% filter(urgent, !is.na(ActualOR), !is.na(ORIn), !is.na(OROut)) %>%
+  select(NE_OR = ActualOR, NE_start = ORIn, NE_end = OROut)
+e  <- genk %>% filter(!urgent, !is.na(PlannedOR), !is.na(PlannedStartDT), !is.na(PlannedEndDT)) %>%
+  select(E_ID = PatientID, E_OR = PlannedOR, E_start = PlannedStartDT, E_end = PlannedEndDT)
+
+overlapped_ids <- ne %>% inner_join(e, by = c("NE_OR" = "E_OR"),
+                                    relationship = "many-to-many") %>%
+  filter(is_overlap(NE_start, NE_end, E_start, E_end)) %>% distinct(E_ID)
+
+genk %>% filter(!urgent) %>%
+  mutate(overlapped = PatientID %in% overlapped_ids$E_ID) %>%
+  group_by(overlapped) %>%
+  summarise(n = n(), overtime_rate = 100 * mean(afterhours_flag == 1, na.rm = TRUE))
+# would answer: do overlap-affected electives run more overtime?
+```
